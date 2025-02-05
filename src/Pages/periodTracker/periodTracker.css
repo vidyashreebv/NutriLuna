@@ -1,0 +1,185 @@
+
+      :root {
+        --primary-red: #660808;
+        --secondary-red: #cd0c0c;
+        --light-red: #c74254;
+        --dark-red: #b90909;
+        --white: #ffffff;
+        --text-color: var(--white);
+        --card-bg: #f2e4e4;
+        --btn-bg: var(--primary-red);
+        --btn-hover-bg: var(--light-red);
+        --light-text: #333;
+        --dark-text: #1a1a1a;
+        --next-period-light: #f7b4b4;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: var(--primary-red);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        margin-top: 110px;
+      }
+
+      nav {
+        position: fixed;
+        background-color: #ffffff;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000; /* Ensure it's above other content */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px; /* Adjusted padding */
+        /* backdrop-filter: blur(10px); Optional frosted glass effect */
+        color: black;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      nav .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Oswald", sans-serif;
+      }
+
+      nav .nav-options {
+        display: flex;
+        gap: 20px;
+      }
+
+      nav .nav-item {
+        text-decoration: none;
+        color: black; /* Light text color */
+        padding: 8px 15px; /* Adjusted padding for better click area */
+        border-radius: 5px;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+
+      nav .nav-item:hover,
+      nav .nav-item.active {
+        background: #ecad29; /* Gold highlight */
+        color: #1a1a1a; /* Dark text for contrast */
+      }
+
+      .nav-links div {
+        position: relative;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        color: #4a4a8a;
+        font-weight: 500;
+        transition: color 0.3s ease, background-color 0.3s ease;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.7
+        ); /* White with transparency */
+        border-radius: 8px; /* Rounded corners for a softer look */
+      }
+
+      .nav-links div:hover {
+        color: #2a2a5a;
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.9
+        ); /* Increase opacity on hover */
+      }
+
+      .indicator {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 5px;
+        z-index: 60;
+        background-color: #ecad29; /* Corrected variable usage */
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--primary-red);
+      }
+
+      label {
+        display: block;
+        margin: 1rem 0 0.5rem;
+        color: var(--dark-text);
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--light-text);
+        border-radius: 5px;
+        background-color: var(--white);
+        color: var(--dark-text);
+        margin-bottom: 1rem;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 5px;
+        background-color: var(--btn-bg);
+        color: var(--text-color);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: var(--btn-hover-bg);
+      }
+
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: var(--dark-text);
+        gap: 15px;
+        margin-top: 5px;
+      }
+
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+      }
+
+      .day {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--white);
+        color: var(--dark-text);
+        border-radius: 5px;
+        font-size: 0.9rem;
+      }
+
+      .period {
+        background-color: var(--primary-red);
+        color: var(--text-color);
+      }
+
+      .next-period {
+        background-color: var(--next-period-light);
+      }

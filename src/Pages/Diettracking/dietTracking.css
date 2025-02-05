@@ -1,0 +1,261 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #fff;
+    padding: 20px;
+    position: relative;
+    margin-top: 60px;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure it's above other content */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px; /* Adjusted padding */
+    /* backdrop-filter: blur(10px); Optional frosted glass effect */
+    color: black;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  nav .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Oswald", sans-serif;
+  }
+
+  nav .nav-options {
+    display: flex;
+    gap: 20px;
+  }
+
+  nav .nav-item {
+    text-decoration: none;
+    color: black; /* Light text color */
+    padding: 8px 15px; /* Adjusted padding for better click area */
+    border-radius: 5px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  nav .nav-item:hover,
+  nav .nav-item.active {
+    background: #ecad29; /* Gold highlight */
+    color: #1a1a1a; /* Dark text for contrast */
+  }
+
+  .nav-links div {
+    position: relative;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #4a4a8a;
+    font-weight: 500;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    background-color: rgba(
+      255,
+      255,
+      255,
+      0.7
+    ); /* White with transparency */
+    border-radius: 8px; /* Rounded corners for a softer look */
+  }
+
+  .nav-links div:hover {
+    color: #2a2a5a;
+    background-color: rgba(
+      255,
+      255,
+      255,
+      0.9
+    ); /* Increase opacity on hover */
+  }
+
+  .indicator {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 5px;
+    z-index: 60;
+    background-color: #ecad29; /* Corrected variable usage */
+  }
+
+  .fixed-header {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 100;
+    padding-bottom: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #e81a1a;
+    margin-bottom: 20px;
+  }
+
+  .meal-form {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  input,
+  select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  button {
+    background-color: #e81a1a;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #ff4d4d;
+  }
+
+  .day-section {
+    margin-bottom: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    scroll-margin-top: 250px;
+  }
+
+  .day-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .day-header h2 {
+    color: #e81a1a;
+    margin: 0;
+  }
+
+  .day-summary {
+    background-color: #fff;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #666;
+  }
+
+  .meal-list {
+    padding: 15px;
+  }
+
+  .meal-item {
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+
+  .meal-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .meal-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .meal-info {
+    flex-grow: 1;
+  }
+
+  .meal-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-right: 10px;
+  }
+
+  .breakfast {
+    background-color: #ffcccc;
+    color: #e81a1a;
+  }
+  .lunch {
+    background-color: #ffe6e6;
+    color: #e81a1a;
+  }
+  .dinner {
+    background-color: #ff9999;
+    color: #e81a1a;
+  }
+  .snack {
+    background-color: #ffb3b3;
+    color: #e81a1a;
+  }
+
+  .meal-time {
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .timeline-nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .timeline-nav button {
+    background-color: white;
+    color: #e81a1a;
+    border: 1px solid;
+    padding: 8px 16px;
+    transition: all 0.3s;
+  }
+
+  .timeline-nav button:hover {
+    background-color: #ffe6e6;
+  }
+
+  .timeline-nav button.active {
+    background-color: #e81a1a;
+    color: white;
+    transform: scale(1.05);
+  }

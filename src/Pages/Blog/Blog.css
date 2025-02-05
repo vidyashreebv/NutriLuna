@@ -1,0 +1,611 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500&display=swap");
+
+:root {
+    --primary-color: #ecad29;
+    --text-color: #FFFFFFDD;
+}
+
+/* General Styles */
+body {
+    background-color: #1a1a1a;
+    color: var(--text-color); /* Corrected variable usage */
+    position: relative;
+    font-family: "Inter", sans-serif;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure it's above other content */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px; /* Adjusted padding */
+    /* backdrop-filter: blur(10px); Optional frosted glass effect */
+    color: black;
+}
+
+nav .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Oswald", sans-serif;
+}
+
+nav .nav-options {
+    display: flex;
+    gap: 20px;
+}
+
+nav .nav-item {
+    text-decoration: none;
+    color: black; /* Light text color */
+    padding: 8px 15px; /* Adjusted padding for better click area */
+    border-radius: 5px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+nav .nav-item:hover,
+nav .nav-item.active {
+    background: #ecad29; /* Gold highlight */
+    color: #1a1a1a; /* Dark text for contrast */
+}
+
+.nav-links div {
+    position: relative;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #4A4A8A;
+    font-weight: 500;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.7); /* White with transparency */
+    border-radius: 8px; /* Rounded corners for a softer look */
+}
+
+.nav-links div:hover {
+    color: #2A2A5A;
+    background-color: rgba(255, 255, 255, 0.9); /* Increase opacity on hover */
+}
+
+.indicator {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 5px;
+    z-index: 60;
+    background-color: #ecad29; /* Corrected variable usage */
+}
+
+.logo img {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.site-title {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.site-title h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.site-title p {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #777;
+}
+
+nav {
+    margin-left: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+    padding: 0;
+    margin: 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    color: #007bff;
+    background: #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* Hero Section */
+/* Hero Section */
+/* Hero Section - Full width */
+.hero {
+    width: 100vw; /* 100% of the viewport width */
+    margin: 0; /* Remove any default margins */
+    padding: 0; /* Adjust padding to fit full width */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    background: #333; /* Or your background */
+}
+
+.hero-content {
+    width: 100%; /* Ensure hero content is full width */
+    max-width: 1200px; /* Optionally, set a max-width to prevent content from stretching too much */
+    padding: 0 20px; /* Optional padding for better spacing */
+}
+
+.hero {
+    position: relative;
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Align items in a column */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    overflow: hidden;
+    color: white;
+    text-align: center;
+    height: 100vh; /* Full viewport height */
+    width: 300vj; /* Full viewport width */
+    padding: 0; /* Remove padding to maximize video space */
+}
+
+.hero {
+    position: relative;
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Align items in a column */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    overflow: hidden;
+    color: white;
+    text-align: center;
+    height: 100vh; /* Full viewport height */
+    padding: 0; /* Remove padding to maximize video space */
+    clip-path: none; /* Ensure no clipping effect is applied */
+}
+
+.hero::before {
+    /* Remove triangle if you have this pseudo-element */
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-left: 50vw solid transparent;
+    border-right: 50vw solid transparent;
+    border-top: 20px solid #000;
+    z-index: 1;
+    display: none; /* This will hide the triangle */
+}
+
+
+.hero .hero-video{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100%; /* Set width to 100% */
+    height: 100%; /* Set height to 100% */
+    z-index: 1;
+    transform: translate(-50%, -50%); /* Center the video */
+    object-fit: cover; /* Ensures the video covers the entire section without stretching */
+}
+
+.hero-content {
+    position: relative; /* Allow z-index to work */
+    z-index: 2; /* Ensure content is above the video */
+    padding: 20px; /* Add padding for spacing */
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7); /* Subtle shadow for text readability */
+}
+
+.hero h2 {
+    font-size: 3rem; /* Larger heading for emphasis */
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    line-height: 1.6; /* Improve readability */
+}
+
+.hero .btn {
+    background-color: #d23c2e; /* Gradient-like primary color */
+    color: #ffffff;
+    padding: 12px 24px;
+    border: none; /* Remove border */
+    border-radius: 50px; /* Fully rounded button */
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-decoration: none; /* Remove underline */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    box-shadow: 0px 8px 15px rgba(106, 130, 251, 0.2); /* Add shadow for depth */
+}
+
+.hero .btn:hover {
+    transform: scale(1.1); /* Slightly enlarge button on hover */
+    box-shadow: 0px 12px 20px rgba(236, 13, 13, 0.4); /* Intensify shadow on hover */
+    background-color: #eaecf4; /* Slightly lighter shade on hover */
+    color: #ec1414;
+}
+
+/* Blog Posts Section */
+/* Blog Section - Centered */
+.blog-posts {
+    display: flex;
+    justify-content: center; /* Center the blog section */
+    align-items: flex-start; /* Align items to the top */
+    flex-wrap: wrap; /* Allow wrapping of cards on smaller screens */
+    padding: 50px 0; /* Adjust padding */
+    width: 100%; /* Full width of the container */
+}
+
+.blog-post-card {
+    width: 100%;
+    max-width: 350px; /* Set a max-width for the cards */
+    margin: 20px; /* Spacing between cards */
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* General reset for blog section */
+.blog-posts {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow: visible; /* Ensure no content is hidden */
+    clip-path: none; /* Remove any clip-path causing triangle cut */
+    background: none; /* Remove any background image that could be making the triangle shape */
+}
+
+/* Ensure there is no cut caused by pseudo-elements */
+.blog-posts::before {
+    content: none; /* Remove the triangle shape or any unwanted content */
+}
+
+/* Ensure blog post cards are not affected by any triangle clipping */
+.blog-post-card {
+    position: relative;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    clip-path: none; /* Disable any clipping */
+}
+
+/* If there’s a triangle effect specifically on one side */
+.blog-post-card::before {
+    content: none; /* Remove triangle effect from pseudo-element */
+}
+
+.blog-posts {
+    padding: 40px 20px;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+.blog-posts h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Explicitly set to 3 columns */
+    gap: 20px;
+    padding: 20px;
+}
+
+.blog-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.blog-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    color: #333;
+}
+
+.card-content p {
+    font-size: 1rem;
+    margin-top: 10px;
+    color: #555;
+}
+
+.card-content a {
+    color: #007bff;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px transition color 0.3s ease;
+}
+
+.card-content a:hover {
+    color: #0056b3;
+}
+
+/* Subscription Section */
+.subscribe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 50px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+}
+
+.subscribe h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.subscribe p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #777;
+    text-align: center;
+}
+
+.subscribe form {
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.subscribe input[type="email"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+.subscribe button {
+    background-color: #d43232!important;
+    color: #ffffff;
+    padding: 12px 24px;
+    border: none; /* Remove border */
+    border-radius: 50px; /* Fully rounded button */
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-decoration: none; /* Remove underline */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    box-shadow: 0px 8px 15px rgba(106, 130, 251, 0.2); /* Add shadow for depth */
+}
+
+.subscribe button:hover {
+    transform: scale(1.1); /* Slightly enlarge button on hover */
+    box-shadow: 0px 12px 20px rgba(236, 13, 13, 0.4); /* Intensify shadow on hover */
+    background-color: #eaecf4!important; /* Slightly lighter shade on hover */
+    color: #ec1414;
+}
+
+/* Footer Section */
+footer {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    border-top: 1px solid #e7e7e7;
+    color: #555;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .blog-card {
+        margin: 10px;
+    }
+
+    .hero h2 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .subscribe form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .subscribe input[type="email"] {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .subscribe button {
+        width: 100%;
+    }
+}
+.blog-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.blog-card img:hover {
+    opacity: 0.8;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    color: #333;
+}
+
+.card-content p {
+    font-size: 1rem;
+    margin-top: 10px;
+    color: #555;
+}
+
+.card-content a {
+    color: #007bff;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.card-content a:hover {
+    color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Subscription Section */
+.subscribe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 50px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+}
+
+.subscribe h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.subscribe p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #777;
+    text-align: center;
+}
+
+.subscribe form {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.subscribe input[type="email"] {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+.subscribe button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.subscribe button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Footer Section */
+footer {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    border-top: 1px solid #e7e7e7;
+    color: #555;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h2 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .subscribe form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .subscribe input[type="email"] {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .subscribe button {
+        width: 100%;
+    }
+}
