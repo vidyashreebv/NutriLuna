@@ -1,20 +1,34 @@
-.loginregister{
-    background-image: url('../../assets/loginbg.jpg');
+/* Full-body styles using the app-body class */
+.app-body {
+    font-family: "Poppins", sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-size: cover; 
-    background-repeat: no-repeat;
-    background-position: center center; 
-}
+    min-height: 100vh;
+    background:url('../../assets/loginbg.jpg') no-repeat ;
+    background-size:cover ;
+    background-size: contain cover;
+    background-position:center ;
+    background-repeat: no-repeat; /* Prevent tiling */
+   
+  }
+  *{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+  
+  }
+  
+
+ 
+
 
 .Wrapper{
     position: relative;
     width : 420px;
     height: 420px;
     background: transparent;
-
+    margin: 10px 0;
     border-radius: 50px;
     color: #fff;
     display: flex;
@@ -22,9 +36,10 @@
     transition: height .2s ease;
     overflow: hidden;
     border: 1px solid rgb(218, 209, 209);
-    backdrop-filter: blur(1.5px);
+    backdrop-filter: blur(3.5px);
     box-shadow: 0 0 10px rgba(195, 61, 61, 0.912);
-   
+    
+
 }
 .Wrapper.activate {
     height:520px
@@ -39,7 +54,7 @@
 
 }
 .Wrapper .form-box-register{
-    width: 80%;
+    width: 100%;
     padding: 40px;  
     position: absolute;
     translate: 600px;
@@ -67,9 +82,13 @@
 
 
 
-form h1{
+.log-hed{
     font-size: 36px;  
      text-align: center; 
+     color: #fff;
+     margin-bottom: 20px;
+     font-family:'Courier New', Courier, monospace;
+     margin-top: 20px;
 }
 
 form .input-box{
@@ -80,9 +99,8 @@ form .input-box{
 }
 
 .input-box input{
-    width: 80%;
-    height: 48%;
-    margin-bottom: 1rem !important ;
+    width: 100%;
+    height: 100%;
     background: transparent ;
     border: none;
     outline: none;
@@ -114,12 +132,23 @@ form .remember-forget{
 
 }
 
-.remember-forget label input { 
+.remember-forget input { 
     accent-color: #fff;
     margin-right: 4px;
-
+    color: #fff;
+    display: flex;
+    width: 16px;  /* Adjust size if needed */
+  height: 16px;
+  
+  
 }
-
+.remember-forget label {
+    accent-color: #fff;
+    margin-right: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Adjust spacing between checkbox and text */
+}
 .remember-forget a{
     color: #fff;
     text-decoration: none; 
@@ -173,9 +202,16 @@ form .terms-condition{
 
 .terms-condition input { 
     accent-color: #fff;
-    margin-right: 4px;
+    margin-right: 0.1px;
+    width: 16px;  /* Adjust size if needed */
+    height: 16px;
 
 }
+.terms-condition label {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Adjust spacing between checkbox and text */
+  }
 
 
 .terms-condition a{

@@ -35,7 +35,7 @@ function PeriodTracker() {
 
     let calendarHTML = "";
     for (let i = 0; i < firstDay; i++) {
-      calendarHTML += '<div class="day"></div>';
+      calendarHTML += '<div class="day empty"></div>';
     }
 
     for (let i = 1; i <= daysInMonth; i++) {
@@ -70,14 +70,14 @@ function PeriodTracker() {
   };
 
   return (
-    <div>
+    <div className="period-tracker">
       <div className="indicator"></div>
-      <nav>
-        <div>
+      <nav className="navbar">
+        <div className="navbar-brand">
           <div className="svg-container">
-            <img src="Menstrual Cycle.svg" alt="" height="40px" />
+            <img src="Menstrual Cycle.svg" alt="Menstrual Cycle" height="40px" className="logo" />
           </div>
-          <div>NutriLuna</div>
+          <div className="brand-name">NutriLuna</div>
         </div>
         <div className="nav-options">
           <a href="indexafterlogin.html" className="nav-item">Home</a>
@@ -88,7 +88,7 @@ function PeriodTracker() {
           <a href="recipe-suggestions.html" className="nav-item">Recipe Suggestions</a>
           <a href="consultation.html" className="nav-item">Consultation</a>
           <a href="dashboard.html" className="nav-item">My Profile</a>
-          <a href="index.html" className="nav-item">
+          <a href="index.html" className="nav-item sign-out">
             <div className="svg-container">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
                 <path d="M24 4A10 10 0 1024 24 10 10 0 1024 4zM36.021 28H11.979C9.785 28 8 29.785 8 31.979V33.5c0 3.312 1.885 6.176 5.307 8.063C16.154 43.135 19.952 44 24 44c7.706 0 16-3.286 16-10.5v-1.521C40 29.785 38.215 28 36.021 28z"></path>
@@ -99,24 +99,23 @@ function PeriodTracker() {
         </div>
       </nav>
       <div className="container">
-        <h1>Track Your Periods</h1>
-        <label htmlFor="last-period">Last Period Date:</label>
-        <input type="date" id="last-period" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
+        <h1 className="title">Track Your Periods</h1>
+        <input type="date" id="last-period" className="input-date" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
 
-        <label htmlFor="cycle-length">Cycle Length (in days):</label>
-        <input type="number" id="cycle-length" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
+        <label className="lab-period" htmlFor="cycle-length">Cycle Length (in days):</label>
+        <input type="number" id="cycle-length" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
 
-        <label htmlFor="period-duration">Period Duration (in days):</label>
-        <input type="number" id="period-duration" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
+        <label className="lab-period" htmlFor="period-duration">Period Duration (in days):</label>
+        <input type="number" id="period-duration" className="input-number" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
 
-        <button onClick={displayCalendar}>Show Calendar</button>
+        <button className="btn-show-calendar" onClick={displayCalendar}>Show Calendar</button>
 
-        <div className="output" id="output">{output}</div>
+        <div className="output-box" id="output">{output}</div>
 
         <div className="calendar-header">
-          <button onClick={() => changeMonth(-1)}>Previous</button>
-          <h2 id="month-year"></h2>
-          <button onClick={() => changeMonth(1)}>Next</button>
+          <button className="btn-prev" onClick={() => changeMonth(-1)}>Previous</button>
+          <h2 id="month-year" className="month-year"></h2>
+          <button className="btn-next" onClick={() => changeMonth(1)}>Next</button>
         </div>
 
         <div id="calendar-container" className="calendar" dangerouslySetInnerHTML={{ __html: calendarHTML }}></div>
