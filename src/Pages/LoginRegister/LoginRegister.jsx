@@ -61,6 +61,10 @@ const LoginRegister = () => {
               <input type="password" placeholder="password" required />
               <TbPasswordUser className="icon" />
             </div>
+            <div className="input-box">
+              <input type="password" placeholder="confirm password" required />
+              <TbPasswordUser className="icon" />
+            </div>
             <div className="terms-condition">
               <label>
                 <input type="checkbox" />

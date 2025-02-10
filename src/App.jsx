@@ -9,7 +9,7 @@ import BlogPage from './Pages/Blog/Blog';
 import AboutUs from './Pages/Aboutus/Aboutus';
 import DietTracking from './Pages/Diettracking/dietTracking';
 import PeriodTracker from './Pages/periodTracker/periodTracker';
-import Recipiesuggestion from './Pages/Recipie/Recipiesuggestion';
+import PersonalDetailsForm from './Pages/LoginRegister/PersonalDetailsForm';
 function App() {
   return (
     <Router>
@@ -21,7 +21,7 @@ function App() {
           <Route path="/blog" element={<BlogPage/>} />
           <Route path="/diet" element={<DietTracking/>} />
           <Route path="/periodtracker" element={<PeriodTracker/>} />
-          <Route path="/recipie" element={<Recipiesuggestion/>} />
+          <Route path="/personaldetails" element={<PersonalDetailsForm/>} />
         </Routes>
       </div>
     </Router>
