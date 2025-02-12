@@ -3,6 +3,8 @@ import axios from "axios"; // Import axios for API requests
 import "./LoginRegister.css";
 import { PiUserFill, PiEnvelopeSimpleBold } from "react-icons/pi";
 import { TbPasswordUser } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
+
 
 const LoginRegister = () => {
   const [action, setAction] = useState("");
@@ -16,6 +18,8 @@ const LoginRegister = () => {
   const [isRegisterDisabled, setIsRegisterDisabled] = useState(true);
   const [isLoginDisabled, setIsLoginDisabled] = useState(true);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
+  const navigate = useNavigate(); // Initialize navigation
+
 
   // Handle input change
   const handleChange = (e) => {
@@ -55,6 +59,7 @@ const LoginRegister = () => {
       if (response.ok) {
         alert('Registration successful');
         console.log(data);
+        navigate('/personaldetails'); // Redirect to next page 
       } else {
         alert(data.error);
       }
