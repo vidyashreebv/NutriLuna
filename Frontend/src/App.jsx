@@ -12,6 +12,7 @@ import PeriodTracker from './Pages/periodTracker/periodTracker';
 import PersonalDetailsForm from './Pages/LoginRegister/PersonalDetailsForm';
 function App() {
   return (
+    
     <Router>
       <div className="App">
         <Routes>
