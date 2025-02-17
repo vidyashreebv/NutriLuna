@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+
+}
+:root {
+  --primary-red: #660808;
+  --secondary-red: #cd0c0c;
+  --light-red: #c74254;
+  --dark-red: #b90909;
+  --white: #ffffff;
+  --text-color: var(--white);
+  --card-bg: #f2e4e4;
+  --btn-bg: var(--primary-red);
+  --btn-hover-bg: var(--light-red);
+  --light-text: #333;
+  --dark-text: #1a1a1a;
+  --next-period-light: #f7b4b4;
+}
