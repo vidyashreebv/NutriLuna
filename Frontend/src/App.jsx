@@ -10,19 +10,20 @@ import AboutUs from './Pages/Aboutus/Aboutus';
 import DietTracking from './Pages/Diettracking/dietTracking';
 import PeriodTracker from './Pages/periodTracker/periodTracker';
 import PersonalDetailsForm from './Pages/LoginRegister/PersonalDetailsForm';
+
 function App() {
   return (
-    
+
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/login" element={<LoginRegister/>} />
-          <Route path="/landing" element={<Landing/>} />
-          <Route path="/about" element={<AboutUs/>} />
-          <Route path="/blog" element={<BlogPage/>} />
-          <Route path="/diet" element={<DietTracking/>} />
-          <Route path="/periodtracker" element={<PeriodTracker/>} />
-          <Route path="/personaldetails" element={<PersonalDetailsForm/>} />
+          <Route path="/login" element={<LoginRegister />} />
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/diet" element={<DietTracking />} />
+          <Route path="/periodtracker" element={<PeriodTracker />} />
+          <Route path="/personaldetails" element={<PersonalDetailsForm />} />
         </Routes>
       </div>
     </Router>

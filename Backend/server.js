@@ -11,7 +11,9 @@ app.use(bodyParser.json());
 
 // Routes
 const userRoutes = require('./pages/user');
+const periodRoutes = require('./pages/periodtrack');
 app.use('/api/user', userRoutes);
+app.use("/api/period", periodRoutes);
 
 
 // Default Route

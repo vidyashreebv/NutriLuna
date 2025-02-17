@@ -111,11 +111,11 @@ const LoginRegister = () => {
               <input type="password" name="password" placeholder="Password" required onChange={handleChange} />
               <TbPasswordUser className="icon" />
             </div>
-            <button 
-              type="submit" 
-              disabled={isLoginDisabled} 
-              style={{ 
-                backgroundColor: isLoginDisabled ? "white" : "white", 
+            <button
+              type="submit"
+              disabled={isLoginDisabled}
+              style={{
+                backgroundColor: isLoginDisabled ? "white" : "white",
                 textDecoration: isLoginDisabled ? "line-through" : "none"
               }}
             >
@@ -151,11 +151,11 @@ const LoginRegister = () => {
               <TbPasswordUser className="icon" />
             </div>
             {passwordMismatch && <p style={{ color: "white", fontSize: "12px", marginTop: "5px" }}>Passwords do not match</p>}
-            <button 
-              type="submit" 
-              disabled={isRegisterDisabled} 
-              style={{ 
-                backgroundColor: isRegisterDisabled ? "white" : "white", 
+            <button
+              type="submit"
+              disabled={isRegisterDisabled}
+              style={{
+                backgroundColor: isRegisterDisabled ? "white" : "white",
                 textDecoration: isRegisterDisabled ? "line-through" : "none"
               }}
             >

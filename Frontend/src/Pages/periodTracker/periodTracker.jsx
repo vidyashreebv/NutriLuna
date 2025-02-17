@@ -1,80 +1,63 @@
 import React, { useState, useEffect } from "react";
 import "./periodTracker.css";
+import { auth } from "../../config/firebaseConfig"; ""; // ✅ Correct import
+import { onAuthStateChanged } from "firebase/auth";
+
 
 function PeriodTracker() {
   const [lastPeriod, setLastPeriod] = useState("");
   const [cycleLength, setCycleLength] = useState("");
   const [periodDuration, setPeriodDuration] = useState("");
   const [output, setOutput] = useState("");
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [calendarHTML, setCalendarHTML] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [days, setDays] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [user, setUser] = useState(null);
+  const [monthYearText, setMonthYearText] = useState("");
 
   useEffect(() => {
-    generateCalendar(currentYear, currentMonth);
-  }, [currentYear, currentMonth]);
-
-  const generateCalendar = (year, month) => {
-    const firstDayOfMonth = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDayOfWeek = firstDayOfMonth.getDay();
-    const newDays = [];
-
-    // Add days of the week headers
-    daysOfWeek.forEach((day) => {
-      newDays.push({ type: "header", label: day });
+    onAuthStateChanged(auth, (currentUser) => {
+      console.log("Auth State Changed:", currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+        fetchPeriodData(currentUser);
+      }
     });
+  }, []);
 
-    // Empty slots before first day
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      newDays.push({ type: "empty" });
+  const fetchPeriodData = async (currentUser) => {
+    if (!currentUser) return;
+
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch("/api/period/getPeriodData", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Response Status:", response.status); // Log the response status
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched Data:", data); // Log the data received
+        setLastPeriod(data.lastPeriod);
+        setCycleLength(data.cycleLength);
+        setPeriodDuration(data.periodDuration);
+      } else {
+        console.error("Failed to fetch period data:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching period data:", error);
     }
-
-    // Actual days
-    for (let day = 1; day <= daysInMonth; day++) {
-      newDays.push({ type: "day", label: day });
-    }
-
-    setDays(newDays);
-  };
-
-  const handleMonthChange = (offset) => {
-    let newMonth = currentMonth + offset;
-    let newYear = currentYear;
-
-    if (newMonth < 0) {
-      newMonth = 11;
-      newYear--;
-    } else if (newMonth > 11) {
-      newMonth = 0;
-      newYear++;
-    }
-
-    setCurrentMonth(newMonth);
-    setCurrentYear(newYear);
-  };
-
-  const openModal = (day) => {
-    setSelectedDate(`${monthNames[currentMonth]} ${day}, ${currentYear}`);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
   };
 
   const displayCalendar = () => {
     if (!lastPeriod || isNaN(cycleLength) || isNaN(periodDuration)) {
       setOutput("Please provide valid inputs for all fields.");
+      setCalendarHTML("");
       return;
     }
 
@@ -84,12 +67,54 @@ function PeriodTracker() {
 
     const options = { year: "numeric", month: "long", day: "numeric" };
     setOutput(`Your next period is expected around: ${nextPeriodDate.toLocaleDateString(undefined, options)}`);
-    generateCalendar(currentYear, currentMonth);
+
+    generateCalendar(currentMonth, currentYear, lastPeriodDate, parseInt(periodDuration), nextPeriodDate);
+  };
+
+  const generateCalendar = (month, year, lastPeriodDate, periodDuration, nextPeriodDate) => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+
+    setMonthYearText(`${new Date(year, month).toLocaleString("default", { month: "long" })} ${year}`);
+
+    let calendarHTML = "";
+    for (let i = 0; i < firstDay; i++) {
+      calendarHTML += '<div class="day empty"></div>';
+    }
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(year, month, i);
+      let dayClass = "day";
+
+      if (currentDate >= lastPeriodDate && currentDate < new Date(lastPeriodDate.getTime() + periodDuration * 24 * 60 * 60 * 1000)) {
+        dayClass += " period";
+      } else if (currentDate >= nextPeriodDate && currentDate < new Date(nextPeriodDate.getTime() + periodDuration * 24 * 60 * 60 * 1000)) {
+        dayClass += " next-period";
+      }
+
+      calendarHTML += `<div class="${dayClass}">${i}</div>`;
+    }
+
+    setCalendarHTML(calendarHTML);
+  };
+
+  const changeMonth = (offset) => {
+    let newMonth = currentMonth + offset;
+    let newYear = currentYear;
+    if (newMonth < 0) {
+      newMonth = 11;
+      newYear--;
+    } else if (newMonth > 11) {
+      newMonth = 0;
+      newYear++;
+    }
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+    displayCalendar();
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen">
-      {/* Navigation Bar */}
+    <div className="period-tracker">
       <div className="indicator"></div>
       <nav className="navbar">
         <div className="navbar-brand">
@@ -117,100 +142,21 @@ function PeriodTracker() {
           </a>
         </div>
       </nav>
-
-      {/* Main Content */}
-      <div className="flex items-center justify-center py-16" style={{ marginTop: "50px" }}>
-        <div className="w-webkit-fill-available  mx-auto p-6 pt-10 pb-8 pl-8 pr-8 my-8 bg-white rounded-lg shadow-lg" style={{ paddingBottom: "40px" }}>
-        <h1 className="text-3xl text-center font-semibold text-teal-600 mb-8" style={{ paddingTop: "30px", paddingBottom: "30px" }}>Track Your Periods</h1>
-
-          <div className="space-y-4" >
-            <input
-              type="date"
-              id="last-period"
-              className="w-webkit-fill-available p-3 mx-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              value={lastPeriod}
-              onChange={(e) => setLastPeriod(e.target.value)}
-            />
-            <label htmlFor="cycle-length" className="block text-teal-500">Cycle Length (in days):</label>
-            <input
-              type="number"
-              id="cycle-length"
-              className="w-webkit-fill-available p-3 mx-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              value={cycleLength}
-              onChange={(e) => setCycleLength(e.target.value)}
-              placeholder="e.g., 28"
-            />
-
-            <label htmlFor="period-duration" className="block text-teal-500">Period Duration (in days):</label>
-            <input
-              type="number"
-              id="period-duration"
-              className="w-webkit-fill-available p-3 mx-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              value={periodDuration}
-              onChange={(e) => setPeriodDuration(e.target.value)}
-              placeholder="e.g., 5"
-            />
-
-            <button
-              className="w-webkit-fill-available p-3 mx-4 bg-teal-600 text-white p-3 rounded-md hover:bg-teal-500"
-              onClick={displayCalendar}
-            >
-              Show Calendar
-            </button>
-
-            <div className="output-box mt-4 text-teal-600 font-semibold w-webkit-fill-available p-3 mx-4" id="output">{output}</div>
-
-            <div className="calendar-header mt-6 flex justify-between items-center ">
-              <button
-                className="text-teal-600 font-semibold text-lg w-webkit-fill-available p-3 mx-4"
-                onClick={() => handleMonthChange(-1)}
-              >
-                Previous
-              </button>
-              <h2 className="text-teal-600 text-xl font-semibold w-webkit-fill-available p-3 mx-4">{monthNames[currentMonth]} {currentYear}</h2>
-              <button
-                className="text-teal-600 font-semibold text-lg"
-                onClick={() => handleMonthChange(1)}
-              >
-                Next
-              </button>
-            </div>
-
-            <div className="calendar mt-6 grid grid-cols-7 gap-2 ">
-              {days.map((day, index) => (
-                day.type === "empty" ? (
-                  <div key={index}></div>
-                ) : day.type === "header" ? (
-                  <div key={index} className="text-center font-semibold text-teal-600">{day.label}</div>
-                ) : (
-                  <div
-                    key={index}
-                    className="text-center py-2 border cursor-pointer hover:bg-teal-100"
-                    onClick={() => openModal(day.label)}
-                  >
-                    {day.label}
-                  </div>
-                )
-              ))}
-            </div>
-
-            {/* Modal */}
-            {isModalOpen && (
-              <div className="fixed inset-0 flex items-center justify-center z-50">
-                <div className="modal-overlay absolute inset-0 bg-black opacity-50"></div>
-                <div className="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
-                  <div className="modal-content py-4 text-left px-6">
-                    <div className="flex justify-between items-center pb-3">
-                      <p className="text-2xl font-bold">Selected Date</p>
-                      <button onClick={closeModal} className="modal-close px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring">✕</button>
-                    </div>
-                    <div className="text-xl font-semibold">{selectedDate}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+      <div className="container">
+        <h1 className="title">Track Your Periods</h1>
+        <input type="date" className="input-date" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
+        <label className="lab-period">Cycle Length (in days):</label>
+        <input type="number" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
+        <label className="lab-period">Period Duration (in days):</label>
+        <input type="number" className="input-number" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
+        <button className="btn-show-calendar" onClick={displayCalendar}>Show Calendar</button>
+        <div className="output-box">{output}</div>
+        <div className="calendar-header flex items-center">
+          <button className="btn-prev" onClick={() => changeMonth(-1)}>Previous</button>
+          <h3 className="month-year">{monthYearText}</h3>
+          <button className="btn-next" onClick={() => changeMonth(1)}>Next</button>
         </div>
+        <div className="calendar" dangerouslySetInnerHTML={{ __html: calendarHTML }}></div>
       </div>
     </div>
   );
