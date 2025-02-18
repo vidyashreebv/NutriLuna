@@ -10,7 +10,7 @@ import AboutUs from './Pages/Aboutus/Aboutus';
 import DietTracking from './Pages/Diettracking/dietTracking';
 import PeriodTracker from './Pages/periodTracker/periodTracker';
 import PersonalDetailsForm from './Pages/LoginRegister/PersonalDetailsForm';
-import Dashboard from './Pages/Dashboard/Dashboard';
+import Profile from './Pages/Profile/Profile';
 function App() {
   return (
     
