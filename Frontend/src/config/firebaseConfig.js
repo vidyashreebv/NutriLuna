@@ -1,7 +1,7 @@
-// src/config/firebaseConfig.js
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAr--QBGH8ed01xXD9VTKm7LGdve8JAIZw",
   authDomain: "nutri-luna.firebaseapp.com",
@@ -12,7 +12,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp(); // Use the existing app
+}
+
 const auth = getAuth(app);
 
 export { app, auth };

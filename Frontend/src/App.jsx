@@ -8,23 +8,24 @@ import Landing from './Pages/Landing/Landing';
 import BlogPage from './Pages/Blog/Blog';
 import AboutUs from './Pages/Aboutus/Aboutus';
 import DietTracking from './Pages/Diettracking/dietTracking';
-// import PeriodTracker from './Pages/periodTracker/periodTracker';
+import PeriodTracker from './Pages/PeriodTracker/PeriodTracker';
 import PersonalDetailsForm from './Pages/LoginRegister/PersonalDetailsForm';
 import Navbar from './Components/Navbar';
 import Dashboard from './Pages/Dashboard/Dashboard';
 function App() {
   return (
-    
+
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/login" element={<LoginRegister/>} />
-          <Route path="/landing" element={<Landing/>} />
-          <Route path="/about" element={<AboutUs/>} />
-          <Route path="/blog" element={<BlogPage/>} />
-          <Route path="/diet" element={<DietTracking/>} />
-          <Route path="/personaldetails" element={<PersonalDetailsForm/>} />
-          <Route path="/dashboard" element={<Dashboard/>} />
+          <Route path="/login" element={<LoginRegister />} />
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/diet" element={<DietTracking />} />
+          <Route path="/period" element={<PeriodTracker />} />
+          <Route path="/personaldetails" element={<PersonalDetailsForm />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>
