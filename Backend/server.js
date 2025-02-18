@@ -11,17 +11,10 @@ app.use(bodyParser.json());
 
 // Routes
 const userRoutes = require('./pages/user');
-<<<<<<< HEAD
 app.use('/api/user', userRoutes);
 
 const personalDetailsRoutes = require('./routes/personalDetails'); // Import new route
 app.use('/api/personalDetails', personalDetailsRoutes); // Use personal details route
-=======
-const periodRoutes = require('./pages/periodtrack');
-app.use('/api/user', userRoutes);
-app.use("/api/period", periodRoutes);
-
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 
 // Default Route
 app.get('/', (req, res) => {

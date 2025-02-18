@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
 import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 
 
-=======
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 import { 
   CalendarIcon, 
   UserIcon, 
@@ -20,14 +17,11 @@ import {
 } from 'lucide-react';
 import './PersonalDetailsForm.css';
 
-<<<<<<< HEAD
 
 
 
 
 
-=======
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 const PersonalDetailsForm = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [formData, setFormData] = useState({
@@ -80,7 +74,6 @@ const PersonalDetailsForm = () => {
       }
     }));
   };
-<<<<<<< HEAD
   const navigate = useNavigate(); // Initialize navigation
 
   const handleNext = (e) => {
@@ -121,13 +114,6 @@ const PersonalDetailsForm = () => {
   
 
   
-=======
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-  };
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 
   const renderSection = () => {
     switch(currentSection) {
@@ -328,7 +314,6 @@ const PersonalDetailsForm = () => {
           {renderSection()}
 
           <div className="form-navigation">
-<<<<<<< HEAD
   <button
     type="button"
     onClick={() => setCurrentSection(prev => prev - 1)}
@@ -348,33 +333,6 @@ const PersonalDetailsForm = () => {
   )}
 </div>
 
-=======
-            <button
-              type="button"
-              onClick={() => setCurrentSection(prev => prev - 1)}
-              className={`prev-button ${currentSection === 0 ? 'hidden' : ''}`}
-            >
-              Previous
-            </button>
-            
-            {currentSection === sections.length - 1 ? (
-              <button
-                type="submit"
-                className="next-button"
-              >
-                Submit
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setCurrentSection(prev => prev + 1)}
-                className="next-button"
-              >
-                Next
-              </button>
-            )}
-          </div>
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
         </form>
       </div>
     </div>

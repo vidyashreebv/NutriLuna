@@ -162,11 +162,7 @@ form .remember-forget{
 
 }
 button:disabled {
-<<<<<<< HEAD
     background-color: rgba(243, 236, 236, 0.736); /* Light gray */
-=======
-    background-color: rgba(0, 0, 0, 0.2); /* Light gray */
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
     cursor: not-allowed;
     text-emphasis-style:inherit;
     text-decoration: line-through;
@@ -188,7 +184,6 @@ form button{
     font-weight: 700;
 
 }
-<<<<<<< HEAD
 form button:hover{
     background: #ef4444;
     color: #fff;
@@ -196,8 +191,6 @@ form button:hover{
 
 
 
-=======
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 
 form .new-register-link {
     font-size: 14.5px;

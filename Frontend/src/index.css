@@ -1,12 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 @import "tailwindcss";
-<<<<<<< HEAD
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-=======
 
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
 
 
 *{
@@ -28,7 +22,6 @@
     --light-text: #333;
     --dark-text: #1a1a1a;
     --next-period-light: #f7b4b4;
-<<<<<<< HEAD
   }
   :root {
     --background: 0 0% 100%;
@@ -46,6 +39,4 @@
     --card-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-=======
->>>>>>> 3fb4a77a1ce0c373e7b74e428103a548387b2af5
   }
