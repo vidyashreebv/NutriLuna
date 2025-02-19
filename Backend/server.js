@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { admin, db } = require('./config/firebaseConfig'); // Import Firebase config
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -13,8 +13,12 @@ app.use(bodyParser.json());
 const userRoutes = require('./pages/user');
 app.use('/api/user', userRoutes);
 
-const personalDetailsRoutes = require('./routes/personalDetails'); // Import new route
+const personalDetailsRoutes = require('./pages/personalDetails'); // Import new route
 app.use('/api/personalDetails', personalDetailsRoutes); // Use personal details route
+
+const dietTrackerRoutes = require("./pages/diettracker"); // ✅ Ensure correct path
+app.use("/api/diettracker", dietTrackerRoutes); // 🚨 This should be an Express Router
+
 
 // Default Route
 app.get('/', (req, res) => {
