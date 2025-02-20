@@ -1,233 +1,500 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronUp, Plus, Trash2, Edit2 } from "lucide-react";
+import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import "./dietTracking.css";
+import axios from "axios";
+import Navbar from "../../Components/Navbar";
+
+
+
 
 const DietTracker = () => {
-  const [meals, setMeals] = useState({
-    today: [],
-    yesterday: [],
-    earlier: [],
-  });
+  // State management
+  const [meals, setMeals] = useState({ today: [], yesterday: [], earlier: [] });
+  const [user, setUser] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [activeSection, setActiveSection] = useState("today");
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [navbarHeight, setNavbarHeight] = useState(0);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [hoveredMeal, setHoveredMeal] = useState(null);
+  const [hoveredSection, setHoveredSection] = useState(null);
+  const [isAddButtonHovered, setIsAddButtonHovered] = useState(false);
+  const [isScrollButtonHovered, setIsScrollButtonHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(null);
 
-  // Function to add a meal to the Today section
-  const addMeal = () => {
-    const foodName = document.getElementById("foodName").value;
-    const calories = document.getElementById("calories").value;
-    const mealType = document.getElementById("mealType").value;
+  // Refs
+  const navbarRef = useRef(null);
+  const fixedHeaderRef = useRef(null);
 
-    // Get current time
-    const now = new Date();
-    const timeString = now.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
+  // Format date helper
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
     });
-
-    // Create a new meal object
-    const newMeal = {
-      foodName,
-      calories,
-      mealType,
-      time: timeString,
-    };
-
-    // Add the new meal to the "Today" section and update the state
-    setMeals((prevMeals) => ({
-      ...prevMeals,
-      today: [newMeal, ...prevMeals.today],  // Add new meal at the top
-    }));
-
-    // Clear the input fields after adding the meal
-    document.getElementById("foodName").value = "";
-    document.getElementById("calories").value = "";
-    document.getElementById("mealType").value = "breakfast";
   };
 
+  // Calculate relative date
+  const getRelativeDate = (date) => {
+    const today = new Date();
+    const diffTime = Math.ceil((today - new Date(date)) / (1000 * 60 * 60 * 24));
+    if (diffTime === 1) return "Yesterday";
+    if (diffTime <= 7) return `${diffTime} days ago`;
+    return formatDate(date);
+  };
+
+
+    // Layout effects
+    useEffect(() => {
+      const updateNavbarHeight = () => {
+        if (navbarRef.current) {
+          setNavbarHeight(navbarRef.current.offsetHeight);
+        }
+      };
+  
+      const updateHeaderHeight = () => {
+        if (fixedHeaderRef.current) {
+          setHeaderHeight(fixedHeaderRef.current.offsetHeight);
+        }
+      };
+  
+      const handleResize = () => {
+        updateNavbarHeight();
+        updateHeaderHeight();
+      };
+  
+      const handleScroll = () => {
+        const currentScrollY = window.scrollY;
+        setShowScrollTop(currentScrollY > 200);
+        setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 100);
+        setLastScrollY(currentScrollY);
+      };
+  
+      // Initial setup
+      updateNavbarHeight();
+      setTimeout(updateHeaderHeight, 100);
+  
+      // Event listeners
+      window.addEventListener('resize', handleResize);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+  
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }, [lastScrollY]);
+   
+  
+  // Fetch user and set state
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch Meals
+  const fetchMealsData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const userId = auth.currentUser?.uid; // Use the logged-in user's ID
+    
+    if (!userId) {
+      throw new Error('User ID is not available');
+    }
+
+      if (!user) {
+        setError('Please sign in to view your meals');
+        setIsLoading(false);
+        return;
+      }
+  
+      const token = await auth.currentUser.getIdToken();
+      const response = await axios.get(`http://localhost:5001/api/diettracker/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+  
+      console.log("✅ Fetched meals data:", response.data);
+  
+      // Make sure response.data contains the expected structure
+      if (!response.data || typeof response.data !== "object") {
+        throw new Error("Invalid response format");
+      }
+  
+      setMeals(response.data); // Directly set the fetched data
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to fetch meals');
+      console.error('❌ Error fetching meals:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Call fetchMeals only when user is available
+  useEffect(() => {
+    if (user) fetchMealsData();
+  }, [user]);
+
+
+
+  // Meal management functions
+  const addMeal = async () => {
+    try {
+        const token = await auth.currentUser.getIdToken();
+        console.log("🔑 Firebase Token:", token); // ✅ Debugging token
+        const response = await axios.post("http://localhost:5001/api/diettracker/add", {
+            mealType: document.getElementById("mealType").value,
+            foodName: document.getElementById("foodName").value,
+            calories: document.getElementById("calories").value,
+            date: new Date().toISOString().split("T")[0] // Ensure date is formatted properly
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log("Meal added successfully:", response.data);
+        fetchMealsData()  // ✅ Fetch updated logs after adding a meal
+
+    } catch (error) {
+        console.error("Failed to add meal:", error);
+    }
+};
+
+
+  const deleteMeal = async (id, section) => {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      await axios.delete(`/api/meals/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setMeals(prevMeals => ({
+        ...prevMeals,
+        [section]: prevMeals[section].filter(meal => meal.id !== id)
+      }));
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete meal');
+    }
+  };
+
+  const editMeal = async (id, section, updatedData) => {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await axios.put(`/api/meals/${id}`, updatedData, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setMeals(prevMeals => ({
+        ...prevMeals,
+        [section]: prevMeals[section].map(meal =>
+          meal.id === id ? response.data : meal
+        )
+      }));
+      setIsEditing(null);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update meal');
+    }
+  };
+
+  // Navigation functions
   const scrollToSection = (sectionId) => {
+    setActiveSection(sectionId);
     const section = document.getElementById(sectionId);
-    const headerHeight = document.querySelector(".fixed-header").offsetHeight;
-    const sectionRect = section.getBoundingClientRect();
-    const scrollPosition =
-      window.pageYOffset + sectionRect.top - headerHeight - 20;
+    if (section) {
+      const totalOffset = navbarHeight + (isHeaderVisible ? headerHeight : 0);
+      const scrollPosition = section.offsetTop - totalOffset - 20;
 
-    window.scrollTo({
-      top: scrollPosition,
-      behavior: "smooth",
-    });
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: "smooth",
+        });
+      }, 50);
+    }
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // UI event handlers
+  const handleMealMouseEnter = (index) => setHoveredMeal(index);
+  const handleMealMouseLeave = () => setHoveredMeal(null);
+  const handleSectionMouseEnter = (sectionId) => setHoveredSection(sectionId);
+  const handleSectionMouseLeave = () => setHoveredSection(null);
+
+  // Calculate content padding
+  const contentPaddingTop = navbarHeight + (isHeaderVisible ? headerHeight : 0) + 20;
+
+  if (isLoading) {
+    return (
+      <div className="loading-state" style={{ paddingTop: contentPaddingTop }}>
+        Loading your meals...
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="indicator"></div>
-      <nav>
-        <div className="logo-container">
-          <img src="Menstrual Cycle.svg" alt="" height="40px" />
-          <div>NutriLuna</div>
-        </div>
-        <div className="nav-options">
-          <a href="indexafterlogin.html" className="nav-item">
-            Home
-          </a>
-          <a href="aboutafterlogin.html" className="nav-item">
-            About
-          </a>
-          <a href="blogafterlogin.html" className="nav-item">
-            Blog
-          </a>
-          <a href="period-tracker.html" className="nav-item">
-            Track Your Periods
-          </a>
-          <a href="diet-tracking.html" className="nav-item active">
-            Diet Tracking
-          </a>
-          <a href="recipe-suggestions.html" className="nav-item">
-            Recipe Suggestions
-          </a>
-          <a href="consultation.html" className="nav-item">
-            Consultation
-          </a>
-          <a href="dashboard.html" className="nav-item">
-            My Profile
-          </a>
-          <a href="index.html" className="nav-item">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 48 48"
-            >
-              <path
-                d="M24 4A10 10 0 1024 24 10 10 0 1024 4zM36.021 28H11.979C9.785 28 8 29.785 8 31.979V33.5c0 3.312 1.885 6.176 5.307 8.063C16.154 43.135 19.952 44 24 44c7.706 0 16-3.286 16-10.5v-1.521C40 29.785 38.215 28 36.021 28z"
-              ></path>
-            </svg>
-            Sign Out
-          </a>
-        </div>
-      </nav>
-      <div className="container">
-        <div className="fixed-header">
-          <h1>Diet Tracker</h1>
-          <div className="meal-form">
-            <input
-              type="text"
-              id="foodName"
-              placeholder="Food Name"
-              required
-            />
-            <input
-              type="number"
-              id="calories"
-              placeholder="Calories"
-              required
-            />
-            <select id="mealType">
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch">Lunch</option>
-              <option value="dinner">Dinner</option>
-              <option value="snack">Snack</option>
-            </select>
-            <button onClick={addMeal}>Add Meal</button>
-          </div>
-          <div className="timeline-nav">
-            <button onClick={() => scrollToSection("today")} className="active">
-              Today
-            </button>
-            <button onClick={() => scrollToSection("yesterday")}>Yesterday</button>
-            <button onClick={() => scrollToSection("earlier")}>Last 7 Days</button>
+    <div className="App">
+      <div ref={navbarRef} className="fixed-navbar">
+        <Navbar />
+      </div>
+  
+      <div className="diet-tracker-container">
+        <div
+          ref={fixedHeaderRef}
+          className={`fixed-header ${isHeaderVisible ? "header-visible" : "header-hidden"}`}
+          style={{ top: `${navbarHeight}px` }}
+        >
+          <div className="header-content">
+            <h1 className="tracker-title">Diet Tracker</h1>
+  
+            <div className="meal-form">
+              <div className="form-controls">
+                <input type="text" id="foodName" placeholder="Food Name" required className="food-input" />
+                <input type="number" id="calories" placeholder="Calories" required className="calories-input" />
+                <select id="mealType" className="meal-type-select">
+                  <option value="breakfast">Breakfast</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="dinner">Dinner</option>
+                  <option value="snack">Snack</option>
+                </select>
+                <button
+                  onClick={addMeal}
+                  className="add-meal-button"
+                  onMouseEnter={() => setIsAddButtonHovered(true)}
+                  onMouseLeave={() => setIsAddButtonHovered(false)}
+                >
+                  {isAddButtonHovered ? (
+                    <span className="flex items-center">
+                      <Plus size={16} className="mr-2" />
+                      Add Meal
+                    </span>
+                  ) : (
+                    "Add Meal"
+                  )}
+                </button>
+              </div>
+            </div>
+  
+            <div className="timeline-nav">
+              <button
+                onClick={() => scrollToSection("today")}
+                className={`nav-button ${activeSection === "today" ? "active" : ""}`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => scrollToSection("yesterday")}
+                className={`nav-button ${activeSection === "yesterday" ? "active" : ""}`}
+              >
+                Yesterday
+              </button>
+              <button
+                onClick={() => scrollToSection("earlier")}
+                className={`nav-button ${activeSection === "earlier" ? "active" : ""}`}
+              >
+                Last 7 Days
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Today's Section */}
-        <div id="today" className="day-section">
-          <div className="day-header">
-            <h2>Today</h2>
-            <span>January 6, 2025</span>
-          </div>
-          <div className="day-summary">
-            <p>Total Calories: {meals.today.reduce((total, meal) => total + Number(meal.calories), 0)} | Meals: {meals.today.length}</p>
-          </div>
-          <div className="meal-list">
-            {meals.today.map((meal, index) => (
-              <div className="meal-card" key={index}>
-                <div className="meal-info">
-                  <span className={`meal-type ${meal.mealType}`}>
-                    {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
+  
+        <div className="content-container" style={{ paddingTop: `${contentPaddingTop}px` }}>
+          {error && (
+            <div className="error-message">
+              {error}
+              <button onClick={() => setError(null)}>Dismiss</button>
+            </div>
+          )}
+  
+          {Object.keys(meals).length === 0 ? (
+            <p>Loading meals...</p>
+          ) : (
+            ["today", "yesterday", "earlier"].map((section) => (
+              <div
+                key={section}
+                id={section}
+                className="day-section"
+                onMouseEnter={() => handleSectionMouseEnter(section)}
+                onMouseLeave={handleSectionMouseLeave}
+              >
+                <div className="day-header">
+                  <h2 className="day-title">
+                    {section === "today" ? "Today" : section === "yesterday" ? "Yesterday" : "Last 7 Days"}
+                  </h2>
+                  <span className="day-date">
+                    {section === "today"
+                      ? formatDate(new Date())
+                      : section === "yesterday"
+                      ? formatDate(new Date(new Date().setDate(new Date().getDate() - 1)))
+                      : formatDate(new Date(new Date().setDate(new Date().getDate() - 7)))}
                   </span>
-                  <h3>{meal.foodName}</h3>
-                  <p>{meal.calories} calories</p>
-                  <span className="meal-time">{meal.time}</span>
                 </div>
-              </div>
-            ))}
+  
+                <div className="day-summary">
+                  <p className="summary-text">
+                    Total Calories:{" "}
+                    {Array.isArray(meals[section])
+                      ? meals[section].reduce((total, meal) => total + Number(meal.calories), 0)
+                      : 0}{" "}
+                    | Meals: {Array.isArray(meals[section]) ? meals[section].length : 0}
+                  </p>
+                </div>
+  
+                <div className="meal-list">
+  {meals[section] && Array.isArray(meals[section]) ? (
+    meals[section].length > 0 ? (
+      meals[section].map((meal) => (
+        <div key={meal.id} className="meal-card">
+          <div className="meal-header">
+            <span className="meal-type">{meal.mealType}</span>
+          </div>
+          <div className="meal-info">
+            <p className="meal-name">{meal.foodName}</p>
+            <span className="calories">{meal.calories} calories</span>
+          </div>
+          <div className="meal-actions">
+            <button className="edit-btn" onClick={() => onEditMeal(meal)}>✏️</button>
+            <button className="delete-btn" onClick={() => onDeleteMeal(meal.id)}>🗑️</button>
           </div>
         </div>
+      ))
+    ) : (
+      <p className="empty-state">
+        No meals logged for {section}.
+        {section === "today" && " Add your first meal above!"}
+      </p>
+    )
+  ) : (
+    <p>Adding your meal...</p>
+  )}
+</div>
 
-        {/* Yesterday's Section */}
-        <div id="yesterday" className="day-section">
-          <div className="day-header">
-            <h2>Yesterday</h2>
-            <span>January 5, 2025</span>
-          </div>
-          <div className="day-summary">
-            <p>Total Calories: 2,100 | Meals: 5</p>
-          </div>
-          <div className="meal-list">
-            <div className="meal-card">
-              <div className="meal-info">
-                <span className="meal-type dinner">Dinner</span>
-                <h3>Salmon with Roasted Vegetables</h3>
-                <p>550 calories</p>
-                <span className="meal-time">7:00 PM</span>
-              </div>
-            </div>
-            <div className="meal-card">
-              <div className="meal-info">
-                <span className="meal-type snack">Snack</span>
-                <h3>Mixed Nuts</h3>
-                <p>250 calories</p>
-                <span className="meal-time">4:30 PM</span>
-              </div>
-            </div>
-            <div className="meal-card">
-              <div className="meal-info">
-                <span className="meal-type lunch">Lunch</span>
-                <h3>Turkey Sandwich</h3>
-                <p>450 calories</p>
-                <span className="meal-time">12:30 PM</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Day Before Yesterday Section */}
-        <div id="earlier" className="day-section">
-          <div className="day-header">
-            <h2>January 4, 2025</h2>
-            <span>2 days ago</span>
-          </div>
-          <div className="day-summary">
-            <p>Total Calories: 1,950 | Meals: 4</p>
-          </div>
-          <div className="meal-list">
-            <div className="meal-card">
-              <div className="meal-info">
-                <span className="meal-type dinner">Dinner</span>
-                <h3>Vegetable Stir Fry</h3>
-                <p>400 calories</p>
-                <span className="meal-time">6:45 PM</span>
               </div>
-            </div>
-            <div className="meal-card">
-              <div className="meal-info">
-                <span className="meal-type lunch">Lunch</span>
-                <h3>Chickpea Curry</h3>
-                <p>550 calories</p>
-                <span className="meal-time">1:15 PM</span>
-              </div>
-            </div>
-          </div>
+            ))
+          )}
         </div>
+  
+        <button
+          onClick={scrollToTop}
+          className={`scroll-top-button ${showScrollTop ? "visible" : "hidden"}`}
+          aria-label="Scroll to top"
+          onMouseEnter={() => setIsScrollButtonHovered(true)}
+          onMouseLeave={() => setIsScrollButtonHovered(false)}
+        >
+          <ChevronUp size={isScrollButtonHovered ? 26 : 24} />
+        </button>
+  
+        {/* Edit Meal Modal */}
+        {isEditing && (
+          <div className="modal-overlay">
+            <div className="edit-modal">
+              <h3>Edit Meal</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const meal =
+                    meals.today.find((m) => m.id === isEditing) ||
+                    meals.yesterday.find((m) => m.id === isEditing) ||
+                    meals.earlier.find((m) => m.id === isEditing);
+  
+                  const section = meals.today.find((m) => m.id === isEditing)
+                    ? "today"
+                    : meals.yesterday.find((m) => m.id === isEditing)
+                    ? "yesterday"
+                    : "earlier";
+  
+                  const updatedData = {
+                    foodName: e.target.foodName.value,
+                    calories: Number(e.target.calories.value),
+                    mealType: e.target.mealType.value,
+                    time: meal.time,
+                    date: meal.date,
+                  };
+  
+                  editMeal(isEditing, section, updatedData);
+                }}
+              >
+                <div className="form-group">
+                  <label htmlFor="edit-foodName">Food Name</label>
+                  <input
+                    id="edit-foodName"
+                    name="foodName"
+                    type="text"
+                    defaultValue={
+                      meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing)
+                    }
+                    required
+                  />
+                </div>
+  
+                <div className="form-group">
+                  <label htmlFor="edit-calories">Calories</label>
+                  <input
+                    id="edit-calories"
+                    name="calories"
+                    type="number"
+                    defaultValue={
+                      meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing)
+                    }
+                    required
+                  />
+                </div>
+  
+                <div className="form-group">
+                  <label htmlFor="edit-mealType">Meal Type</label>
+                  <select
+                    id="edit-mealType"
+                    name="mealType"
+                    defaultValue={
+                      meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing)
+                    }
+                  >
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snack">Snack</option>
+                  </select>
+                </div>
+  
+                <button type="submit" className="edit-button">
+                  Save Changes
+                </button>
+                <button type="button" className="cancel-button" onClick={() => setIsEditing(null)}>
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
+  
 };
 
 export default DietTracker;

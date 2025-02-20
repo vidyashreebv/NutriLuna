@@ -18,7 +18,7 @@ const Dashboard = () => {
     { label: 'About', href: 'aboutafterlogin.html' },
     { label: 'Blog', href: 'blogafterlogin.html' },
     { label: 'Track Your Periods', href: 'period-tracker.html' },
-    { label: 'Diet Tracking', href: 'diet-tracking.html' },
+    { label: 'Diet Tracking', href: './diet' },
     { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
     { label: 'Consultation', href: 'consultation.html' },
     { label: 'My Profile', href: 'dashboard.html', active: true }

@@ -1,27 +1,24 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { admin, db } = require('./config/firebaseConfig'); // Import Firebase config
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-const cors = require('cors');
-app.use(cors({
-    origin: 'http://localhost:5173', // Allow requests from your frontend
-    methods: ['GET', 'POST'], // Specify allowed methods
-    allowedHeaders: ['Authorization', 'Content-Type'], // Specify allowed headers
-}));
+app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
 const userRoutes = require('./pages/user');
 app.use('/api/user', userRoutes);
 
-const personalDetailsRoutes = require('./pages/personalDetails'); // Import personal details route
+const personalDetailsRoutes = require('./pages/personalDetails'); // Import new route
 app.use('/api/personalDetails', personalDetailsRoutes); // Use personal details route
 
-const periodTrackRoutes = require('./pages/periodtrack'); // Import period tracking route
-app.use('/api/period', periodTrackRoutes); // Use period tracking route
+const dietTrackerRoutes = require("./pages/diettracker"); // ✅ Ensure correct path
+app.use("/api/diettracker", dietTrackerRoutes); // 🚨 This should be an Express Router
+
 
 // Default Route
 app.get('/', (req, res) => {

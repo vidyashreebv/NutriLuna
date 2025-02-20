@@ -1,247 +1,984 @@
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000; /* Ensure it's above other content */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px; /* Adjusted padding */
-    /* backdrop-filter: blur(10px); Optional frosted glass effect */
-    color: black;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
 
-  nav .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: "Oswald", sans-serif;
-  }
+/* Base container */
+.diet-tracker-container {
+  background: url('../../assets/diettrackbag.jpg') no-repeat ;
+  background-size: cover;
+  
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.diet-tracker-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../../assets/diettrackbag.jpg') no-repeat ;
+  filter: blur(5px); /* Increase the blur effect as needed */
+  z-index: -100; /* Ensures the blur stays in the background */
+}
 
-  nav .nav-options {
-    display: flex;
-    gap: 20px;
-  }
 
-  nav .nav-item {
-    text-decoration: none;
-    color: black; /* Light text color */
-    padding: 8px 15px; /* Adjusted padding for better click area */
-    border-radius: 5px;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
+/* Fixed navbar */
+.fixed-navbar {
+  position: fixed;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(205, 0, 0, 0.1), 0 2px 4px -1px rgba(205, 0, 0, 0.06);
+  border-bottom: 2px solid #f3f3f3;
+}
+/* Improving the card size */
+.meal-card {
+  width: 90%; /* Adjust width as needed */
+  max-width: 500px; /* Limit max width */
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9); /* Slight transparency */
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+/* Fixed header */
+.fixed-header {
+  position: fixed;
+  width: 100%;
+  background: white;
+  z-index: 998;
+  margin-top: 100px; /* Adjust the value as needed */
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  top: calc(var(--navbar-height) + 100px); /* Adjust 10px as needed */
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(205, 0, 0, 0.1), 0 2px 4px -1px rgba(205, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 0.5rem;
+}
 
-  nav .nav-item:hover,
-  nav .nav-item.active {
-    background: #ecad29; /* Gold highlight */
-    color: #1a1a1a; /* Dark text for contrast */
-  }
+.header-visible {
+  transform: translateY(0);
+}
 
-  .nav-links div {
-    position: relative;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    color: #4a4a8a;
-    font-weight: 500;
-    transition: color 0.3s ease, background-color 0.3s ease;
-    background-color: rgba(
-      255,
-      255,
-      255,
-      0.7
-    ); /* White with transparency */
-    border-radius: 8px; /* Rounded corners for a softer look */
-  }
+.header-hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
 
-  .nav-links div:hover {
-    color: #2a2a5a;
-    background-color: rgba(
-      255,
-      255,
-      255,
-      0.9
-    ); /* Increase opacity on hover */
-  }
+.header-content {
+  padding: 1.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
 
-  .indicator {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 5px;
-    z-index: 60;
-    background-color: #ecad29; /* Corrected variable usage */
-  }
+/* Tracker title */
+.tracker-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #e60000;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s ease;
+  align-items: center;
+}
 
+/* Meal form */
+.meal-form {
+  margin-bottom: 1rem;
+}
+
+.form-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.food-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.625rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.food-input:hover {
+  border-color: #ff6666;
+}
+
+.food-input:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
+}
+
+.calories-input {
+  width: 8rem;
+  padding: 0.625rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.calories-input:hover {
+  border-color: #ff6666;
+}
+
+.calories-input:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
+}
+
+.meal-type-select {
+  width: 8rem;
+  padding: 0.625rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.meal-type-select:hover {
+  border-color: #ff6666;
+}
+
+.meal-type-select:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
+}
+
+.add-meal-button {
+  padding: 0.625rem 1.5rem;
+  background-color: #e60000;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.add-meal-button:hover {
+  background-color: #cc0000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(230, 0, 0, 0.25);
+}
+
+.add-meal-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.25);
+}
+
+/* Timeline navigation */
+.timeline-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.nav-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-button:hover {
+  background-color: #ffe6e6;
+  border-color: #ffcccc;
+}
+
+.nav-button.active {
+  background-color: #e60000;
+  color: white;
+  box-shadow: 0 3px 6px rgba(230, 0, 0, 0.2);
+}
+
+.nav-button.active:hover {
+  background-color: #cc0000;
+}
+
+/* Content container */
+.content-container {
+  width: 75%; /* Adjust width as needed */
+  max-width: 300px; /* Limit max width */
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  margin-top: 6.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Day sections */
+.day-section {
+  position: relative;
+  background: url('../../assets/diettrackbag.jpg') no-repeat center center;
+  background-size: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-top: 6.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid #f3f3f3;
+  overflow: hidden;
+}
+
+.day-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3); /* Adjust transparency */
+  backdrop-filter: blur(10px);
+  z-index: 0;
+}
+
+.day-section * {
+  position: relative;
+  z-index: 1;
+}
+
+.day-section:hover {
+  box-shadow: 0 6px 12px -1px rgba(199, 194, 194, 0.1), 0 4px 8px -1px rgba(230, 0, 0, 0.06);
+  border-color: #ffcccc;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.day-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0b0a0a;
+  transition: color 0.2s ease;
+}
+
+.day-section:hover .day-title {
+  color: #fff9f9;
+}
+
+.day-date {
+  color: #070707;
+  transition: color 0.2s ease;
+}
+
+.day-section:hover .day-date {
+  color: #f5ebeb;
+}
+
+.day-summary {
+  background-color: #fff5f5;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #ffe6e6;
+  transition: all 0.3s ease;
+}
+
+.day-section:hover .day-summary {
+  background-color: #ffe6e6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: #ffcccc;
+}
+
+.summary-text {
+  color: #cc0000;
+  font-weight: 500;
+}
+
+/* Meal list */
+.meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.empty-state {
+  color: #777777;
+  text-align: center;
+  padding: 1.5rem 0;
+  font-style: italic;
+  border: 1px dashed #dddddd;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.day-section:hover .empty-state {
+  border-color: #ffcccc;
+  color: #555555;
+}
+
+/* Meal cards */
+.meal-card {
+  background-color: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.meal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px -3px rgba(230, 0, 0, 0.15), 0 4px 6px -2px rgba(230, 0, 0, 0.1);
+  border-color: #ffcccc;
+}
+
+.meal-type {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.meal-card:hover .meal-type {
+  transform: scale(1.05);
+}
+
+.meal-type.breakfast {
+  background-color: #fff0f0;
+  color: #cc0000;
+  border: 1px solid #ffcccc;
+}
+
+.meal-card:hover .meal-type.breakfast {
+  background-color: #ffe6e6;
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.15);
+}
+
+.meal-type.lunch {
+  background-color: #fff5f5;
+  color: #e60000;
+  border: 1px solid #ffcccc;
+}
+
+.meal-card:hover .meal-type.lunch {
+  background-color: #ffe6e6;
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.15);
+}
+
+.meal-type.dinner {
+  background-color: #fff8f8;
+  color: #b30000;
+  border: 1px solid #ffcccc;
+}
+
+.meal-card:hover .meal-type.dinner {
+  background-color: #ffe6e6;
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.15);
+}
+
+.meal-type.snack {
+  background-color: #fff8f8;
+  color: #e60000;
+  border: 1px solid #ffcccc;
+}
+
+.meal-card:hover .meal-type.snack {
+  background-color: #ffe6e6;
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.15);
+}
+
+.meal-name {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  color: #333333;
+  transition: color 0.2s ease;
+}
+
+.meal-card:hover .meal-name {
+  color: #e60000;
+}
+
+.meal-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.calories-text {
+  color: #555555;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.meal-card:hover .calories-text {
+  color: #cc0000;
+}
+
+.meal-time {
+  font-size: 0.875rem;
+  color: #777777;
+  transition: color 0.2s ease;
+}
+
+.meal-card:hover .meal-time {
+  color: #555555;
+}
+
+/* Scroll to top button */
+.scroll-top-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.75rem;
+  background-color: rgba(230, 0, 0, 0.9);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 10px 15px -3px rgba(230, 0, 0, 0.2), 0 4px 6px -2px rgba(230, 0, 0, 0.15);
+  transition: all 0.3s;
+  cursor: pointer;
+  z-index: 30;
+}
+
+.scroll-top-button:hover {
+  background-color: #cc0000;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 20px -3px rgba(230, 0, 0, 0.25), 0 5px 10px -2px rgba(230, 0, 0, 0.2);
+}
+
+.scroll-top-button:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.scroll-top-button.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-top-button.hidden {
+  opacity: 0;
+  transform: translateY(2.5rem);
+  pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .diet-tracker-container {
+    padding: 1rem;
+  }
+  .day-section{
+    margin-top: 10.5rem;
+  }
+  .fixed-navbar {
+    padding: 0.5rem;
+  }
+  
   .fixed-header {
-    position: sticky;
-    top: 0;
-    background-color: #fff;
-    z-index: 100;
-    padding-bottom: 20px;
+    padding: 0.5rem;
   }
-
-  h1 {
-    text-align: center;
-    color: #e81a1a;
-    margin-bottom: 20px;
-  }
-
-  .meal-form {
-    display: grid;
-    gap: 15px;
-    margin-bottom: 30px;
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-  }
-
-  input,
-  select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-
-  button {
-    background-color: #e81a1a;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-  }
-
-  button:hover {
-    background-color: #ff4d4d;
-  }
-
+  
   .day-section {
-    margin-bottom: 30px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    scroll-margin-top: 250px;
+    padding: 0.5rem;
+  }
+  
+  .day-summary {
+    padding: 0.75rem;
+  }
+  
+  .day-title {
+    font-size: 1.125rem;
+  }
+  
+  .meal-card {
+    padding: 0.75rem;
+  }
+  
+  .meal-name {
+    font-size: 1rem;
+  }
+  
+  .calories-text {
+    font-size: 0.875rem;
+  }
+  
+  .meal-time {
+    font-size: 0.75rem;
+  }
+  
+  .meal-actions {
+    gap: 0.25rem;
+  }
+  .form-controls {
+    flex-direction: column;
+  }
+  
+  .food-input,
+  .calories-input,
+  .meal-type-select {
+    width: 100%;
+  }
+  
+  .add-meal-button {
+    width: 100%;
+  }
+  
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+@media (max-width: 375px) {
+  .day-header {
+    gap: 0.25rem;
+  }
+}
+@media screen and (max-width: 768p) {
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 
-  .day-header {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-bottom: 1px solid #e0e0e0;
+  }
+  @media screen and (max-width: 480p) {
+    .day-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      }
+}
+/* Flash animation for newly added meals */
+@keyframes flash-highlight {
+  0% {
+    background-color: rgba(230, 0, 0, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.flash-update {
+  animation: flash-highlight 0.3s ease-out;
+}
+
+/* Button press effect */
+@keyframes button-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.add-meal-button:active {
+  animation: button-press 0.2s ease-out;
+}
+
+/* Smooth appear for meal action buttons */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.meal-actions {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* Subtle pulse for empty state when section is hovered */
+@keyframes pulse-subtle {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.day-section:hover .empty-state {
+  animation: pulse-subtle 2s infinite;
+}
+
+/* Scale-up effect for meal type badges */
+@keyframes scale-up {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+/* Shadow enhancement animation */
+@keyframes enhance-shadow {
+  0% {
+    box-shadow: 0 4px 6px -1px rgba(230, 0, 0, 0.1), 0 2px 4px -1px rgba(230, 0, 0, 0.06);
+  }
+  100% {
+    box-shadow: 0 8px 15px -3px rgba(230, 0, 0, 0.15), 0 4px 6px -2px rgba(230, 0, 0, 0.1);
+  }
+}
+
+/* Fixed header shadow animation when scrolling */
+.fixed-header.header-visible {
+  animation: enhance-shadow 0.3s forwards;
+}
+
+.fixed-header.header-hidden {
+  animation: none;
+}
+
+/* Day section hover state enhancements */
+.day-section:hover {
+  animation: enhance-shadow 0.3s forwards;
+}
+ 
+  /* Add these CSS styles to your DietTracking.css file */
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .edit-modal {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .edit-modal h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .save-button,
+  .cancel-button {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .save-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+  }
+  
+  .save-button:hover {
+    background-color: #45a049;
+  }
+  
+  .cancel-button {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+  }
+  
+  .cancel-button:hover {
+    background-color: #e8e8e8;
+  }
+  
+  .error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-
-  .day-header h2 {
-    color: #e81a1a;
-    margin: 0;
+  
+  .error-message button {
+    background: none;
+    border: none;
+    color: #c62828;
+    cursor: pointer;
+    font-weight: 500;
   }
-
-  .day-summary {
-    background-color: #fff;
-    padding: 10px 15px;
-    border-bottom: 1px solid #e0e0e0;
+  
+  .loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    font-size: 1.2rem;
     color: #666;
+  }
+  
+  .flash-update {
+    animation: flashUpdate 0.3s ease-out;
+  }
+  
+  @keyframes flashUpdate {
+    0% {
+      background-color: transparent;
+    }
+    50% {
+      background-color: rgba(76, 175, 80, 0.1);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+  
+  .meal-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .edit-button,
+  .delete-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+  }
+  
+  .edit-button:hover,
+  .delete-button:hover {
+    background-color: #ffe6e6;
   }
 
   .meal-list {
-    padding: 15px;
-  }
-
-  .meal-item {
-    background-color: #fff;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .meal-card {
+    display: flex;
+    width: 100%;
     justify-content: space-between;
     align-items: center;
-    transition: transform 0.2s;
+    background: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.3s ease-in-out;
   }
-
-  .meal-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+  .meal-card:hover {
+    transform: scale(1.02);
   }
-
-  .meal-item:last-child {
-    margin-bottom: 0;
-  }
-
+  
   .meal-info {
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
-
+  
+  .meal-info h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .meal-info p {
+    margin: 3px 0;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .calories {
+    font-size: 0.9rem;
+    color: #777;
+  }
+  
+  .meal-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .meal-actions button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  
+  .edit-btn {
+    color: #007bff;
+  }
+  
+  .delete-btn {
+    color: #dc3545;
+  }
+  
+  .meal-actions button:hover {
+    opacity: 0.7;
+  }
+  .meal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .meal-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.2); /* Red shadow */
+    transition: 0.3s ease-in-out;
+    text-align: center;
+    width: 100%;
+    margin: auto;
+  }
+  
+  .meal-card:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Oval Shape for Meal Type */
   .meal-type {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    margin-right: 10px;
+    background: white;
+    border: 2px solid red;
+    color: red;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 8px 20px; /* More padding makes it oval */
+    border-radius: 50px; /* Oval shape */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 6px rgba(255, 0, 0, 0.4);
+    margin-bottom: 10px;
   }
-
-  .breakfast {
-    background-color: #ffcccc;
-    color: #e81a1a;
-  }
-  .lunch {
-    background-color: #ffe6e6;
-    color: #e81a1a;
-  }
-  .dinner {
-    background-color: #ff9999;
-    color: #e81a1a;
-  }
-  .snack {
-    background-color: #ffb3b3;
-    color: #e81a1a;
-  }
-
-  .meal-time {
-    color: #666;
-    font-size: 0.9em;
-  }
-
-  .timeline-nav {
+  
+  /* Meal details */
+  .meal-info {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 30px;
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
+    flex-direction: column;
+    align-items: center;
   }
-
-  .timeline-nav button {
-    background-color: white;
-    color: #e81a1a;
-    border: 1px solid;
-    padding: 8px 16px;
-    transition: all 0.3s;
+  
+  .meal-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 5px 0;
   }
-
-  .timeline-nav button:hover {
-    background-color: #ffe6e6;
+  
+  .calories {
+    font-size: 0.9rem;
+    color: #777;
   }
-
-  .timeline-nav button.active {
-    background-color: #e81a1a;
+  
+  /* Actions */
+  .meal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .meal-actions button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: 0.2s ease-in-out;
+  }
+  
+  .edit-btn {
+    background: #007bff;
     color: white;
-    transform: scale(1.05);
+    padding: 5px 8px;
+    border-radius: 6px;
   }
+  
+  .delete-btn {
+    background: #dc3545;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 6px;
+  }
+  
+  .meal-actions button:hover {
+    opacity: 0.8;
+  }
+  
