@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, MessageSquare } from 'lucide-react';
+import { Bell, MessageSquare, Droplet, Heart, Activity, Smile } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const Dashboard = () => {
@@ -25,11 +25,11 @@ const Dashboard = () => {
   ];
 
   return (
-    <main className="mt-4 bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="h-1 bg-yellow-500 fixed top-0 left-0 right-0 z-50" />
-      
+    <main className="mt-4 bg-white rounded-xl shadow-lg overflow">
+      <div className="h-1 bg-red-500 fixed top-0 left-0 right-0 z-50" />
+
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-white z-40">
+      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-white z-40 shadow-md">
         <div className="flex items-center gap-2">
           <div className="h-10 w-10">
             <img src="/api/placeholder/40/40" alt="Logo" className="h-full w-full" />
@@ -41,9 +41,8 @@ const Dashboard = () => {
             <a
               key={index}
               href={item.href}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                item.active ? 'bg-yellow-500 text-gray-900' : 'text-gray-900 hover:bg-yellow-500'
-              }`}
+              className={`px-4 py-2 rounded-md transition-colors ${item.active ? 'bg-red-500 text-white' : 'text-gray-900 hover:bg-red-500 hover:text-white'
+                }`}
             >
               {item.label}
             </a>
@@ -51,41 +50,48 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      <div className="grid grid-cols-3 gap-4 p-4 mt-16">
+      <div className="grid grid-cols-3 gap-4 p-4 mt-20">
         {/* Left Content */}
         <div className="col-span-2 space-y-4">
           {/* Menstrual Health Tips */}
-          <div className="bg-rose-50 rounded-lg p-4">
+          <div className="bg-pink-50 rounded-lg p-4">
             <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Menstrual Health Tips</h2>
             <div className="grid grid-cols-2 gap-4">
               {[
                 {
                   title: "Track Your Cycle",
-                  description: "Keep a record of your menstrual cycle for better health management and predictions."
+                  description: "Keep a record of your menstrual cycle for better health management and predictions.",
+                  icon: <Droplet className="w-6 h-6 text-red-500" />
                 },
                 {
                   title: "Maintain Healthy Diet",
-                  description: "A balanced diet rich in iron and vitamins helps manage menstrual symptoms."
+                  description: "A balanced diet rich in iron and vitamins helps manage menstrual symptoms.",
+                  icon: <Heart className="w-6 h-6 text-red-500" />
                 },
                 {
                   title: "Stay Active",
-                  description: "Exercise helps alleviate cramps and boosts overall well-being during menstruation."
+                  description: "Exercise helps alleviate cramps and boosts overall well-being during menstruation.",
+                  icon: <Activity className="w-6 h-6 text-red-500" />
                 },
                 {
                   title: "Relax & Manage Stress",
-                  description: "Practice relaxation techniques such as yoga or meditation to reduce stress during your cycle."
+                  description: "Practice relaxation techniques such as yoga or meditation to reduce stress during your cycle.",
+                  icon: <Smile className="w-6 h-6 text-red-500" />
                 }
               ].map((tip, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-gray-700 mb-2">{tip.title}</h3>
-                  <p className="text-gray-600 text-sm">{tip.description}</p>
+                <div key={index} className="bg-white p-4 rounded-lg shadow flex items-center gap-2">
+                  {tip.icon}
+                  <div>
+                    <h3 className="font-semibold text-gray-700 mb-2">{tip.title}</h3>
+                    <p className="text-gray-600 text-sm">{tip.description}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Cycle Tracker */}
-          <div className="bg-rose-50 rounded-lg p-4">
+          <div className="bg-pink-50 rounded-lg p-4">
             <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Cycle Tracker</h2>
             <div className="grid grid-cols-3 gap-4">
               {[
@@ -106,7 +112,7 @@ const Dashboard = () => {
           </div>
 
           {/* Diet Tracking */}
-          <div className="bg-rose-50 rounded-lg p-4">
+          <div className="bg-pink-50 rounded-lg p-4">
             <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Diet Tracking</h2>
             <div className="grid grid-cols-3 gap-4 mb-4">
               {[
@@ -139,7 +145,7 @@ const Dashboard = () => {
           </div>
 
           {/* Cycle Statistics */}
-          <div className="bg-rose-50 rounded-lg p-4">
+          <div className="bg-pink-50 rounded-lg p-4">
             <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Cycle Statistics</h2>
             <div className="grid gap-4">
               {[
@@ -156,7 +162,7 @@ const Dashboard = () => {
           </div>
 
           {/* Period Chart */}
-          <div className="bg-rose-50 rounded-lg p-4">
+          <div className="bg-pink-50 rounded-lg p-4">
             <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Period Length Over Time</h2>
             <div className="bg-white p-4 rounded-lg shadow">
               <LineChart width={300} height={200} data={periodData}>
@@ -176,5 +182,7 @@ const Dashboard = () => {
     </main>
   );
 };
+
+
 
 export default Dashboard;
