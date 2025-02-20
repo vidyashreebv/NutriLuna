@@ -49,29 +49,24 @@ function PeriodTracker() {
                 },
             });
 
-            const data = await response.json();
-            console.log("✅ Fetched Data:", data);
+            const responseText = await response.text();
 
-            // Update the form fields
-            setLastPeriod(data.lastPeriod || "");
-            setCycleLength(data.cycleLength || "");
-            setPeriodDuration(data.periodDuration || "");
+            try {
+                const data = JSON.parse(responseText);
+                console.log("✅ Fetched Data:", data);
 
-            // Update the periods history
-            if (data.periodsHistory && Array.isArray(data.periodsHistory)) {
-                const sortedPeriods = data.periodsHistory.sort((a, b) =>
-                    new Date(b.startDate) - new Date(a.startDate)
-                );
-                console.log("📅 Loaded periods history:", sortedPeriods);
-                setAllPeriods(sortedPeriods);
+                // Update the form fields
+                setLastPeriod(data.lastPeriod || "");
+                setCycleLength(data.cycleLength || "");
+                setPeriodDuration(data.periodDuration || "");
 
-                // Update calendar if we have data
-                if (sortedPeriods.length > 0) {
-                    const mostRecent = sortedPeriods[0];
-                    setLastPeriod(mostRecent.startDate);
-                    setCycleLength(mostRecent.cycleLength.toString());
-                    setPeriodDuration(mostRecent.duration.toString());
+                // Update the periods history
+                if (data.periodsHistory && Array.isArray(data.periodsHistory)) {
+                    setAllPeriods(data.periodsHistory);
                 }
+            } catch (jsonError) {
+                console.error("❌ JSON Parsing Error:", jsonError.message);
+                throw new Error("Received non-JSON response from server");
             }
         } catch (error) {
             console.error("❌ Error fetching period data:", error);
@@ -149,6 +144,16 @@ function PeriodTracker() {
         try {
             const token = await auth.currentUser.getIdToken(true);
 
+            // Create a new period entry
+            const newPeriod = {
+                startDate: lastPeriod,
+                duration: parseInt(periodDuration),
+                cycleLength: parseInt(cycleLength)
+            };
+
+            // Update periods history
+            const updatedPeriods = [...allPeriods, newPeriod];
+
             const response = await fetch("http://localhost:5001/api/period/savePeriodData", {
                 method: "POST",
                 headers: {
@@ -158,14 +163,14 @@ function PeriodTracker() {
                 body: JSON.stringify({
                     lastPeriod,
                     cycleLength,
-                    periodDuration
+                    periodDuration,
+                    periodsHistory: updatedPeriods
                 }),
             });
 
             const result = await response.json();
             if (response.ok) {
-                // Refresh the period data to get the updated history
-                fetchPeriodData(user);
+                setAllPeriods(updatedPeriods);
                 setOutput(result.message);
             } else {
                 setOutput(result.error);

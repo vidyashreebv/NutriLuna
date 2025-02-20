@@ -15,17 +15,17 @@ const Dashboard = () => {
 
   const navItems = [
     { label: 'Home', href: 'indexafterlogin.html' },
-    { label: 'About', href: 'aboutafterlogin.html' },
+    { label: 'About', href: '/about' },
     { label: 'Blog', href: 'blogafterlogin.html' },
-    { label: 'Track Your Periods', href: 'period-tracker.html' },
-    { label: 'Diet Tracking', href: './diet' },
+    { label: 'Track Your Periods', href: '/period' },
+    { label: 'Diet Tracking', href: '/diet' },
     { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
     { label: 'Consultation', href: 'consultation.html' },
-    { label: 'My Profile', href: 'dashboard.html', active: true }
+    { label: 'My Profile', href: '/dashboard', active: true }
   ];
 
   return (
-    <main className="mt-4 bg-white rounded-xl shadow-lg overflow">
+    <main className="mt-[4rem] bg-white rounded-xl shadow-lg overflow">
       <div className="h-1 bg-red-500 fixed top-0 left-0 right-0 z-50" />
 
       {/* Navigation */}

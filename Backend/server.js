@@ -19,6 +19,9 @@ app.use('/api/personalDetails', personalDetailsRoutes); // Use personal details 
 const dietTrackerRoutes = require("./pages/diettracker"); // ✅ Ensure correct path
 app.use("/api/diettracker", dietTrackerRoutes); // 🚨 This should be an Express Router
 
+const periodRoutes = require('./pages/periodtrack');
+app.use("/api/period", periodRoutes);
+
 
 // Default Route
 app.get('/', (req, res) => {
