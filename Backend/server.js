@@ -13,15 +13,18 @@ app.use(bodyParser.json());
 const userRoutes = require('./pages/user');
 app.use('/api/user', userRoutes);
 
-const personalDetailsRoutes = require('./pages/personalDetails'); // Import new route
-app.use('/api/personalDetails', personalDetailsRoutes); // Use personal details route
+const personalDetailsRoutes = require('./pages/personalDetails');
+app.use('/api/personalDetails', personalDetailsRoutes);
 
-const dietTrackerRoutes = require("./pages/diettracker"); // ✅ Ensure correct path
-app.use("/api/diettracker", dietTrackerRoutes); // 🚨 This should be an Express Router
+const dietTrackerRoutes = require("./pages/diettracker");
+app.use("/api/diettracker", dietTrackerRoutes);
 
 const periodRoutes = require('./pages/periodtrack');
 app.use("/api/period", periodRoutes);
 
+// Add the new dashboard stats route
+const dashboardStatRoutes = require('./pages/dashboardstat');
+app.use("/api/dashboardstat", dashboardStatRoutes);
 
 // Default Route
 app.get('/', (req, res) => {

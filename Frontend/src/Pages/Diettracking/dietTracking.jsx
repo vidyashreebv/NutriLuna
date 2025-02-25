@@ -3,7 +3,8 @@ import { ChevronUp, Plus, Trash2, Edit2 } from "lucide-react";
 import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import "./dietTracking.css";
 import axios from "axios";
-import Navbar from "../../Components/Navbar";
+import Navbarafter from "../../Components/Navbarafter";
+
 
 
 
@@ -29,6 +30,17 @@ const DietTracker = () => {
   // Refs
   const navbarRef = useRef(null);
   const fixedHeaderRef = useRef(null);
+
+  const navItems = [
+    { label: 'Home', href: 'indexafterlogin.html' },
+    { label: 'About', href: '/aboutusafter'},
+    { label: 'Blog', href: '/blogafter' },
+    { label: 'Track Your Periods', href: '/period' },
+    { label: 'Diet Tracking', href: '/diet' , active: true },
+    { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
+    { label: 'Consultation', href: 'consultation.html' },
+    { label: 'My Profile', href: '/dashboard' }
+  ];
 
   // Format date helper
   const formatDate = (date) => {
@@ -252,9 +264,7 @@ const DietTracker = () => {
 
   return (
     <div className="App">
-      <div ref={navbarRef} className="fixed-navbar">
-        <Navbar />
-      </div>
+        <Navbarafter navItems={navItems} />
   
       <div className="diet-tracker-container">
         <div

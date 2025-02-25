@@ -1,0 +1,94 @@
+.navbarafter-top-line {
+  height: 4px;
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.navbarafter-nav {
+  position: fixed;
+  top: 4px; /* Adjust if necessary */
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.1);
+  z-index: 1000; /* Ensure this is higher than other elements */
+}
+
+.navbarafter-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbarafter-logo {
+  height: 3rem;
+  width: 3rem;
+  padding: 0.25rem;
+  background: linear-gradient(45deg, #fee2e2, #fecaca);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbarafter-logo-image {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.navbarafter-brand {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #dc2626, #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.05em;
+}
+
+.navbarafter-nav-items {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(254, 242, 242, 0.8); /* Slightly more opaque */
+  padding: 0.5rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.navbarafter-nav-link {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  color: #4b5563;
+  font-weight: 500;
+  position: relative;
+  text-decoration: none;
+}
+
+.navbarafter-nav-link:hover {
+  background: linear-gradient(45deg, #fee2e2, #fecaca);
+  color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.navbarafter-nav-link-active {
+  background: linear-gradient(45deg, #dc2626, #ef4444);
+  color: white;
+  font-weight: 600;
+}
+
+.navbarafter-nav-link-active:hover {
+  background: linear-gradient(45deg, #dc2626, #ef4444);
+  color: white;
+  transform: translateY(-1px);
+}

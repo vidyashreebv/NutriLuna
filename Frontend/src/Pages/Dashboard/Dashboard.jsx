@@ -1,22 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, MessageSquare, Droplet, Heart, Activity, Smile } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { doc, getDoc } from 'firebase/firestore';
+import Navbarafter from '../../Components/Navbarafter';
+import Footer from "../../Components/Footer";
+import { useAuth } from "../../context/AuthContext";
+import { db } from "../../config/firebase";
+import './Dashboard.css';
 
 const Dashboard = () => {
-  // Sample period data for the chart
-  const periodData = [
-    { month: "Jan", length: 28 },
-    { month: "Feb", length: 30 },
-    { month: "Mar", length: 27 },
-    { month: "Apr", length: 29 },
-    { month: "May", length: 31 },
-    { month: "Jun", length: 26 }
-  ];
+  const { currentUser } = useAuth();
+  const [periodData, setPeriodData] = useState({
+    data: {
+      lastPeriod: "Not available",
+      cycleLength: 0,
+      periodDuration: 0
+    }
+  });
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPeriodData = async () => {
+      if (!currentUser) {
+        console.log("No current user found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log("Current user:", currentUser);
+        console.log("User  ID:", currentUser?.uid);
+        const userRef = doc(db, "users", currentUser.uid);
+
+        // Add error handling for database connection
+        if (!db) {
+          throw new Error("Firebase database connection not established");
+        }
+
+        const docSnap = await getDoc(userRef);
+        console.log("Document snapshot fetched");
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          console.log("Period data from DB:", data.periodData.data);
+
+          // Set period data with proper validation
+          setPeriodData({
+            data: {
+              lastPeriod: data.periodData.data.lastPeriod || "Not available",
+              cycleLength: data.periodData.data.cycleLength || 0,
+              periodDuration: data.periodData.data.periodDuration || 0
+            }
+          });
+
+          // Process chart data if history exists
+          if (data.periodData.data.history && typeof data.periodData.data.history === "object") {
+            const formattedChartData = Object.values(data.periodData.data.history)
+              .slice(0, 6)
+              .map(period => ({
+                month: new Date(period.startDate).toLocaleString('default', { month: 'short' }),
+                length: period.duration || 0
+              }));
+            setChartData(formattedChartData);
+          } else {
+            console.log("No history data available");
+            setChartData([]);
+          }
+        } else {
+          console.log("No period data found in document");
+          // Initialize with default data
+          setPeriodData({
+            data: {
+              lastPeriod: "Not tracked yet",
+              cycleLength: 0,
+              periodDuration: 0
+            }
+          });
+          setChartData([]);
+        }
+      } catch (err) {
+        console.error("Error details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPeriodData(); // Call the function inside useEffect
+  }, [currentUser]); // Correctly close the useEffect hook
 
   const navItems = [
-    { label: 'Home', href: 'indexafterlogin.html' },
-    { label: 'About', href: '/about' },
-    { label: 'Blog', href: 'blogafterlogin.html' },
+    { label: 'Home', href: '/landing' },
+    { label: 'About', href: '/aboutusafter' },
+    { label: 'Blog', href: '/blogafter' },
     { label: 'Track Your Periods', href: '/period' },
     { label: 'Diet Tracking', href: '/diet' },
     { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
@@ -24,165 +101,169 @@ const Dashboard = () => {
     { label: 'My Profile', href: '/dashboard', active: true }
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Loading your dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">
+          <h2>Error Loading Dashboard</h2>
+          <p>{error}</p>
+          <p>Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Please log in to view your dashboard</div>
+      </div>
+    );
+  }
+
   return (
-    <main className="mt-[4rem] bg-white rounded-xl shadow-lg overflow">
-      <div className="h-1 bg-red-500 fixed top-0 left-0 right-0 z-50" />
+    <main className="dashboard-main">
+      <div className="dashboard-top-line" />
+      <Navbarafter navItems={navItems} />
 
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-white z-40 shadow-md">
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-10">
-            <img src="/api/placeholder/40/40" alt="Logo" className="h-full w-full" />
-          </div>
-          <div className="text-black">NutriLuna</div>
-        </div>
-        <div className="flex gap-5">
-          {navItems.map((item, index) => (
-            <a
-              key={index}
-              href={item.href}
-              className={`px-4 py-2 rounded-md transition-colors ${item.active ? 'bg-red-500 text-white' : 'text-gray-900 hover:bg-red-500 hover:text-white'
-                }`}
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
-      </nav>
-
-      <div className="grid grid-cols-3 gap-4 p-4 mt-20">
-        {/* Left Content */}
-        <div className="col-span-2 space-y-4">
-          {/* Menstrual Health Tips */}
-          <div className="bg-pink-50 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Menstrual Health Tips</h2>
-            <div className="grid grid-cols-2 gap-4">
+      <div className="dashboard-content-grid">
+        <div className="dashboard-left-content">
+          <div className="dashboard-tips-container">
+            <h2 className="dashboard-section-title">Menstrual Health Tips</h2>
+            <div className="dashboard-tips-grid">
               {[
                 {
                   title: "Track Your Cycle",
                   description: "Keep a record of your menstrual cycle for better health management and predictions.",
-                  icon: <Droplet className="w-6 h-6 text-red-500" />
+                  icon: <Droplet className="dashboard-tip-icon" />
                 },
                 {
                   title: "Maintain Healthy Diet",
                   description: "A balanced diet rich in iron and vitamins helps manage menstrual symptoms.",
-                  icon: <Heart className="w-6 h-6 text-red-500" />
+                  icon: <Heart className="dashboard-tip-icon" />
                 },
                 {
                   title: "Stay Active",
                   description: "Exercise helps alleviate cramps and boosts overall well-being during menstruation.",
-                  icon: <Activity className="w-6 h-6 text-red-500" />
+                  icon: <Activity className="dashboard-tip-icon" />
                 },
                 {
                   title: "Relax & Manage Stress",
                   description: "Practice relaxation techniques such as yoga or meditation to reduce stress during your cycle.",
-                  icon: <Smile className="w-6 h-6 text-red-500" />
+                  icon: <Smile className="dashboard-tip-icon" />
                 }
               ].map((tip, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow flex items-center gap-2">
+                <div key={index} className="dashboard-tip-card">
                   {tip.icon}
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">{tip.title}</h3>
-                    <p className="text-gray-600 text-sm">{tip.description}</p>
+                    <h3 className="dashboard-tip-title">{tip.title}</h3>
+                    <p className="dashboard-tip-description">{tip.description}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Cycle Tracker */}
-          <div className="bg-pink-50 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Cycle Tracker</h2>
-            <div className="grid grid-cols-3 gap-4">
+          <div className="dashboard-cycle-container">
+            <h2 className="dashboard-section-title">Cycle Tracker</h2>
+            <div className="dashboard-cycle-grid">
               {[
-                { day: 15, cycleDay: 1, event: "Start of Period" },
-                { day: 16, cycleDay: 2, event: "Heavy Flow" },
-                { day: 17, cycleDay: 3, event: "Light Flow" }
+                { day: new Date().getDate(), cycleDay: 1, event: "Start of Period" },
+                { day: new Date().getDate() + 1, cycleDay: 2, event: "Heavy Flow" },
+                { day: new Date().getDate() + 2, cycleDay: 3, event: "Light Flow" }
               ].map((day, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow text-center">
-                  <h3 className="text-2xl font-bold text-gray-700">{day.day}</h3>
-                  <p className="text-gray-600">Day {day.cycleDay}</p>
-                  <span className="text-sm text-gray-500">{day.event}</span>
-                  <button className="mt-2 bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-600">
-                    Log Event
-                  </button>
+                <div key={index} className="dashboard-cycle-card">
+                  <h3 className="dashboard-cycle-day">{day.day}</h3>
+                  <p className="dashboard-cycle-number">Day {day.cycleDay}</p>
+                  <span className="dashboard-cycle-event">{day.event}</span>
+                  <button className="dashboard-button">Log Event</button>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Diet Tracking */}
-          <div className="bg-pink-50 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Diet Tracking</h2>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="dashboard-diet-container">
+            <h2 className="dashboard-section-title">Diet Tracking</h2>
+            <div className="dashboard-diet-grid">
               {[
                 { title: "Calories Consumed", value: "1500 kcal" },
                 { title: "Calories Burned", value: "1200 kcal" },
                 { title: "Net Calories", value: "300 kcal" }
               ].map((stat, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow text-center">
-                  <h3 className="font-semibold text-gray-700 mb-2">{stat.title}</h3>
-                  <p className="text-xl text-red-700">{stat.value}</p>
+                <div key={index} className="dashboard-diet-card">
+                  <h3 className="dashboard-diet-title">{stat.title}</h3>
+                  <p className="dashboard-diet-value">{stat.value}</p>
                 </div>
               ))}
             </div>
-            <button className="w-full bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-600">
-              Add Meal
-            </button>
+            <button className="dashboard-button dashboard-button-full">Add Meal</button>
           </div>
         </div>
 
-        {/* Right Content */}
-        <div className="space-y-4">
-          {/* User Info */}
-          <div className="bg-white rounded-lg p-4 shadow flex items-center justify-between">
-            <div className="flex gap-4">
-              <Bell className="w-6 h-6 text-gray-600" />
-              <MessageSquare className="w-6 h-6 text-gray-600" />
-            </div>
-            <h4 className="text-lg font-semibold">Emma Johnson</h4>
-            <img src="/api/placeholder/80/80" alt="Profile" className="w-20 h-20 rounded-full" />
-          </div>
-
-          {/* Cycle Statistics */}
-          <div className="bg-pink-50 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Cycle Statistics</h2>
-            <div className="grid gap-4">
-              {[
-                { title: "Average Cycle Length", value: "28 days" },
-                { title: "Longest Cycle", value: "31 days" },
-                { title: "Shortest Cycle", value: "26 days" }
-              ].map((stat, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg shadow">
-                  <h3 className="font-semibold text-gray-700 mb-2">{stat.title}</h3>
-                  <p className="text-lg text-red-700">{stat.value}</p>
+        <div className="dashboard-right-content">
+          <div className="dashboard-stats-container">
+            <h2 className="dashboard-section-title">Cycle Statistics</h2>
+            <div className="dashboard-stats-grid">
+              <div>
+                <div className="dashboard-stats-card">
+                  <h3 className="dashboard-stats-title">Last Period</h3>
+                  <p className="dashboard-stats-value">{periodData.data.lastPeriod}</p>
                 </div>
-              ))}
+                <div className="dashboard-stats-card">
+                  <h3 className="dashboard-stats-title">Cycle Length</h3>
+                  <p className="dashboard-stats-value">
+                    {periodData.data.cycleLength ? `${periodData.data.cycleLength} days` : "Not available"}
+                  </p>
+                </div>
+                <div className="dashboard-stats-card">
+                  <h3 className="dashboard-stats-title">Period Duration</h3>
+                  <p className="dashboard-stats-value">
+                    {periodData.data.periodDuration ? `${periodData.data.periodDuration} days` : "Not available"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Period Chart */}
-          <div className="bg-pink-50 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-gray-700 mb-4 text-center">Period Length Over Time</h2>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <LineChart width={300} height={200} data={periodData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="length" stroke="#DC2626" />
-              </LineChart>
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                This chart shows the cycle length over the past six months.
+          <div className="dashboard-chart-container">
+            <h2 className="dashboard-section-title">Period Length Over Time</h2>
+            <div className="dashboard-chart-card">
+              {chartData.length > 0 ? (
+                <LineChart width={300} height={400} data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="length" stroke="#DC2626" />
+                </LineChart>
+              ) : (
+                <div className="dashboard-no-data">
+                  No period tracking data available yet
+                </div>
+              )}
+              <p className="dashboard-chart-description">
+                This chart shows the period duration over the past six months.
+                {periodData.data.lastPeriod !== "Not available" && (
+                  <span className="dashboard-last-period">
+                    Last period started on: {periodData.data.lastPeriod}
+                  </span>
+                )}
               </p>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   );
 };
-
-
 
 export default Dashboard;

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import "./PeriodTracker.css";
 import { auth } from "../../config/firebaseConfig";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Navbarafter from "../../Components/Navbarafter";
+import Footer from "../../Components/Footer";
 
 function PeriodTracker() {
     const [lastPeriod, setLastPeriod] = useState("");
@@ -14,6 +16,17 @@ function PeriodTracker() {
     const [user, setUser] = useState(null);
     const [monthYearText, setMonthYearText] = useState("");
     const [allPeriods, setAllPeriods] = useState([]);
+
+    const navItems = [
+        { label: 'Home', href: 'indexafterlogin.html' },
+        { label: 'About', href: '/aboutusafter' },
+        { label: 'Blog', href: '/blogafter' },
+        { label: 'Track Your Periods', href: '/period', active: true },
+        { label: 'Diet Tracking', href: '/diet' },
+        { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
+        { label: 'Consultation', href: 'consultation.html' },
+        { label: 'My Profile', href: '/dashboard' }
+    ];
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -204,34 +217,11 @@ function PeriodTracker() {
     return (
         <div className="period-tracker">
             <div className="indicator"></div>
-            <nav className="navbar">
-                <div className="navbar-brand">
-                    <div className="svg-container">
-                        <img src="Menstrual Cycle.svg" alt="Menstrual Cycle" height="40px" className="logo" />
-                    </div>
-                    <div className="brand-name">NutriLuna</div>
-                </div>
-                <div className="nav-options">
-                    <a href="indexafterlogin.html" className="nav-item">Home</a>
-                    <a href="aboutafterlogin.html" className="nav-item">About</a>
-                    <a href="blogafterlogin.html" className="nav-item">Blog</a>
-                    <a href="period-tracker.html" className="nav-item active">Track Your Periods</a>
-                    <a href="diet-tracking.html" className="nav-item">Diet Tracking</a>
-                    <a href="recipe-suggestions.html" className="nav-item">Recipe Suggestions</a>
-                    <a href="consultation.html" className="nav-item">Consultation</a>
-                    <a href="dashboard.html" className="nav-item">My Profile</a>
-                    <a href="index.html" className="nav-item sign-out">
-                        <div className="svg-container">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">
-                                <path d="M24 4A10 10 0 1024 24 10 10 0 1024 4zM36.021 28H11.979C9.785 28 8 29.785 8 31.979V33.5c0 3.312 1.885 6.176 5.307 8.063C16.154 43.135 19.952 44 24 44c7.706 0 16-3.286 16-10.5v-1.521C40 29.785 38.215 28 36.021 28z"></path>
-                            </svg>
-                            Sign Out
-                        </div>
-                    </a>
-                </div>
-            </nav>
+            <Navbarafter navItems={navItems} />
             <div className="container">
-                <h1 className="title">Track Your Periods</h1>
+                <h1 className="title" style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                    Track Your Periods
+                </h1>
                 <input type="date" className="input-date" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
                 <label className="lab-period">Cycle Length (in days):</label>
                 <input type="number" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
@@ -241,11 +231,14 @@ function PeriodTracker() {
                 <div className="output-box">{output}</div>
                 <div className="calendar-header flex items-center">
                     <button className="btn-prev" onClick={() => changeMonth(-1)}>Previous</button>
-                    <h3 className="month-year">{monthYearText}</h3>
+                    <h3 className="month-year" style={{ fontSize: '1.8rem', fontWeight: '600' }}>
+                        {monthYearText}
+                    </h3>
                     <button className="btn-next" onClick={() => changeMonth(1)}>Next</button>
                 </div>
                 <div className="calendar">{calendarHTML}</div>
             </div>
+            <Footer />
         </div>
     );
 }

@@ -1,1 +1,250 @@
+/* Dashboard Styles */
 
+.dashboard-main {
+  background-color: #fafafa;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow-y: scroll; /* Force vertical scrollbar */
+  height: auto; /* Let it grow as needed */
+  min-height: 100vh;
+  padding: 1rem;
+  position: relative; /* Add this */
+}
+
+.dashboard-top-line {
+  height: 4px;
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+.dashboard-content-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 1.5rem;
+  margin-top: 96px;
+}
+
+.dashboard-left-content {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-right-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Tips Section */
+.dashboard-tips-container,
+.dashboard-cycle-container,
+.dashboard-diet-container,
+.dashboard-stats-container,
+.dashboard-chart-container {
+  background-color: #fff1f2;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  border: 1px solid #fecdd3;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-section-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #dc2626;
+  margin-bottom: 2rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-tips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.dashboard-tip-card,
+.dashboard-cycle-card,
+.dashboard-diet-card,
+.dashboard-stats-card,
+.dashboard-chart-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  border: 1px solid #fee2e2;
+  transition: all 0.3s ease;
+}
+
+.dashboard-tip-card:hover,
+.dashboard-cycle-card:hover,
+.dashboard-diet-card:hover,
+.dashboard-stats-card:hover,
+.dashboard-chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 20px 0px;
+  border-color: #fecaca;
+}
+
+.dashboard-tip-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #dc2626;
+  padding: 0.25rem;
+  background-color: #fef2f2;
+  border-radius: 0.5rem;
+}
+
+.dashboard-tip-title,
+.dashboard-cycle-day,
+.dashboard-diet-title,
+.dashboard-stats-title {
+  color: #111827;
+  font-weight: 700;
+}
+
+.dashboard-tip-description,
+.dashboard-cycle-event,
+.dashboard-chart-description {
+  color: #374151;
+}
+
+.dashboard-diet-value,
+.dashboard-stats-value,
+.dashboard-cycle-number {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Cycle Tracker */
+.dashboard-cycle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.dashboard-cycle-card {
+  text-align: center;
+}
+
+.dashboard-cycle-day {
+  font-size: 1.5rem;
+}
+
+.dashboard-cycle-number {
+  color: #4b5563;
+}
+
+.dashboard-cycle-event {
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: block;
+  margin: 0.5rem 0;
+}
+
+/* Diet Tracking */
+.dashboard-diet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-diet-card {
+  text-align: center;
+}
+
+.dashboard-diet-title {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-diet-value {
+  font-size: 1.25rem;
+  color: #dc2626;
+}
+
+/* Stats Section */
+.dashboard-stats-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.dashboard-stats-card {
+  text-align: center;
+}
+
+.dashboard-stats-title {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-stats-value {
+  font-size: 1.125rem;
+  color: #dc2626;
+}
+
+/* Chart Section */
+.dashboard-chart-container {
+  height: 100%; /* Take full height of container */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-chart-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  border: 1px solid #fee2e2;
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-chart-description {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Buttons */
+.dashboard-button {
+  background-color: #b91c1c;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dashboard-button:hover {
+  background-color: #dc2626;
+}
+
+.dashboard-button-full {
+  width: 100%;
+}
+
+/* Add this new style for the body if needed */
+body {
+  overflow-y: auto;
+  height: 100%;
+  min-height: 100vh;
+}
