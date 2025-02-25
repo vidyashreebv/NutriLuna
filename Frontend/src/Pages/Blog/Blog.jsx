@@ -7,7 +7,7 @@ const Blog = () => {
   const [articles, setArticles] = useState([]);
 
   const navItems = [
-    { label: 'Home', href: '/indexafter' },
+    { label: 'Home', href: '/landing' },
     { label: 'About', href: '/about' },
     { label: 'Blog', href: '/blog', active: true },
     { label: 'Login', href: '/login' }

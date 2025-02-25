@@ -5,7 +5,7 @@ import Footer from "../../Components/Footer";
 
 const AboutUs = () => {
   const navItems = [
-    { label: 'Home', href: '/index' },
+    { label: 'Home', href: '/landing' },
     { label: 'About', href: '/about', active: true },
     { label: 'Blog', href: '/blog' },
     { label: 'Login', href: '/login' }
@@ -74,7 +74,7 @@ const AboutUs = () => {
           </div>
         </div>
 
-        <div className="cta">
+        <div className="aboutus-cta">
           <h2>Start Your Health Journey Today</h2>
           <p>Join thousands of women who have already transformed their health management with NutriLuna.</p>
           <a href="/login" className="cta-button">Get Started</a>

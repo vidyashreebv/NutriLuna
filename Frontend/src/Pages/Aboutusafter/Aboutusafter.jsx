@@ -5,14 +5,14 @@ import Footer from "../../Components/Footer";
 
 const AboutUsAfter = () => {
   const navItems = [
-    { label: 'Home', href: '/indexafter' },
-    { label: 'About', href: '/aboutusafter', active: true },
-    { label: 'Blog', href: '/blogafter' },
-    { label: 'Track Your Periods', href: '/period' },
-    { label: 'Diet Tracking', href: '/diet' },
-    { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
-    { label: 'Consultation', href: 'consultation.html' },
-    { label: 'My Profile', href: '/dashboard' }
+    { label: 'Home', href: '/landing'},
+        { label: 'About', href: '/aboutusafter' , active: true },
+        { label: 'Blog', href: '/blogafter' },
+        { label: 'Track Your Periods', href: '/period'},
+        { label: 'Diet Tracking', href: '/diet'},
+        { label: 'Recipe Suggestions', href: '/recipe' },
+        { label: 'Consultation', href: 'consultation' },
+        { label: 'My Profile', href: '/dashboard' }
   ];
 
   return (
@@ -78,7 +78,7 @@ const AboutUsAfter = () => {
           </div>
         </div>
 
-        <div className="cta">
+        <div className="aboutus-cta">
           <h2>Start Your Health Journey Today</h2>
           <p>Join thousands of women who have already transformed their health management with NutriLuna.</p>
           <a href="/login" className="cta-button">Get Started</a>

@@ -6,16 +6,7 @@
         padding: 0;
         margin-top: 110px;
       } */
-      
-      .indicator {
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: 5px;
-        z-index: 60;
-        background-color: #ecad29; /* Corrected variable usage */
-      }
+    
       
       .container {
         max-width: 600px;
@@ -37,10 +28,10 @@
         color: white;
       }
       
-      lab-period {
+      .lab-period {
         display: block;
         margin: 1rem 0 0.5rem;
-        color: var(--dark-text);
+        color: black;
       }
       
       input {
@@ -58,7 +49,7 @@
         padding: 0.75rem;
         border: none;
         border-radius: 5px;
-        background-color: var(--btn-bg);
+        background-color: #dc2626;
         color: var(--text-color);
         font-size: 1rem;
         cursor: pointer;
@@ -73,10 +64,32 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        color: var(--dark-text);
-        gap: 15px;
-        margin-top: 5px;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 0;
+      }
+      
+      .calendar-header h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-red);
+        margin: 0;
+        padding: 0 1rem;
+      }
+      
+      .calendar-header button {
+        padding: 8px 16px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+      
+      .calendar-header button:hover {
+        background: #d32f2f;
+        transform: translateY(-1px);
       }
       
       .calendar {
@@ -86,28 +99,252 @@
       }
       
       .day {
-        width: 40px;
-        height: 40px;
+        position: relative;
+        aspect-ratio: 1;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        background-color: var(--white);
-        color: var(--dark-text);
-        border-radius: 5px;
-        font-size: 0.9rem;
+        justify-content: center;
+        font-size: 1rem;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        padding: 5px;
+      }
+      
+      .day-number {
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+      
+      .day-emoji {
+        font-size: 1.2rem;
+        margin-top: 2px;
+      }
+      
+      .ovulation-day {
+        background: #fff3e0;
+        border: 2px solid #ffb74d;
+      }
+      
+      .fertile-day {
+        background: #e8f5e9;
+        border: 2px solid #81c784;
       }
       
       .period-day {
-        background-color: #610909; /* Dark red for past periods */
-        color: white;
+        background: #ffebee;
+        border: 2px solid #e57373;
       }
       
-      .next-period {
-        background-color: #ff9999; /* Lighter red for predicted periods */
-        color: white;
+      /* Add new style for predicted period */
+      .period-day.predicted {
+        background: #fff5f5;
+        border: 2px dashed #e57373;
+        opacity: 0.8;
       }
       
-      .period {
-        background-color: var(--primary-red);
-        color: var(--text-color);
+      .period-day.predicted .day-emoji {
+        opacity: 0.7;
       }
+      
+      /* Add a tooltip on hover */
+      .day::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+      
+      .day:hover::after {
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      /* Add a legend */
+      .cycle-legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+        flex-wrap: wrap;
+      }
+      
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+      
+      .legend-item span {
+        color: #333;  /* Add dark color for legend text */
+        font-weight: 500;  /* Make it slightly bolder */
+      }
+      
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid;
+      }
+      
+      .legend-ovulation {
+        background: #fff3e0;
+        border-color: #ffb74d;
+      }
+      
+      .legend-fertile {
+        background: #e8f5e9;
+        border-color: #81c784;
+      }
+      
+      .legend-period {
+        background: #ffebee;
+        border-color: #e57373;
+      }
+
+      /* Add these styles for the calendar */
+      .calendar-section {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden; /* Add this to contain everything */
+      }
+
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .weekday {
+        text-align: center;
+        font-weight: 600;
+        padding: 8px;
+        color: #666;
+      }
+
+      .day {
+        background: white;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: 1px solid #eee;
+        color: #333;
+      }
+
+      .day-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      .day-number {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: #333;
+      }
+
+      .day-emoji {
+        font-size: 1.2rem;
+      }
+
+      .day.empty {
+        background: none;
+        border: none;
+      }
+
+      .ovulation-day {
+        background: #fff3e0;
+        border: 2px solid #ffb74d;
+        color: #333;
+      }
+
+      .fertile-day {
+        background: #e8f5e9;
+        border: 2px solid #81c784;
+        color: #333;
+      }
+
+      .period-day {
+        background: #ffebee;
+        border: 2px solid #e57373;
+        color: #333;
+      }
+
+      /* Update the legend styles */
+      .cycle-legend {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #eee;
+        flex-wrap: wrap;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .calendar-section {
+            padding: 1rem;
+            margin: 1rem;
+        }
+
+        .calendar {
+            gap: 4px;
+        }
+
+        .day {
+            min-height: 45px;
+            padding: 4px;
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+        }
+
+        .day-emoji {
+            font-size: 1rem;
+        }
+      }
+
+.period-tracker {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+.period-content {
+    margin-top: 0;
+    padding-top: 100px;
+}

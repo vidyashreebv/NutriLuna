@@ -70,8 +70,6 @@ function Landing() {
   ];
 
   useEffect(() => {
-    // JavaScript code from the original HTML <script> tag goes here
-    // ... (data array as in the original script)
     const _ = (id) => document.getElementById(id);
     const cards = data
       .map(
@@ -405,7 +403,6 @@ function Landing() {
 
   return (
     <div>
-      <div className="indicator"></div>
       <Navbarafter navItems={navItems} />
       <div id="demo" className="content-area"></div>
       <div className="details" id="details-even">

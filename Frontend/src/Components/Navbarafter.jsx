@@ -8,6 +8,7 @@ const Navbarafter = ({ navItems }) => {
   return (
 
     <nav className="navbarafter-nav">
+      <div className="navbarafter-top-line" />
       <div className="navbarafter-logo-container">
         <div className="navbarafter-logo">
           <img src={logo} />

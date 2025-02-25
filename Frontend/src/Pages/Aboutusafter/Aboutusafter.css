@@ -190,48 +190,54 @@ section {
 }
 
 /* Call to Action */
-.cta {
-  text-align: center;
-  padding: 80px 40px; /* Increased padding */
-  margin: 80px 40px; /* Increased margin */
-  background: linear-gradient(135deg, #ffffff 0%, #fee2e2 100%);
-  border-radius: 25px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  animation: fadeInUp 1.5s ease-in-out;
+.aboutus-cta {
+    text-align: center;
+    padding: 80px 40px;
+    margin: 0 !important;  /* Force override any other margins */
+    width: 100vw !important;  /* Force full viewport width */
+    box-sizing: border-box;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fee2e2 100%);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 1.5s ease-in-out;
 }
 
-.cta h2 {
-  font-size: 3.5rem;
-  color: #dc2626;
-  margin-bottom: 30px;
-  font-weight: 800;
+.aboutus-cta h2 {
+    font-size: 3.5rem;
+    color: #dc2626;
+    margin-bottom: 30px;
+    font-weight: 800;
 }
 
-.cta p {
-  font-size: 1.4rem;
-  color: #4a4a4a;
-  max-width: 800px;
-  margin: 0 auto 40px;
-  line-height: 1.8;
+.aboutus-cta p {
+    font-size: 1.4rem;
+    color: #4a4a4a;
+    max-width: 800px;
+    margin: 0 auto 40px;
+    line-height: 1.8;
 }
 
 .cta-button {
-  display: inline-block;
-  padding: 20px 60px;
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  color: #fff;
-  text-decoration: none;
-  border-radius: 50px;
-  font-size: 1.3rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2);
+    display: inline-block;
+    padding: 20px 60px;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2);
 }
 
 .cta-button:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 /* Animations */
@@ -264,7 +270,7 @@ section {
   }
 
   .mission-section h2,
-  .cta h2 {
+  .aboutus-cta h2 {
     font-size: 3rem;
   }
 }
@@ -285,7 +291,7 @@ section {
 }
 
   .mission-section p,
-  .cta p {
+  .aboutus-cta p {
     font-size: 1.2rem;
   }
 
@@ -319,7 +325,7 @@ section {
     margin: 80px 0 40px; /* Slightly reduced margin for mobile */
   }
 
-  .cta {
+  .aboutus-cta {
     margin: 60px 20px;
     padding: 60px 30px;
   }

@@ -5,9 +5,25 @@ const { admin, db } = require('./config/firebaseConfig'); // Import Firebase con
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
-app.use(cors());
+// Enhanced CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true
+}));
+
 app.use(bodyParser.json());
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Add request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 // Routes
 const userRoutes = require('./pages/user');
@@ -22,9 +38,9 @@ app.use("/api/diettracker", dietTrackerRoutes);
 const periodRoutes = require('./pages/periodtrack');
 app.use("/api/period", periodRoutes);
 
-// Add the new dashboard stats route
-const dashboardStatRoutes = require('./pages/dashboardstat');
-app.use("/api/dashboardstat", dashboardStatRoutes);
+// Add the dashboard routes
+const dashboardRoutes = require('./pages/dashboardRoutes');
+app.use("/api/dashboard", dashboardRoutes);
 
 // Default Route
 app.get('/', (req, res) => {

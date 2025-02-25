@@ -7,14 +7,14 @@ const Blogafter = () => {
   const [articles, setArticles] = useState([]);
 
   const navItems = [
-    { label: 'Home', href: '/indexafter' },
-    { label: 'About', href: '/aboutusafter' },
-    { label: 'Blog', href: '/blogafter', active: true },
-    { label: 'Track Your Periods', href: '/period' },
-    { label: 'Diet Tracking', href: '/diet' },
-    { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
-    { label: 'Consultation', href: 'consultation.html' },
-    { label: 'My Profile', href: '/dashboard' }
+    { label: 'Home', href: '/landing' },
+        { label: 'About', href: '/aboutusafter' },
+        { label: 'Blog', href: '/blogafter', active: true  },
+        { label: 'Track Your Periods', href: '/period'},
+        { label: 'Diet Tracking', href: '/diet'},
+        { label: 'Recipe Suggestions', href: '/recipe' },
+        { label: 'Consultation', href: 'consultation' },
+        { label: 'My Profile', href: '/dashboard' }
   ];
 
   useEffect(() => {

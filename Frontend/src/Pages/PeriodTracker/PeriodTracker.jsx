@@ -16,15 +16,16 @@ function PeriodTracker() {
     const [user, setUser] = useState(null);
     const [monthYearText, setMonthYearText] = useState("");
     const [allPeriods, setAllPeriods] = useState([]);
+    const [periodData, setPeriodData] = useState(null);
 
     const navItems = [
-        { label: 'Home', href: 'indexafterlogin.html' },
+        { label: 'Home', href: '/landing' },
         { label: 'About', href: '/aboutusafter' },
         { label: 'Blog', href: '/blogafter' },
         { label: 'Track Your Periods', href: '/period', active: true },
         { label: 'Diet Tracking', href: '/diet' },
-        { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
-        { label: 'Consultation', href: 'consultation.html' },
+        { label: 'Recipe Suggestions', href: '/recipe' },
+        { label: 'Consultation', href: 'consultation' },
         { label: 'My Profile', href: '/dashboard' }
     ];
 
@@ -77,6 +78,8 @@ function PeriodTracker() {
                 if (data.periodsHistory && Array.isArray(data.periodsHistory)) {
                     setAllPeriods(data.periodsHistory);
                 }
+
+                setPeriodData(data);
             } catch (jsonError) {
                 console.error("❌ JSON Parsing Error:", jsonError.message);
                 throw new Error("Received non-JSON response from server");
@@ -86,48 +89,166 @@ function PeriodTracker() {
         }
     };
 
-    const generateCalendar = (month, year, lastPeriodDate, periodDuration, nextPeriodDate) => {
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDay = new Date(year, month, 1).getDay();
+    // Helper to get the most recent period
+    const getMostRecentPeriod = () => {
+        if (!allPeriods || allPeriods.length === 0) return null;
+        
+        return allPeriods.reduce((latest, current) => {
+            const currentDate = new Date(current.startDate);
+            const latestDate = new Date(latest.startDate);
+            return currentDate > latestDate ? current : latest;
+        });
+    };
 
-        setMonthYearText(`${new Date(year, month).toLocaleString("default", { month: "long" })} ${year}`);
+    // Calculate cycle phases based on most recent period
+    const calculateCyclePhases = (date) => {
+        const mostRecentPeriod = getMostRecentPeriod();
+        if (!mostRecentPeriod) return null;
 
-        const calendarDays = [];
+        const startDate = new Date(mostRecentPeriod.startDate);
+        const cycleLength = mostRecentPeriod.cycleLength;
+        const ovulationDay = Math.floor(cycleLength / 2) - 2;
+        
+        return {
+            ovulationDate: new Date(startDate.getTime() + (ovulationDay * 24 * 60 * 60 * 1000)),
+            fertileWindowStart: new Date(startDate.getTime() + ((ovulationDay - 5) * 24 * 60 * 60 * 1000)),
+            fertileWindowEnd: new Date(startDate.getTime() + ((ovulationDay + 4) * 24 * 60 * 60 * 1000))
+        };
+    };
 
-        // Add empty cells for days before the first of the month
-        for (let i = 0; i < firstDay; i++) {
-            calendarDays.push(<div className="day empty" key={`empty-${i}`}></div>);
-        }
+    // Helper to get the next predicted period
+    const getNextPeriod = () => {
+        const mostRecentPeriod = getMostRecentPeriod();
+        if (!mostRecentPeriod) return null;
 
-        // Generate calendar days
-        for (let i = 1; i <= daysInMonth; i++) {
-            const currentDate = new Date(year, month, i);
-            let dayClass = "day";
+        const startDate = new Date(mostRecentPeriod.startDate);
+        const cycleLength = mostRecentPeriod.cycleLength;
+        const duration = mostRecentPeriod.duration;
 
-            // Check historical periods
-            allPeriods.forEach(period => {
-                const periodStart = new Date(period.startDate);
-                const periodEnd = new Date(periodStart);
-                periodEnd.setDate(periodStart.getDate() + parseInt(period.duration));
+        // Calculate next period start date
+        const nextPeriodStart = new Date(startDate);
+        nextPeriodStart.setDate(startDate.getDate() + parseInt(cycleLength));
 
-                if (currentDate >= periodStart && currentDate <= periodEnd) {
-                    dayClass += " period-day"; // Past periods
-                }
+        // Calculate next period end date
+        const nextPeriodEnd = new Date(nextPeriodStart);
+        nextPeriodEnd.setDate(nextPeriodStart.getDate() + parseInt(duration));
+
+        return {
+            startDate: nextPeriodStart,
+            endDate: nextPeriodEnd,
+            duration: duration
+        };
+    };
+
+    // Update isPeriodDay to include next predicted period
+    const isPeriodDay = (date) => {
+        // Check logged periods
+        if (allPeriods && allPeriods.length > 0) {
+            const isLoggedPeriod = allPeriods.some(period => {
+                const startDate = new Date(period.startDate);
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + parseInt(period.duration));
+                
+                const checkDateObj = new Date(date);
+                return checkDateObj >= startDate && checkDateObj <= endDate;
             });
 
-            // Check predicted next period
-            if (nextPeriodDate && currentDate >= nextPeriodDate &&
-                currentDate < new Date(nextPeriodDate.getTime() + periodDuration * 24 * 60 * 60 * 1000)) {
-                dayClass += " next-period"; // Predicted period
-            }
+            if (isLoggedPeriod) return true;
+        }
 
+        // Check next predicted period
+        const nextPeriod = getNextPeriod();
+        if (nextPeriod) {
+            const checkDate = new Date(date);
+            return checkDate >= nextPeriod.startDate && checkDate <= nextPeriod.endDate;
+        }
+
+        return false;
+    };
+
+    // Update generateCalendar to use the updated isPeriodDay
+    const generateCalendar = (month, year) => {
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        setMonthYearText(`${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`);
+        
+        const calendarDays = [];
+
+        // Add weekday headers
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
             calendarDays.push(
-                <div className={dayClass} key={i}>
-                    {i}
+                <div key={`header-${day}`} className="weekday">
+                    {day}
+                </div>
+            );
+        });
+        
+        // Add empty cells for days before the first of the month
+        for (let i = 0; i < firstDay; i++) {
+            calendarDays.push(
+                <div key={`empty-${i}`} className="day empty"></div>
+            );
+        }
+        
+        // Add the days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const currentDate = new Date(year, month, day);
+            const cyclePhases = calculateCyclePhases(currentDate);
+            
+            let className = "day";
+            let emoji = "";
+            let label = "";
+            
+            // Check if it's a period day (logged or predicted)
+            if (isPeriodDay(currentDate)) {
+                className += " period-day";
+                emoji = "🌺";
+                
+                // Add predicted class if it's a predicted period
+                const nextPeriod = getNextPeriod();
+                if (nextPeriod && 
+                    currentDate >= nextPeriod.startDate && 
+                    currentDate <= nextPeriod.endDate) {
+                    className += " predicted";
+                    label = "Predicted Period";
+                } else {
+                    label = "Period Day";
+                }
+            }
+            // Then check for ovulation and fertile window
+            else if (cyclePhases) {
+                const dayStr = currentDate.toISOString().split('T')[0];
+                
+                if (dayStr === cyclePhases.ovulationDate.toISOString().split('T')[0]) {
+                    className += " ovulation-day";
+                    emoji = "🥚";
+                    label = "Ovulation Day";
+                }
+                else if (
+                    currentDate >= cyclePhases.fertileWindowStart && 
+                    currentDate <= cyclePhases.fertileWindowEnd
+                ) {
+                    className += " fertile-day";
+                    emoji = "✨";
+                    label = "Fertile Window";
+                }
+            }
+            
+            calendarDays.push(
+                <div 
+                    key={`day-${day}`}
+                    className={className}
+                    title={label}
+                >
+                    <div className="day-content">
+                        <span className="day-number">{day}</span>
+                        {emoji && <span className="day-emoji">{emoji}</span>}
+                    </div>
                 </div>
             );
         }
-
+        
         setCalendarHTML(calendarDays);
     };
 
@@ -145,7 +266,7 @@ function PeriodTracker() {
         const options = { year: "numeric", month: "long", day: "numeric" };
         setOutput(`Your next period is expected around: ${nextPeriodDate.toLocaleDateString(undefined, options)}`);
 
-        generateCalendar(currentMonth, currentYear, lastPeriodDate, parseInt(periodDuration), nextPeriodDate);
+        generateCalendar(currentMonth, currentYear);
     };
 
     const savePeriodData = async () => {
@@ -214,29 +335,108 @@ function PeriodTracker() {
         savePeriodData();
     };
 
+    const calculatePeriodStatus = (lastPeriod, cycleLength) => {
+        if (!lastPeriod || !cycleLength) return null;
+
+        const lastPeriodDate = new Date(lastPeriod);
+        const today = new Date();
+        const nextPeriodDate = new Date(lastPeriodDate);
+        nextPeriodDate.setDate(lastPeriodDate.getDate() + parseInt(cycleLength));
+
+        const diffTime = nextPeriodDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return {
+                status: 'late',
+                days: Math.abs(diffDays),
+                nextDate: nextPeriodDate
+            };
+        } else {
+            return {
+                status: 'upcoming',
+                days: diffDays,
+                nextDate: nextPeriodDate
+            };
+        }
+    };
+
     return (
         <div className="period-tracker">
-            <div className="indicator"></div>
             <Navbarafter navItems={navItems} />
             <div className="container">
                 <h1 className="title" style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
-                    Track Your Periods
+                    Period Tracker
                 </h1>
-                <input type="date" className="input-date" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
-                <label className="lab-period">Cycle Length (in days):</label>
-                <input type="number" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
-                <label className="lab-period">Period Duration (in days):</label>
-                <input type="number" className="input-number" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
-                <button className="btn-show-calendar" onClick={() => handleShowCalendar()}>Show Calendar</button>
-                <div className="output-box">{output}</div>
-                <div className="calendar-header flex items-center">
-                    <button className="btn-prev" onClick={() => changeMonth(-1)}>Previous</button>
-                    <h3 className="month-year" style={{ fontSize: '1.8rem', fontWeight: '600' }}>
-                        {monthYearText}
-                    </h3>
-                    <button className="btn-next" onClick={() => changeMonth(1)}>Next</button>
+                <div className="period-tracker-container">
+                    
+                    {/* Add Period Status Card */}
+                    {periodData && periodData.lastPeriod && (
+                        <div className="period-status-section">
+                            {(() => {
+                                const status = calculatePeriodStatus(
+                                    periodData.lastPeriod,
+                                    periodData.cycleLength
+                                );
+                                
+                                if (!status) return null;
+
+                                return (
+                                    <div className={`period-status-card ${status.status}`}>
+                                        <div className="status-icon">
+                                            {status.status === 'late' ? '⚠️' : '📅'}
+                                        </div>
+                                        <div className="status-text">
+                                            {status.status === 'late' ? (
+                                                <>
+                                                    <h3>Period is {status.days} days late</h3>
+                                                    <p>Expected date was {status.nextDate.toLocaleDateString()}</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <h3>Next period in {status.days} days</h3>
+                                                    <p>Expected on {status.nextDate.toLocaleDateString()}</p>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
+
+                    <input type="date" className="input-date" value={lastPeriod} onChange={(e) => setLastPeriod(e.target.value)} />
+                    <label className="lab-period">Cycle Length (in days):</label>
+                    <input type="number" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
+                    <label className="lab-period">Period Duration (in days):</label>
+                    <input type="number" className="input-number" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
+                    <button className="btn-show-calendar" onClick={() => handleShowCalendar()}>Show Calendar</button>
+                    <div className="output-box">{output}</div>
+                    <div className="calendar-section">
+                        <div className="calendar-header">
+                            <button onClick={() => changeMonth(-1)}>Previous</button>
+                            <h3>{monthYearText}</h3>
+                            <button onClick={() => changeMonth(1)}>Next</button>
+                        </div>
+                        <div className="calendar">
+                            {calendarHTML}
+                        </div>
+                        <div className="cycle-legend">
+                            <div className="legend-item">
+                                <div className="legend-color legend-period"></div>
+                                <span>Period 🌺</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-color legend-ovulation"></div>
+                                <span>Ovulation 🥚</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-color legend-fertile"></div>
+                                <span>Fertile Window ✨</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="calendar">{calendarHTML}</div>
             </div>
             <Footer />
         </div>

@@ -1,14 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
-
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing: border-box;
-
+/* Reset default margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Common page container styles */
+.dashboard-main,
+.about-us,
+.blog-container,
+.period-tracker,
+.diet-tracker,
+.recipe-suggestion,
+.profile-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Common content wrapper styles */
+.content-wrapper {
+    margin-top: 0;
+    padding-top: 100px; /* Adjust based on your navbar height */
+}
+
+/* Navbar styles to ensure it stays on top */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
 :root {
     --primary-red: #660808;
     --secondary-red: #cd0c0c;
@@ -22,21 +56,21 @@
     --light-text: #333;
     --dark-text: #1a1a1a;
     --next-period-light: #f7b4b4;
-  }
-  :root {
+}
+:root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --border: 214.3 31.8% 91.4%;
     --muted-foreground: 215.4 16.3% 46.9%;
-  }
-  
-  .dark {
+}
+
+.dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-  }
+}

@@ -24,22 +24,6 @@
   z-index: -100; /* Ensures the blur stays in the background */
 }
 
-
-/* Fixed navbar */
-.fixed-navbar {
-  position: fixed;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: white;
-  z-index: 999;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(205, 0, 0, 0.1), 0 2px 4px -1px rgba(205, 0, 0, 0.06);
-  border-bottom: 2px solid #f3f3f3;
-}
 /* Improving the card size */
 .meal-card {
   width: 90%; /* Adjust width as needed */

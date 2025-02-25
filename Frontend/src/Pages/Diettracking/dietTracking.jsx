@@ -32,14 +32,14 @@ const DietTracker = () => {
   const fixedHeaderRef = useRef(null);
 
   const navItems = [
-    { label: 'Home', href: 'indexafterlogin.html' },
-    { label: 'About', href: '/aboutusafter'},
-    { label: 'Blog', href: '/blogafter' },
-    { label: 'Track Your Periods', href: '/period' },
-    { label: 'Diet Tracking', href: '/diet' , active: true },
-    { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
-    { label: 'Consultation', href: 'consultation.html' },
-    { label: 'My Profile', href: '/dashboard' }
+    { label: 'Home', href: '/landing' },
+        { label: 'About', href: '/aboutusafter' },
+        { label: 'Blog', href: '/blogafter' },
+        { label: 'Track Your Periods', href: '/period'},
+        { label: 'Diet Tracking', href: '/diet' , active: true },
+        { label: 'Recipe Suggestions', href: '/recipe' },
+        { label: 'Consultation', href: 'consultation' },
+        { label: 'My Profile', href: '/dashboard' }
   ];
 
   // Format date helper

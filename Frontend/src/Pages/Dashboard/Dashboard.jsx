@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, MessageSquare, Droplet, Heart, Activity, Smile } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { doc, getDoc } from 'firebase/firestore';
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from "../../Components/Footer";
 import { useAuth } from "../../context/AuthContext";
-import { db } from "../../config/firebase";
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -20,6 +18,12 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dietData, setDietData] = useState({
+    totalCalories: 0,
+    meals: [],
+    loading: true,
+    error: null
+  });
 
   useEffect(() => {
     const fetchPeriodData = async () => {
@@ -30,76 +34,170 @@ const Dashboard = () => {
       }
 
       try {
-        console.log("Current user:", currentUser);
-        console.log("User  ID:", currentUser?.uid);
-        const userRef = doc(db, "users", currentUser.uid);
+        const token = await currentUser.getIdToken(true);
+        console.log("Fetching data with token:", token.substring(0, 10) + "...");
 
-        // Add error handling for database connection
-        if (!db) {
-          throw new Error("Firebase database connection not established");
+        const response = await fetch("http://localhost:5001/api/dashboard/data", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Server responded with ${response.status}: ${errorData}`);
         }
 
-        const docSnap = await getDoc(userRef);
-        console.log("Document snapshot fetched");
+        const data = await response.json();
+        console.log("Received data:", data);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          console.log("Period data from DB:", data.periodData.data);
-
-          // Set period data with proper validation
-          setPeriodData({
-            data: {
-              lastPeriod: data.periodData.data.lastPeriod || "Not available",
-              cycleLength: data.periodData.data.cycleLength || 0,
-              periodDuration: data.periodData.data.periodDuration || 0
-            }
-          });
-
-          // Process chart data if history exists
-          if (data.periodData.data.history && typeof data.periodData.data.history === "object") {
-            const formattedChartData = Object.values(data.periodData.data.history)
-              .slice(0, 6)
-              .map(period => ({
-                month: new Date(period.startDate).toLocaleString('default', { month: 'short' }),
-                length: period.duration || 0
-              }));
-            setChartData(formattedChartData);
-          } else {
-            console.log("No history data available");
-            setChartData([]);
-          }
-        } else {
-          console.log("No period data found in document");
-          // Initialize with default data
-          setPeriodData({
-            data: {
-              lastPeriod: "Not tracked yet",
-              cycleLength: 0,
-              periodDuration: 0
-            }
-          });
-          setChartData([]);
-        }
+        setPeriodData(data.periodData);
+        setChartData(data.chartData);
       } catch (err) {
-        console.error("Error details:", err);
+        console.error("Error fetching dashboard data:", err);
+        setError(err.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPeriodData(); // Call the function inside useEffect
-  }, [currentUser]); // Correctly close the useEffect hook
+    fetchPeriodData();
+  }, [currentUser]);
+
+  useEffect(() => {
+    const fetchDietData = async () => {
+      if (!currentUser) {
+        console.log("No current user found");
+        setDietData(prev => ({
+          ...prev,
+          loading: false,
+          error: "Please log in to view your diet data"
+        }));
+        return;
+      }
+
+      try {
+        console.log("Fetching diet data for user:", currentUser.uid);
+        const token = await currentUser.getIdToken(true);
+        
+        if (!token) {
+          throw new Error("Failed to get authentication token");
+        }
+
+        const response = await fetch("http://localhost:5001/api/diettracker/today", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server error response:", errorText);
+          throw new Error(`Server error: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Received diet data:", data);
+
+        setDietData({
+          totalCalories: data.totalCalories || 0,
+          meals: data.meals || [],
+          loading: false,
+          error: null
+        });
+      } catch (err) {
+        console.error("Error fetching diet data:", err);
+        setDietData(prev => ({
+          ...prev,
+          loading: false,
+          error: err.message || "Failed to load diet data"
+        }));
+      }
+    };
+
+    if (currentUser) {
+      fetchDietData();
+    }
+  }, [currentUser]);
 
   const navItems = [
     { label: 'Home', href: '/landing' },
-    { label: 'About', href: '/aboutusafter' },
-    { label: 'Blog', href: '/blogafter' },
-    { label: 'Track Your Periods', href: '/period' },
-    { label: 'Diet Tracking', href: '/diet' },
-    { label: 'Recipe Suggestions', href: 'recipe-suggestions.html' },
-    { label: 'Consultation', href: 'consultation.html' },
-    { label: 'My Profile', href: '/dashboard', active: true }
+        { label: 'About', href: '/aboutusafter' },
+        { label: 'Blog', href: '/blogafter' },
+        { label: 'Track Your Periods', href: '/period'},
+        { label: 'Diet Tracking', href: '/diet'},
+        { label: 'Recipe Suggestions', href: '/recipe' },
+        { label: 'Consultation', href: 'consultation' },
+        { label: 'My Profile', href: '/dashboard' , active: true  }
   ];
+
+  const calculateCycleDays = () => {
+    if (!periodData.data.lastPeriod || periodData.data.lastPeriod === "Not available") {
+      return [];
+    }
+
+    const lastPeriodDate = new Date(periodData.data.lastPeriod);
+    const today = new Date();
+    const diffTime = Math.abs(today - lastPeriodDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Calculate cycle day (1-based)
+    const cycleDay = (diffDays % (periodData.data.cycleLength || 28)) + 1;
+    
+    return [
+      { 
+        day: lastPeriodDate.getDate(), 
+        cycleDay: 1, 
+        event: "Start of Period",
+        date: lastPeriodDate
+      },
+      { 
+        day: new Date(lastPeriodDate.getTime() + 24 * 60 * 60 * 1000).getDate(), 
+        cycleDay: 2, 
+        event: cycleDay <= periodData.data.periodDuration ? "Heavy Flow" : "Regular Day",
+        date: new Date(lastPeriodDate.getTime() + 24 * 60 * 60 * 1000)
+      },
+      { 
+        day: new Date(lastPeriodDate.getTime() + 2 * 24 * 60 * 60 * 1000).getDate(), 
+        cycleDay: 3, 
+        event: cycleDay <= periodData.data.periodDuration ? "Light Flow" : "Regular Day",
+        date: new Date(lastPeriodDate.getTime() + 2 * 24 * 60 * 60 * 1000)
+      }
+    ];
+  };
+
+  const calculatePeriodStatus = (lastPeriod, cycleLength) => {
+    if (!lastPeriod || !cycleLength) return null;
+
+    const lastPeriodDate = new Date(lastPeriod);
+    const today = new Date();
+    const nextPeriodDate = new Date(lastPeriodDate);
+    nextPeriodDate.setDate(lastPeriodDate.getDate() + parseInt(cycleLength));
+
+    const diffTime = nextPeriodDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      // Period is late
+      return {
+        status: 'late',
+        days: Math.abs(diffDays),
+        nextDate: nextPeriodDate
+      };
+    } else {
+      // Period is upcoming
+      return {
+        status: 'upcoming',
+        days: diffDays,
+        nextDate: nextPeriodDate
+      };
+    }
+  };
 
   if (loading) {
     return (
@@ -130,8 +228,8 @@ const Dashboard = () => {
   }
 
   return (
+    <>
     <main className="dashboard-main">
-      <div className="dashboard-top-line" />
       <Navbarafter navItems={navItems} />
 
       <div className="dashboard-content-grid">
@@ -172,39 +270,110 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="dashboard-cycle-container">
-            <h2 className="dashboard-section-title">Cycle Tracker</h2>
-            <div className="dashboard-cycle-grid">
-              {[
-                { day: new Date().getDate(), cycleDay: 1, event: "Start of Period" },
-                { day: new Date().getDate() + 1, cycleDay: 2, event: "Heavy Flow" },
-                { day: new Date().getDate() + 2, cycleDay: 3, event: "Light Flow" }
-              ].map((day, index) => (
-                <div key={index} className="dashboard-cycle-card">
-                  <h3 className="dashboard-cycle-day">{day.day}</h3>
-                  <p className="dashboard-cycle-number">Day {day.cycleDay}</p>
-                  <span className="dashboard-cycle-event">{day.event}</span>
-                  <button className="dashboard-button">Log Event</button>
+          <div className="dashboard-period-container">
+            <h2 className="dashboard-section-title">Period Tracker</h2>
+            {periodData.data.lastPeriod === "Not available" ? (
+              <div className="dashboard-no-data">
+                No period tracking data available. Please add your period data.
+              </div>
+            ) : (
+              <>
+                <div className="dashboard-period-status">
+                  {(() => {
+                    const status = calculatePeriodStatus(
+                      periodData.data.lastPeriod,
+                      periodData.data.cycleLength
+                    );
+                    
+                    if (!status) return null;
+
+                    return (
+                      <div className={`period-status-card ${status.status}`}>
+                        <div className="status-icon">
+                          {status.status === 'late' ? '⚠️' : '📅'}
+                        </div>
+                        <div className="status-text">
+                          {status.status === 'late' ? (
+                            <>
+                              <h3>Period is {status.days} days late</h3>
+                              <p>Expected date was {status.nextDate.toLocaleDateString()}</p>
+                            </>
+                          ) : (
+                            <>
+                              <h3>Next period in {status.days} days</h3>
+                              <p>Expected on {status.nextDate.toLocaleDateString()}</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
-              ))}
-            </div>
+                
+                <div className="dashboard-cycle-grid">
+                  {calculateCycleDays().map((day, index) => (
+                    <div key={index} className="dashboard-cycle-card">
+                      <h3 className="dashboard-cycle-day">
+                        {day.date.toLocaleDateString('default', { month: 'short', day: 'numeric' })}
+                      </h3>
+                      <p className="dashboard-cycle-number">Day {day.cycleDay}</p>
+                      <span className="dashboard-cycle-event">{day.event}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="dashboard-diet-container">
             <h2 className="dashboard-section-title">Diet Tracking</h2>
-            <div className="dashboard-diet-grid">
-              {[
-                { title: "Calories Consumed", value: "1500 kcal" },
-                { title: "Calories Burned", value: "1200 kcal" },
-                { title: "Net Calories", value: "300 kcal" }
-              ].map((stat, index) => (
-                <div key={index} className="dashboard-diet-card">
-                  <h3 className="dashboard-diet-title">{stat.title}</h3>
-                  <p className="dashboard-diet-value">{stat.value}</p>
+            {dietData.loading ? (
+              <div className="dashboard-loading">Loading diet data...</div>
+            ) : dietData.error ? (
+              <div className="dashboard-error">{dietData.error}</div>
+            ) : (
+              <>
+                <div className="dashboard-diet-grid">
+                  <div className="dashboard-diet-card">
+                    <h3 className="dashboard-diet-title">Calories Consumed</h3>
+                    <p className="dashboard-diet-value">{dietData.totalCalories} kcal</p>
+                  </div>
+                  <div className="dashboard-diet-card">
+                    <h3 className="dashboard-diet-title">Meals Today</h3>
+                    <p className="dashboard-diet-value">{dietData.meals.length}</p>
+                  </div>
+                  <div className="dashboard-diet-card">
+                    <h3 className="dashboard-diet-title">Daily Goal</h3>
+                    <p className="dashboard-diet-value">2000 kcal</p>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <button className="dashboard-button dashboard-button-full">Add Meal</button>
+
+                <div className="dashboard-recent-meals">
+                  <h3 className="dashboard-diet-subtitle">Recent Meals</h3>
+                  {dietData.meals.length > 0 ? (
+                    <div className="dashboard-meals-list">
+                      {dietData.meals.slice(0, 3).map((meal, index) => (
+                        <div key={index} className="dashboard-meal-item">
+                          <div className="dashboard-meal-info">
+                            <span className="dashboard-meal-name">{meal.name}</span>
+                            <span className="dashboard-meal-type">{meal.type}</span>
+                          </div>
+                          <span className="dashboard-meal-calories">
+                            {parseInt(meal.calories) || 0} cal
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="dashboard-no-meals">No meals tracked today</p>
+                  )}
+                </div>
+
+                <a href="/diet" className="dashboard-button dashboard-button-full">
+                  Track New Meal
+                </a>
+              </>
+            )}
           </div>
         </div>
 
@@ -261,8 +430,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </main>
+          <Footer />
+    </>
   );
 };
 

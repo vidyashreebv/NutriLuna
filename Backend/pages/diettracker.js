@@ -1,34 +1,138 @@
 const express = require("express");
 const router = express.Router();
-const { db } = require("../config/firebaseConfig");
+const { admin, db } = require("../config/firebaseConfig");
 const authenticateUser = require("../middleware/authMiddleware");
 
-// **Add a new diet log**
-router.post("/add", authenticateUser, async (req, res) => {
-  const { mealType, foodName, calories, date } = req.body;
-  const userId = req.user.uid; // Extract userId from the decoded token
+// Middleware to verify token
+const verifyToken = async (req, res, next) => {
+    try {
+        if (!req.headers.authorization) {
+            console.log("❌ No authorization header");
+            return res.status(403).json({ error: "No authorization header" });
+        }
 
-  if (!userId || !mealType || !foodName || !date) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
+        const token = req.headers.authorization.split("Bearer ")[1];
+        if (!token) {
+            console.log("❌ No token in authorization header");
+            return res.status(403).json({ error: "No token provided" });
+        }
 
-  try {
-    const dietLogRef = db.collection("users").doc(userId).collection("dietLogs").doc();
-    await dietLogRef.set({
-      mealType,
-      foodName,
-      calories,
-      date,
-      createdAt: new Date(),
-    });
+        console.log("🟢 Verifying token:", token.substring(0, 10) + "...");
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        
+        if (!decodedToken.uid) {
+            console.log("❌ No UID in decoded token");
+            return res.status(403).json({ error: "Invalid token - no UID" });
+        }
 
-    res.status(200).json({ message: "Diet log added successfully!" });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to add diet log" });
-  }
+        req.user = decodedToken;
+        console.log("🟢 Successfully authenticated user:", decodedToken.uid);
+        next();
+    } catch (error) {
+        console.error("❌ Authentication error:", error);
+        res.status(403).json({ error: "Authentication failed" });
+    }
+};
+
+// Get today's meals
+router.get("/today", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        console.log("🟢 Fetching meals for user ID:", userId);
+
+        // Get today's date as string in YYYY-MM-DD format
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+        console.log("🟢 Fetching meals for date:", todayString);
+
+        // Query the dietLogs collection
+        const mealsSnapshot = await db.collection("users")
+            .doc(userId)
+            .collection("dietLogs")
+            .where("date", "==", todayString)
+            .get();
+
+        console.log("🟢 Found", mealsSnapshot.size, "meals");
+
+        let meals = [];
+        let totalCalories = 0;
+
+        mealsSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log("🟢 Processing meal:", data);
+            
+            const meal = {
+                id: doc.id,
+                name: data.foodName,
+                calories: parseInt(data.calories) || 0,
+                type: data.mealType,
+                date: data.date
+            };
+            
+            meals.push(meal);
+            totalCalories += meal.calories;
+        });
+
+        console.log("🟢 Processed meals:", meals);
+        console.log("🟢 Total calories:", totalCalories);
+
+        res.status(200).json({
+            meals,
+            totalCalories
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching meals:", error);
+        res.status(500).json({ 
+            error: "Failed to fetch meals",
+            details: error.message
+        });
+    }
 });
 
-// **Fetch all diet logs for a user**
+// **Add a new diet log**
+router.post("/add", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        console.log("🟢 Adding meal for user:", userId);
+
+        const { mealType, foodName, calories } = req.body;
+        
+        // Get today's date as string in YYYY-MM-DD format
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0];
+
+        const mealData = {
+            mealType,
+            foodName,
+            calories: calories.toString(), // Store as string to match existing format
+            date: dateString,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        console.log("🟢 Saving meal data:", mealData);
+
+        const mealRef = await db.collection("users")
+            .doc(userId)
+            .collection("dietLogs")
+            .add(mealData);
+
+        console.log("🟢 Meal saved with ID:", mealRef.id);
+
+        res.status(200).json({
+            message: "Meal saved successfully",
+            mealId: mealRef.id
+        });
+
+    } catch (error) {
+        console.error("❌ Error saving meal:", error);
+        res.status(500).json({ 
+            error: "Failed to save meal",
+            details: error.message
+        });
+    }
+});
+
 // **Fetch all diet logs for a user**
 router.get("/:userId", authenticateUser, async (req, res) => {
   try {
@@ -99,5 +203,6 @@ router.delete("/:logId", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to delete diet log" });
   }
 });
+
 module.exports = router; // ✅ Ensure router is exported correctly
 
