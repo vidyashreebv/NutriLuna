@@ -1188,3 +1188,236 @@
   --header-height: 200px;
 }
   
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+/* Edit Modal - Red Theme */
+.edit-modal-red {
+  background-color: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease-out;
+  overflow: hidden;
+  border: 1px solid #f8f8f8;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Modal Header - Red Theme */
+.modal-header-red {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #e41e3f; /* Red header background */
+  color: white;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header-red h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+.close-button-red {
+  background: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: rgba(231, 23, 23, 0.8);
+  transition: color 0.2s;
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-button-red:hover {
+  color: white;
+}
+
+/* Form Styling - Red Theme */
+.edit-form-red {
+  padding: 20px;
+}
+
+.form-group-red {
+  margin-bottom: 18px;
+}
+
+.form-group-red label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-input-red, .modal-select-red {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #f9f9f9;
+}
+
+.modal-input-red:focus, .modal-select-red:focus {
+  border-color: #eee7e8;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(147, 4, 28, 0.2);
+  background-color: white;
+}
+
+/* Modal Action Buttons - Red Theme */
+.modal-actions-red {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Make sure these button styles are specific enough to override any reset styles */
+.cancel-button-red, .save-button-red {
+  padding: 10px 18px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 16px !important;
+  border: !important;
+  outline: none !important;
+}
+
+.cancel-button-red {
+  background-color: #f1f1f1 !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+}
+
+.cancel-button-red:hover {
+  background-color: #e5e5e5 !important;
+}
+
+.save-button-red {
+  background-color: #e41e3f !important;
+  color: white !important;
+}
+
+.save-button-red:hover {
+  background-color: #c51835 !important;
+}
+
+/* This ensures the button retains its styling when active/focused */
+.save-button-red:active, .save-button-red:focus {
+  background-color: #e41e3f !important;
+  color: white !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(228, 30, 63, 0.4) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .edit-modal-red {
+    width: 95%;
+  }
+  
+  .modal-actions-red {
+    flex-direction: column;
+  }
+  
+  .cancel-button-red, .save-button-red {
+    width: 100% !important;
+  }
+}
+
+/* Input and dropdown with red borders */
+.modal-input-red, .modal-select-red {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 2px solid #e41e3f; /* Red border */
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: white;
+  color: #333 !important; /* Force black text color */
+}
+
+/* Specific styling for the dropdown */
+.modal-select-red {
+  -webkit-appearance: menulist; /* Standard dropdown appearance on all browsers */
+  appearance: menulist;
+  cursor: pointer;
+  background-color: white;
+}
+
+/* Make focused inputs have a deeper red border and subtle glow */
+.modal-input-red:focus, .modal-select-red:focus {
+  border-color: #c51835; /* Darker red when focused */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(228, 30, 63, 0.2);
+}
+
+/* Make sure the dropdown options have proper styling */
+.modal-select-red option {
+  color: #333;
+  background-color: white;
+  padding: 10px;
+}
+
+/* Style for the form labels */
+.form-group-red label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Remove autofill background color in many browsers */
+.modal-input-red:-webkit-autofill,
+.modal-input-red:-webkit-autofill:hover, 
+.modal-input-red:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px white inset;
+  box-shadow: 0 0 0px 1000px white inset;
+  -webkit-text-fill-color: #333;
+  border: 2px solid #e41e3f;
+}
+
+/* Change dropdown selection color to red */
+.meal-type-select option:checked,
+.meal-type-select option:hover,
+.meal-type-select option:focus {
+  background-color: #e60000 !important; /* Red color to match your theme */
+  color: white !important;
+}
+
+/* For some browsers that need additional styling */
+.meal-type-select option:checked {
+  box-shadow: 0 0 10px 100px #e60000 inset !important;
+  -webkit-box-shadow: 0 0 10px 100px #e60000 inset !important;
+}
