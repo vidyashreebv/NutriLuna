@@ -161,31 +161,48 @@ form .remember-forget{
     text-decoration: none; 
 
 }
-button:disabled {
-    background-color: rgba(243, 236, 236, 0.736); /* Light gray */
+.register-button:disabled {
+    background-color: rgba(234, 229, 229, 0.736); /* Light gray */
     cursor: not-allowed;
     text-emphasis-style:inherit;
     text-decoration: line-through;
-    /* filter: blur(2px); Blurred effect */
+    color: rgb(3, 3, 3);
+  }
+  .register-button:disabled:hover{
+    background-color: rgba(204, 16, 16, 0.736);
+    color: #fff;
+    border: 2px solid #660808;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    text-emphasis-style:inherit;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
+
   }
   
-form button{
-
+/* Make the selector more specific */
+.form-box-login button[type="submit"].register-button,
+.form-box-register button[type="submit"].register-button,
+button.register-button {
     width: 100%;
     height: 45px;
-    background: #fff;
-    border: none;
+    background: white !important; /* Added !important as last resort */
+    border: 2px solid #660808;
     outline: none;
     border-radius: 40px;
-    box-shadow: 0 0 10px rgba(0,0,0,.1);
+    box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
     cursor: pointer;
     font-size: 16px;
     color: #333;
     font-weight: 700;
-
+    transition: all 0.3s ease;
 }
-form button:hover{
-    background: #ef4444;
+
+/* Make hover selector equally specific */
+.form-box-login button[type="submit"].register-button:hover,
+.form-box-register button[type="submit"].register-button:hover,
+button.register-button:hover {
+    background: #da0e0e !important;
     color: #fff;
 }
 

@@ -15,7 +15,7 @@ import Navbarafter from './Components/Navbarafter';
 import AboutUsAfter from './Pages/Aboutusafter/Aboutusafter';
 import Dashboard from './Pages/Dashboard/Dashboard';
 import Blogafter from './Pages/Blogafter/Blogafter';
-import RecipeSuggestion from './Pages/RecipeSuggestion/RecipeSuggestion';
+import RecipeSuggestion2 from './Pages/RecipeSuggestion/RecipeSuggestion2';
 function App() {
   return (
     <AuthProvider>
@@ -33,7 +33,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/blogafter" element={<Blogafter />} />
             <Route path="/navbarafter" element={<Navbarafter />} />
-            <Route path="/recipe" element={<RecipeSuggestion />} />
+            <Route path="/recipe" element={<RecipeSuggestion2 />} />
           </Routes>
         </div>
       </Router>

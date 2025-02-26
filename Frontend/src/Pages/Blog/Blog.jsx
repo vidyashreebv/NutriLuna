@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./blog.css";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
+import blogVideo from "../../assets/blogpage.mp4";
 
 const Blog = () => {
   const [articles, setArticles] = useState([]);
@@ -12,6 +13,7 @@ const Blog = () => {
     { label: 'Blog', href: '/blog', active: true },
     { label: 'Login', href: '/login' }
   ];
+  
 
   useEffect(() => {
     const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
@@ -28,7 +30,7 @@ const Blog = () => {
       <div className="blog-hero-section">
         <div className="hero-video-wrapper">
           <video autoPlay loop muted className="hero-video">
-            <source src="./../Frontend/src/assets/video.mp4" type="video/mp4" />
+            <source src={blogVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

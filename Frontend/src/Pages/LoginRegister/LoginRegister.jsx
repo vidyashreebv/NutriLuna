@@ -94,7 +94,7 @@ const LoginRegister = () => {
               <input type="password" name="password" placeholder="Password" required onChange={handleChange} />
               <TbPasswordUser className="icon" />
             </div>
-            <button type="submit" disabled={isLoginDisabled}>
+            <button  className="register-button" type="submit" disabled={isLoginDisabled}>
               Login
             </button>
             <div className="new-register-link">
@@ -127,7 +127,7 @@ const LoginRegister = () => {
               <TbPasswordUser className="icon" />
             </div>
             {passwordMismatch && <p style={{ color: "white", fontSize: "12px", marginTop: "5px" }}>Passwords do not match</p>}
-            <button type="submit" disabled={isRegisterDisabled}>
+            <button className="register-button" type="submit" disabled={isRegisterDisabled}>
               Register
             </button>
             <div className="login-link">

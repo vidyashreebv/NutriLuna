@@ -18,15 +18,6 @@ body {
   margin: 0;
 }
 
-.indicator {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 5px;
-  z-index: 60;
-  background-color: #ecad29; /* Corrected variable usage */
-}
 
 .logo img {
   height: 60px;
@@ -316,35 +307,49 @@ button[type="submit"]:hover {
 }
 
 .blog-hero-section {
-  height: 60vh;
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("/path-to-your-hero-image.jpg") center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: white;
-  margin-top: 0;
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .blog-hero-content {
-  position: relative; /* Ensures content is above the video */
-  z-index: 1; /* Brings the content above the video */
-  color: white; /* Change text color for better visibility */
-  text-align: center; /* Center the text */
-  padding: 20px; /* Add some padding for better spacing */
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .blog-hero-content h1 {
   font-size: 3.5rem;
   margin-bottom: 1rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .blog-hero-content p {
   font-size: 1.5rem;
   opacity: 0.9;
+  color: #fff;
 }
 
 .blog-main-content {
@@ -476,30 +481,35 @@ button[type="submit"]:hover {
   font-size: 1.2rem;
 }
 
-.newsletter-button {
-  padding: 0 3rem;
-  font-size: 1.2rem;
-  min-width: 180px;
-  height: 60px; /* Matching height with input */
-  background: #ff69b4; /* Pink color for menstrual theme */
-  color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Override submit button styles for newsletter */
+.newsletter-form button[type="submit"].newsletter-button,
+.blog-newsletter button[type="submit"].newsletter-button {
+    background: white !important;
+    color: #dc2626 !important;
+    border: 3px solid #dc2626 !important; /* Made border thicker and forced with !important */
+    padding: 0 3rem;
+    font-size: 1.2rem;
+    min-width: 180px;
+    height: 60px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.newsletter-button:hover {
-  background: #ff1493; /* Deeper pink on hover */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.newsletter-form button[type="submit"].newsletter-button:hover,
+.blog-newsletter button[type="submit"].newsletter-button:hover {
+    background: #dc2626 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.2);
 }
 
 @media (max-width: 968px) {
