@@ -1,5 +1,3 @@
-
-
 /* Base container */
 .diet-tracker-container {
   background: url('../../assets/diettrackbag.jpg') no-repeat ;
@@ -40,16 +38,16 @@
   width: 100%;
   background: white;
   z-index: 998;
-  margin-top: 100px; /* Adjust the value as needed */
-  position: fixed;
+  top: 80px; /* Increased to accommodate navbar height */
   left: 0;
   right: 0;
-  z-index: 40;
-  top: calc(var(--navbar-height) + 100px); /* Adjust 10px as needed */
   background-color: #ffffff;
   box-shadow: 0 4px 6px -1px rgba(205, 0, 0, 0.1), 0 2px 4px -1px rgba(205, 0, 0, 0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0 1rem;
+  width: calc(100% - 2rem); /* Account for margins */
 }
 
 .header-visible {
@@ -73,6 +71,7 @@
   font-weight: 700;
   color: #e60000;
   margin-bottom: 1.5rem;
+  margin-top: 0.5rem; /* Add some space at the top */
   transition: color 0.2s ease;
   align-items: center;
 }
@@ -82,135 +81,197 @@
   margin-bottom: 1rem;
 }
 
+/* Form controls and buttons */
 .form-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input Fields */
+.food-input, .calories-input, .meal-type-select {
+  padding: 0.5rem 0.8rem;
+  border: 1.5px solid #e60000;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background-color: white;
 }
 
 .food-input {
+  min-width: 180px;
   flex: 1;
-  min-width: 200px;
-  padding: 0.625rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 0.25rem;
-  transition: all 0.3s ease;
-}
-
-.food-input:hover {
-  border-color: #ff6666;
-}
-
-.food-input:focus {
-  outline: none;
-  border-color: #e60000;
-  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
 }
 
 .calories-input {
-  width: 8rem;
-  padding: 0.625rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 0.25rem;
-  transition: all 0.3s ease;
-}
-
-.calories-input:hover {
-  border-color: #ff6666;
-}
-
-.calories-input:focus {
-  outline: none;
-  border-color: #e60000;
-  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
+  width: 100px;
 }
 
 .meal-type-select {
-  width: 8rem;
-  padding: 0.625rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 0.25rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  width: 120px;
+  padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23e60000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-size: 12px;
 }
 
-.meal-type-select:hover {
-  border-color: #ff6666;
-}
-
-.meal-type-select:focus {
-  outline: none;
-  border-color: #e60000;
-  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.2);
-}
-
+/* Add Meal Button */
 .add-meal-button {
-  padding: 0.625rem 1.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
   background-color: #e60000;
   color: white;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 100px;
+}
+
+/* Navigation Buttons */
+.nav-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  min-width: 100px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.15);
+}
+
+/* Meal Type Badges */
+.meal-type {
+  padding: 0.35rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-width: 1.5px;
+}
+
+/* Action Buttons */
+.edit-btn, .delete-btn {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+/* Hover Effects */
+.food-input:hover, .calories-input:hover, .meal-type-select:hover {
+  border-color: #cc0000;
+  background-color: #fff0f0;
 }
 
 .add-meal-button:hover {
   background-color: #cc0000;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(230, 0, 0, 0.25);
+  box-shadow: 0 3px 8px rgba(230, 0, 0, 0.2);
 }
 
-.add-meal-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.25);
+.nav-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(230, 0, 0, 0.2);
+}
+
+/* Active/Focus States */
+.food-input:focus, .calories-input:focus, .meal-type-select:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 2px rgba(230, 0, 0, 0.1);
+}
+
+.add-meal-button:active, .nav-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .form-controls {
+    gap: 0.6rem;
+  }
+
+  .food-input, .calories-input, .meal-type-select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .add-meal-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .nav-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    min-width: 90px;
+  }
 }
 
 /* Timeline navigation */
 .timeline-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Prevent wrapping */
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav-button {
-  padding: 0.5rem 1rem;
-  border: 1px solid transparent;
-  border-radius: 0.5rem;
-  background-color: #f5f5f5;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 15px;
+  background-color: #e60000;
+  color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-weight: 500;
+  font-size: 0.8rem;
+  min-width: 80px; /* Reduced minimum width */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(230, 0, 0, 0.15);
 }
 
 .nav-button:hover {
-  background-color: #ffe6e6;
-  border-color: #ffcccc;
+  background-color: #cc0000;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(230, 0, 0, 0.2);
 }
 
 .nav-button.active {
   background-color: #e60000;
   color: white;
-  box-shadow: 0 3px 6px rgba(230, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(230, 0, 0, 0.25);
+  position: relative;
 }
 
-.nav-button.active:hover {
-  background-color: #cc0000;
+/* Responsive styles */
+@media (max-width: 640px) {
+  .timeline-nav {
+    gap: 0.3rem; /* Even smaller gap on mobile */
+  }
+
+  .nav-button {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 70px;
+  }
 }
 
 /* Content container */
 .content-container {
-  width: 75%; /* Adjust width as needed */
-  max-width: 300px; /* Limit max width */
+  width: 75%;
+  max-width: 56rem;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  margin-top: 6.5rem;
-  max-width: 56rem;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-top: 180px; /* Match with scroll-margin-top */
 }
 
 /* Day sections */
@@ -222,7 +283,7 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  margin-top: 6.5rem;
+  scroll-margin-top: 180px; /* Adjusted to ensure proper scroll positioning */
   transition: all 0.3s ease;
   border: 1px solid #f3f3f3;
   overflow: hidden;
@@ -237,6 +298,9 @@
   height: 100%;
   background: rgba(255, 255, 255, 0.3); /* Adjust transparency */
   backdrop-filter: blur(10px);
+  text-decoration-color: wheat;
+  box-shadow: 0 6px 12px -1px rgba(199, 194, 194, 0.1), 0 4px 8px -1px rgba(230, 0, 0, 0.06);
+
   z-index: 0;
 }
 
@@ -246,8 +310,10 @@
 }
 
 .day-section:hover {
-  box-shadow: 0 6px 12px -1px rgba(199, 194, 194, 0.1), 0 4px 8px -1px rgba(230, 0, 0, 0.06);
-  border-color: #ffcccc;
+  box-shadow: 0 8px 16px -1px rgba(0, 0, 0, 0.15), 0 6px 10px -1px rgba(0, 0, 0, 0.08);
+  border-color: #000000; /* Keep border black on hover */
+  color: white;
+  text-decoration-color: wheat;
 }
 
 .day-header {
@@ -260,41 +326,56 @@
 .day-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0b0a0a;
+  color: #100e0e;
   transition: color 0.2s ease;
 }
 
 .day-section:hover .day-title {
-  color: #fff9f9;
+  color: #000000;
 }
 
 .day-date {
-  color: #070707;
+  color: #0e0e0e;
   transition: color 0.2s ease;
 }
 
 .day-section:hover .day-date {
-  color: #f5ebeb;
+  color: #000000;
 }
 
+/* Summary text styles */
+.summary-text {
+  color: #000000; /* Changed to black */
+  font-weight: 600; /* Made it slightly bolder */
+  font-size: 1.1rem; /* Slightly larger font size */
+  transition: color 0.2s ease;
+}
+
+.day-section:hover .summary-text {
+  color: #000000; /* Keep it black even on hover */
+}
+
+/* Day summary styles */
 .day-summary {
-  background-color: #fff5f5;
+  background-color: #ff3535e0;
   padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid #ffe6e6;
+  border: 2px solid #000000; /* Changed to black border and increased width */
   transition: all 0.3s ease;
+  text-decoration: black;
 }
 
 .day-section:hover .day-summary {
-  background-color: #ffe6e6;
+  background-color: #f71010;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-color: #ffcccc;
+  border-color: #000000; /* Keep border black on hover */
 }
 
-.summary-text {
-  color: #cc0000;
-  font-weight: 500;
+/* Make sure the text stays black even when the summary background changes */
+.day-summary .summary-text,
+.day-section:hover .day-summary .summary-text {
+  color: #000000;
 }
 
 /* Meal list */
@@ -304,19 +385,36 @@
   gap: 1rem;
 }
 
+/* Empty state message */
 .empty-state {
-  color: #777777;
+  color: #000000; /* Changed to black */
   text-align: center;
   padding: 1.5rem 0;
   font-style: italic;
-  border: 1px dashed #dddddd;
+  border: 1px dashed #090909;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
+  font-weight: 500;
 }
 
+/* Keep text black even on hover */
 .day-section:hover .empty-state {
-  border-color: #ffcccc;
-  color: #555555;
+  border-color: #e80303;
+  color: #000000;
+}
+
+/* For messages outside the dashed border */
+.no-meals-message {
+  color: #000000;
+  text-align: center;
+  padding: 1rem 0;
+  font-style: italic;
+  font-weight: 500;
+  margin: 1rem 0;
+}
+
+.day-section:hover .no-meals-message {
+  color: #000000;
 }
 
 /* Meal cards */
@@ -330,8 +428,8 @@
 
 .meal-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px -3px rgba(230, 0, 0, 0.15), 0 4px 6px -2px rgba(230, 0, 0, 0.1);
-  border-color: #ffcccc;
+  box-shadow: 0 8px 15px -3px rgba(5, 5, 5, 0.15), 0 4px 6px -2px rgba(5, 5, 5, 0.1);
+  border: 2px solid #000000; /* Changed to black border and increased width */
 }
 
 .meal-type {
@@ -433,127 +531,75 @@
 /* Scroll to top button */
 .scroll-top-button {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  padding: 0.75rem;
+  bottom: 2rem;
+  right: 2rem;
+  width: 35px;  /* Small fixed width */
+  height: 35px; /* Small fixed height */
+  padding: 0;
   background-color: rgba(230, 0, 0, 0.9);
   color: white;
   border: none;
-  border-radius: 9999px;
-  box-shadow: 0 10px 15px -3px rgba(230, 0, 0, 0.2), 0 4px 6px -2px rgba(230, 0, 0, 0.15);
-  transition: all 0.3s;
+  border-radius: 50%; /* Perfect circle */
+  box-shadow: 0 2px 5px rgba(230, 0, 0, 0.2);
+  transition: all 0.3s ease;
   cursor: pointer;
-  z-index: 30;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .scroll-top-button:hover {
   background-color: #cc0000;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 20px -3px rgba(230, 0, 0, 0.25), 0 5px 10px -2px rgba(230, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(230, 0, 0, 0.3);
 }
 
 .scroll-top-button:active {
-  transform: translateY(0) scale(0.95);
+  transform: translateY(0);
 }
 
 .scroll-top-button.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: scale(1);
 }
 
 .scroll-top-button.hidden {
   opacity: 0;
-  transform: translateY(2.5rem);
+  transform: scale(0);
   pointer-events: none;
 }
 
+/* Make the icon inside the button smaller */
+.scroll-top-button svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Responsive adjustments */
-@media (max-width: 640px) {
-  .diet-tracker-container {
-    padding: 1rem;
-  }
-  .day-section{
-    margin-top: 10.5rem;
-  }
-  .fixed-navbar {
-    padding: 0.5rem;
-  }
-  
+@media (max-width: 768px) {
   .fixed-header {
-    padding: 0.5rem;
-  }
-  
-  .day-section {
-    padding: 0.5rem;
-  }
-  
-  .day-summary {
+    top: 70px; /* Adjust for smaller navbar on mobile */
+    margin: 0 0.5rem;
+    width: calc(100% - 1rem);
     padding: 0.75rem;
-  }
-  
-  .day-title {
-    font-size: 1.125rem;
-  }
-  
-  .meal-card {
-    padding: 0.75rem;
-  }
-  
-  .meal-name {
-    font-size: 1rem;
-  }
-  
-  .calories-text {
-    font-size: 0.875rem;
-  }
-  
-  .meal-time {
-    font-size: 0.75rem;
-  }
-  
-  .meal-actions {
-    gap: 0.25rem;
-  }
-  .form-controls {
-    flex-direction: column;
-  }
-  
-  .food-input,
-  .calories-input,
-  .meal-type-select {
-    width: 100%;
-  }
-  
-  .add-meal-button {
-    width: 100%;
-  }
-  
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-}
-@media (max-width: 375px) {
-  .day-header {
-    gap: 0.25rem;
-  }
-}
-@media screen and (max-width: 768p) {
-  .day-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
   }
 
+  .content-container {
+    padding-top: 160px;
+    width: 90%;
   }
-  @media screen and (max-width: 480p) {
-    .day-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-      }
+
+  .day-section {
+    scroll-margin-top: 160px;
+  }
+
+  .tracker-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 }
+
 /* Flash animation for newly added meals */
 @keyframes flash-highlight {
   0% {
@@ -965,4 +1011,180 @@
   .meal-actions button:hover {
     opacity: 0.8;
   }
+  
+/* Navbar and Navigation Styles */
+.nav-items {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-item {
+  position: relative;
+  padding: 0.5rem 1rem;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 20px;
+}
+
+.nav-item:hover {
+  color: #e60000;
+  background-color: #fff0f0;
+}
+
+.nav-item.active {
+  color: #fff;
+  background-color: #e60000;
+}
+
+/* Dropdown Styles */
+.meal-type-select {
+  width: 8rem;
+  padding: 0.75rem;
+  border: 2px solid #e60000;
+  border-radius: 8px;
+  background-color: white;
+  color: #e60000;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23e60000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+
+.meal-type-select:hover {
+  border-color: #cc0000;
+  background-color: #fff0f0;
+}
+
+.meal-type-select:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.2);
+}
+
+/* Input Fields */
+.food-input, .calories-input {
+  padding: 0.75rem;
+  border: 2px solid #e60000;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.food-input:hover, .calories-input:hover {
+  border-color: #cc0000;
+  background-color: #fff0f0;
+}
+
+.food-input:focus, .calories-input:focus {
+  outline: none;
+  border-color: #e60000;
+  box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.2);
+}
+
+/* Add Meal Button */
+.add-meal-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #e60000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.add-meal-button:hover {
+  background-color: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 0, 0, 0.25);
+}
+
+.add-meal-button:active {
+  transform: translateY(0);
+}
+
+/* Fixed Header Enhancement */
+.fixed-header {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid rgba(230, 0, 0, 0.1);
+}
+
+/* Meal Type Badges */
+.meal-type {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+}
+
+.meal-type.breakfast {
+  background-color: #ffe6e6;
+  color: #e60000;
+  border: 2px solid #ffcccc;
+}
+
+.meal-type.lunch {
+  background-color: #fff0f0;
+  color: #cc0000;
+  border: 2px solid #ffcccc;
+}
+
+.meal-type.dinner {
+  background-color: #fff5f5;
+  color: #b30000;
+  border: 2px solid #ffcccc;
+}
+
+.meal-type.snack {
+  background-color: #fff8f8;
+  color: #990000;
+  border: 2px solid #ffcccc;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .nav-items {
+    gap: 1rem;
+  }
+
+  .nav-item {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .meal-type-select,
+  .food-input,
+  .calories-input {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .add-meal-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Add this to your root/body element or a CSS variable definition */
+:root {
+  --navbar-height: 80px;
+  --header-height: 200px;
+}
   

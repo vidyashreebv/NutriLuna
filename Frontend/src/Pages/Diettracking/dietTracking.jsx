@@ -4,6 +4,7 @@ import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import "./dietTracking.css";
 import axios from "axios";
 import Navbarafter from "../../Components/Navbarafter";
+import Footer from "../../Components/Footer";
 
 
 
@@ -59,6 +60,28 @@ const DietTracker = () => {
     if (diffTime <= 7) return `${diffTime} days ago`;
     return formatDate(date);
   };
+
+  // Add these functions to your DietTracker component
+const onEditMeal = (meal) => {
+  setIsEditing(meal.id);
+};
+
+const onDeleteMeal = async (mealId) => {
+  try {
+    const token = await auth.currentUser.getIdToken();
+    await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    // Refresh data after deletion
+    fetchMealsData();
+  } catch (err) {
+    setError(err.response?.data?.error || 'Failed to delete meal');
+    console.error('Error deleting meal:', err);
+  }
+};
 
 
     // Layout effects
@@ -502,6 +525,7 @@ const DietTracker = () => {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
   );
   
