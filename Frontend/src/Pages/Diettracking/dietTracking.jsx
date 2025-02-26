@@ -6,10 +6,6 @@ import axios from "axios";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 
-
-
-
-
 const DietTracker = () => {
   // State management
   const [meals, setMeals] = useState({ today: [], yesterday: [], earlier: [] });
@@ -34,13 +30,13 @@ const DietTracker = () => {
 
   const navItems = [
     { label: 'Home', href: '/landing' },
-        { label: 'About', href: '/aboutusafter' },
-        { label: 'Blog', href: '/blogafter' },
-        { label: 'Track Your Periods', href: '/period'},
-        { label: 'Diet Tracking', href: '/diet' , active: true },
-        { label: 'Recipe Suggestions', href: '/recipe' },
-        { label: 'Consultation', href: 'consultation' },
-        { label: 'My Profile', href: '/dashboard' }
+    { label: 'About', href: '/aboutusafter' },
+    { label: 'Blog', href: '/blogafter' },
+    { label: 'Track Your Periods', href: '/period'},
+    { label: 'Diet Tracking', href: '/diet' , active: true },
+    { label: 'Recipe Suggestions', href: '/recipe' },
+    { label: 'Consultation', href: 'consultation' },
+    { label: 'My Profile', href: '/dashboard' }
   ];
 
   // Format date helper
@@ -61,70 +57,47 @@ const DietTracker = () => {
     return formatDate(date);
   };
 
-  // Add these functions to your DietTracker component
-const onEditMeal = (meal) => {
-  setIsEditing(meal.id);
-};
-
-const onDeleteMeal = async (mealId) => {
-  try {
-    const token = await auth.currentUser.getIdToken();
-    await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+  // Layout effects
+  useEffect(() => {
+    const updateNavbarHeight = () => {
+      if (navbarRef.current) {
+        setNavbarHeight(navbarRef.current.offsetHeight);
       }
-    });
-    
-    // Refresh data after deletion
-    fetchMealsData();
-  } catch (err) {
-    setError(err.response?.data?.error || 'Failed to delete meal');
-    console.error('Error deleting meal:', err);
-  }
-};
+    };
 
+    const updateHeaderHeight = () => {
+      if (fixedHeaderRef.current) {
+        setHeaderHeight(fixedHeaderRef.current.offsetHeight);
+      }
+    };
 
-    // Layout effects
-    useEffect(() => {
-      const updateNavbarHeight = () => {
-        if (navbarRef.current) {
-          setNavbarHeight(navbarRef.current.offsetHeight);
-        }
-      };
-  
-      const updateHeaderHeight = () => {
-        if (fixedHeaderRef.current) {
-          setHeaderHeight(fixedHeaderRef.current.offsetHeight);
-        }
-      };
-  
-      const handleResize = () => {
-        updateNavbarHeight();
-        updateHeaderHeight();
-      };
-  
-      const handleScroll = () => {
-        const currentScrollY = window.scrollY;
-        setShowScrollTop(currentScrollY > 200);
-        setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 100);
-        setLastScrollY(currentScrollY);
-      };
-  
-      // Initial setup
+    const handleResize = () => {
       updateNavbarHeight();
-      setTimeout(updateHeaderHeight, 100);
-  
-      // Event listeners
-      window.addEventListener('resize', handleResize);
-      window.addEventListener("scroll", handleScroll, { passive: true });
-  
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener("scroll", handleScroll);
-      };
-    }, [lastScrollY]);
-   
-  
+      updateHeaderHeight();
+    };
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setShowScrollTop(currentScrollY > 200);
+      setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 100);
+      setLastScrollY(currentScrollY);
+    };
+
+    // Initial setup
+    updateNavbarHeight();
+    setTimeout(updateHeaderHeight, 100);
+
+    // Event listeners
+    window.addEventListener('resize', handleResize);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastScrollY]);
+ 
+
   // Fetch user and set state
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -141,16 +114,16 @@ const onDeleteMeal = async (mealId) => {
       setError(null);
       const userId = auth.currentUser?.uid; // Use the logged-in user's ID
     
-    if (!userId) {
-      throw new Error('User ID is not available');
-    }
+      if (!userId) {
+        throw new Error('User ID is not available');
+      }
 
       if (!user) {
         setError('Please sign in to view your meals');
         setIsLoading(false);
         return;
       }
-  
+
       const token = await auth.currentUser.getIdToken();
       const response = await axios.get(`http://localhost:5001/api/diettracker/${userId}`, {
         headers: {
@@ -158,14 +131,13 @@ const onDeleteMeal = async (mealId) => {
         }
       });
       
-  
       console.log("✅ Fetched meals data:", response.data);
-  
+
       // Make sure response.data contains the expected structure
       if (!response.data || typeof response.data !== "object") {
         throw new Error("Invalid response format");
       }
-  
+
       setMeals(response.data); // Directly set the fetched data
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch meals');
@@ -179,8 +151,6 @@ const onDeleteMeal = async (mealId) => {
   useEffect(() => {
     if (user) fetchMealsData();
   }, [user]);
-
-
 
   // Meal management functions
   const addMeal = async () => {
@@ -200,49 +170,57 @@ const onDeleteMeal = async (mealId) => {
         });
 
         console.log("Meal added successfully:", response.data);
-        fetchMealsData()  // ✅ Fetch updated logs after adding a meal
+        fetchMealsData();  // ✅ Fetch updated logs after adding a meal
 
     } catch (error) {
         console.error("Failed to add meal:", error);
     }
-};
+  };
 
+  // New function to handle edit button click
+  const onEditMeal = (meal) => {
+    setIsEditing(meal.id);
+  };
 
-  const deleteMeal = async (id, section) => {
+  // New function to handle delete button click
+  const onDeleteMeal = async (mealId) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      await axios.delete(`/api/meals/${id}`, {
+      
+      await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
-      setMeals(prevMeals => ({
-        ...prevMeals,
-        [section]: prevMeals[section].filter(meal => meal.id !== id)
-      }));
+      
+      console.log("Meal deleted successfully");
+      // Refresh meals data after deletion
+      fetchMealsData();
     } catch (err) {
+      console.error("Error deleting meal:", err);
       setError(err.response?.data?.error || 'Failed to delete meal');
     }
   };
 
+  // Updated editMeal function
   const editMeal = async (id, section, updatedData) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await axios.put(`/api/meals/${id}`, updatedData, {
+      
+      console.log("Updating meal:", id, "with data:", updatedData);
+      
+      await axios.put(`http://localhost:5001/api/diettracker/${id}`, updatedData, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      setMeals(prevMeals => ({
-        ...prevMeals,
-        [section]: prevMeals[section].map(meal =>
-          meal.id === id ? response.data : meal
-        )
-      }));
+      console.log("Meal updated successfully");
+      // Refresh meals data after update
+      fetchMealsData();
       setIsEditing(null);
     } catch (err) {
+      console.error("Error updating meal:", err);
       setError(err.response?.data?.error || 'Failed to update meal');
     }
   };
@@ -287,8 +265,8 @@ const onDeleteMeal = async (mealId) => {
 
   return (
     <div className="App">
-        <Navbarafter navItems={navItems} />
-  
+      <Navbarafter navItems={navItems} />
+
       <div className="diet-tracker-container">
         <div
           ref={fixedHeaderRef}
@@ -297,7 +275,7 @@ const onDeleteMeal = async (mealId) => {
         >
           <div className="header-content">
             <h1 className="tracker-title">Diet Tracker</h1>
-  
+
             <div className="meal-form">
               <div className="form-controls">
                 <input type="text" id="foodName" placeholder="Food Name" required className="food-input" />
@@ -325,7 +303,7 @@ const onDeleteMeal = async (mealId) => {
                 </button>
               </div>
             </div>
-  
+
             <div className="timeline-nav">
               <button
                 onClick={() => scrollToSection("today")}
@@ -348,7 +326,7 @@ const onDeleteMeal = async (mealId) => {
             </div>
           </div>
         </div>
-  
+
         <div className="content-container" style={{ paddingTop: `${contentPaddingTop}px` }}>
           {error && (
             <div className="error-message">
@@ -356,7 +334,7 @@ const onDeleteMeal = async (mealId) => {
               <button onClick={() => setError(null)}>Dismiss</button>
             </div>
           )}
-  
+
           {Object.keys(meals).length === 0 ? (
             <p>Loading meals...</p>
           ) : (
@@ -380,7 +358,7 @@ const onDeleteMeal = async (mealId) => {
                       : formatDate(new Date(new Date().setDate(new Date().getDate() - 7)))}
                   </span>
                 </div>
-  
+
                 <div className="day-summary">
                   <p className="summary-text">
                     Total Calories:{" "}
@@ -390,42 +368,40 @@ const onDeleteMeal = async (mealId) => {
                     | Meals: {Array.isArray(meals[section]) ? meals[section].length : 0}
                   </p>
                 </div>
-  
+
                 <div className="meal-list">
-  {meals[section] && Array.isArray(meals[section]) ? (
-    meals[section].length > 0 ? (
-      meals[section].map((meal) => (
-        <div key={meal.id} className="meal-card">
-          <div className="meal-header">
-            <span className="meal-type">{meal.mealType}</span>
-          </div>
-          <div className="meal-info">
-            <p className="meal-name">{meal.foodName}</p>
-            <span className="calories">{meal.calories} calories</span>
-          </div>
-          <div className="meal-actions">
-            <button className="edit-btn" onClick={() => onEditMeal(meal)}>✏️</button>
-            <button className="delete-btn" onClick={() => onDeleteMeal(meal.id)}>🗑️</button>
-          </div>
-        </div>
-      ))
-    ) : (
-      <p className="empty-state">
-        No meals logged for {section}.
-        {section === "today" && " Add your first meal above!"}
-      </p>
-    )
-  ) : (
-    <p>Adding your meal...</p>
-  )}
-</div>
-
-
+                  {meals[section] && Array.isArray(meals[section]) ? (
+                    meals[section].length > 0 ? (
+                      meals[section].map((meal) => (
+                        <div key={meal.id} className="meal-card">
+                          <div className="meal-header">
+                            <span className="meal-type">{meal.mealType}</span>
+                          </div>
+                          <div className="meal-info">
+                            <p className="meal-name">{meal.foodName}</p>
+                            <span className="calories">{meal.calories} calories</span>
+                          </div>
+                          <div className="meal-actions">
+                            <button className="edit-btn" onClick={() => onEditMeal(meal)}>✏️</button>
+                            <button className="delete-btn" onClick={() => onDeleteMeal(meal.id)}>🗑️</button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="empty-state">
+                        No meals logged for {section}.
+                        {section === "today" && " Add your first meal above!"}
+                      </p>
+                    )
+                  ) : (
+                    <p>Adding your meal...</p>
+                  )}
+                </div>
               </div>
             ))
           )}
         </div>
-  
+
         <button
           onClick={scrollToTop}
           className={`scroll-top-button ${showScrollTop ? "visible" : "hidden"}`}
@@ -435,7 +411,7 @@ const onDeleteMeal = async (mealId) => {
         >
           <ChevronUp size={isScrollButtonHovered ? 26 : 24} />
         </button>
-  
+
         {/* Edit Meal Modal */}
         {isEditing && (
           <div className="modal-overlay">
@@ -448,13 +424,13 @@ const onDeleteMeal = async (mealId) => {
                     meals.today.find((m) => m.id === isEditing) ||
                     meals.yesterday.find((m) => m.id === isEditing) ||
                     meals.earlier.find((m) => m.id === isEditing);
-  
+
                   const section = meals.today.find((m) => m.id === isEditing)
                     ? "today"
                     : meals.yesterday.find((m) => m.id === isEditing)
                     ? "yesterday"
                     : "earlier";
-  
+
                   const updatedData = {
                     foodName: e.target.foodName.value,
                     calories: Number(e.target.calories.value),
@@ -462,7 +438,7 @@ const onDeleteMeal = async (mealId) => {
                     time: meal.time,
                     date: meal.date,
                   };
-  
+
                   editMeal(isEditing, section, updatedData);
                 }}
               >
@@ -473,14 +449,14 @@ const onDeleteMeal = async (mealId) => {
                     name="foodName"
                     type="text"
                     defaultValue={
-                      meals.today.find((m) => m.id === isEditing) ||
+                      (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
-                      meals.earlier.find((m) => m.id === isEditing)
+                      meals.earlier.find((m) => m.id === isEditing))?.foodName || ""
                     }
                     required
                   />
                 </div>
-  
+
                 <div className="form-group">
                   <label htmlFor="edit-calories">Calories</label>
                   <input
@@ -488,23 +464,23 @@ const onDeleteMeal = async (mealId) => {
                     name="calories"
                     type="number"
                     defaultValue={
-                      meals.today.find((m) => m.id === isEditing) ||
+                      (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
-                      meals.earlier.find((m) => m.id === isEditing)
+                      meals.earlier.find((m) => m.id === isEditing))?.calories || ""
                     }
                     required
                   />
                 </div>
-  
+
                 <div className="form-group">
                   <label htmlFor="edit-mealType">Meal Type</label>
                   <select
                     id="edit-mealType"
                     name="mealType"
                     defaultValue={
-                      meals.today.find((m) => m.id === isEditing) ||
+                      (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
-                      meals.earlier.find((m) => m.id === isEditing)
+                      meals.earlier.find((m) => m.id === isEditing))?.mealType || "breakfast"
                     }
                   >
                     <option value="breakfast">Breakfast</option>
@@ -513,7 +489,7 @@ const onDeleteMeal = async (mealId) => {
                     <option value="snack">Snack</option>
                   </select>
                 </div>
-  
+
                 <button type="submit" className="edit-button">
                   Save Changes
                 </button>
@@ -528,7 +504,6 @@ const onDeleteMeal = async (mealId) => {
       <Footer/>
     </div>
   );
-  
 };
 
 export default DietTracker;
