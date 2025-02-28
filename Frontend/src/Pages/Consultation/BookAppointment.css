@@ -1,149 +1,254 @@
-/* BookAppointment.css */
-
-/* Root Variables */
 :root {
   --primary: #d02822;
+  --primary-dark: #b01e19;
+  --primary-light: #ff4b45;
+  --primary-transparent: rgba(208, 40, 34, 0.1);
   --secondary: #ff4b45;
   --text-dark: #2d3748;
   --text-light: #718096;
   --white: #ffffff;
   --background: #f7fafc;
   --success: #28a745;
+  --gray-100: #f7fafc;
+  --gray-200: #edf2f7;
+  --gray-300: #e2e8f0;
+  --gray-400: #cbd5e0;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
   --spacing-lg: 32px;
   --spacing-xl: 48px;
   --border-radius: 16px;
-  --navbar-height: 80px;
+  --box-shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --box-shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --navbar-height: 4px;
 }
 
-/* Base Layout */
-.book-appointment-wrapper {
-  min-height: 100vh;
-  background: var(--background);
-  padding-top: var(--navbar-height);
+
+
+.navdiv {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background: var(--white);
+  box-shadow: var(--box-shadow-sm);
 }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-}
-
-/* Hero Section Refinements */
-.hero-section {
+/* Enhanced Hero Section */
+.hero-sectionbook {
+  height: 100vh;
+  width: 100%;
+  margin-top: var(--navbar-height);
   height: calc(100vh - var(--navbar-height));
-  margin-top: calc(-1 * var(--navbar-height));
   position: relative;
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-carousel {
+  width: 100%;
+  height: 100%;
+  margin-top: 20px;
 }
 
 .carousel-slide {
+  padding-top: 20;
   height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.carousel-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.6)
+  );
+  z-index: 1;
 }
 
 .carousel-slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1);
+  transition: transform 7s ease;
 }
 
-.carousel-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.4),
-    rgba(0, 0, 0, 0.6)
-  );
-  z-index: 1;
+.carousel-slide.selected img {
+  transform: scale(1.1);
 }
 
-.carousel-content {
+.legend {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  width: 90%;
-  max-width: 1200px;
-  text-align: center;
+  bottom: 15%;
+  left: 0;
+  right: 0;
   padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--white);
+  z-index: 2;
+  opacity: 1 !important;
+  background: transparent !important;
 }
 
-.carousel-content h2 {
-  font-size: 4rem;
+.legend h2 {
+  font-size: 3.5rem;
   font-weight: 800;
-  color: var(--white);
   margin-bottom: var(--spacing-md);
-  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s var(--transition-normal) forwards;
 }
 
-.carousel-content p {
-  font-size: 1.8rem;
-  color: var(--white);
+.legend p {
+  font-size: 1.6rem;
   opacity: 0.9;
-  line-height: 1.5;
+  max-width: 700px;
+  margin: 0 auto;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1s var(--transition-normal) 0.2s forwards;
 }
 
 /* Main Booking Section */
 .booking-section {
   position: relative;
   background: var(--white);
-  padding: var(--spacing-xl) 0;
+  padding:20dp;
   margin-top: -60px;
   border-radius: 60px 60px 0 0;
   box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
-  padding: 0 var(--spacing-lg);
-}
-
 .section-title {
-  font-size: 3rem;
+  font-size: 2.8rem;
   color: var(--text-dark);
   margin-bottom: var(--spacing-sm);
   font-weight: 700;
+  text-align: center;
+  position: relative;
+  padding-bottom: var(--spacing-md);
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: var(--primary);
+  border-radius: 4px;
 }
 
 .section-subtitle {
   font-size: 1.2rem;
   color: var(--text-light);
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0 auto var(--spacing-xl) auto;
   line-height: 1.6;
+  text-align: center;
 }
 
-/* Doctor Selection */
+.booking-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+}
+
+/* Enhanced Doctor Selection */
+.selection-container {
+  background: var(--gray-100);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.selection-container h3 {
+  font-size: 1.6rem;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  font-weight: 600;
+}
+
 .doctors-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-md);
 }
 
 .doctor-card {
   background: var(--white);
   border-radius: var(--border-radius);
   padding: var(--spacing-lg);
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   border: 2px solid transparent;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--box-shadow-sm);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.doctor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  transform: translateY(-100%);
+  transition: transform var(--transition-normal);
 }
 
 .doctor-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  border-color: var(--primary);
+  box-shadow: var(--box-shadow-md);
+}
+
+.doctor-card:hover::before {
+  transform: translateY(0);
 }
 
 .doctor-card.selected {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--white), var(--gray-100));
+  position: relative;
+}
+
+.doctor-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
   color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .doctor-info {
@@ -157,14 +262,21 @@
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--white);
+  border: 3px solid var(--white);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-normal);
 }
 
-.doctor-details h3 {
+.doctor-card:hover .doctor-avatar {
+  transform: scale(1.05);
+  border-color: var(--primary-light);
+}
+
+.doctor-details h4 {
   font-size: 1.4rem;
   margin-bottom: var(--spacing-xs);
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text-dark);
 }
 
 .doctor-details p {
@@ -173,15 +285,16 @@
   margin-bottom: var(--spacing-xs);
 }
 
-/* Time Slots */
-.time-slots-container {
-  margin: var(--spacing-xl) 0;
-  padding: var(--spacing-md);
+.doctor-details p:last-child {
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: var(--spacing-xs);
 }
 
+/* Enhanced Time Slots */
 .time-slots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--spacing-md);
   max-width: 900px;
   margin: 0 auto;
@@ -193,27 +306,53 @@
   border-radius: var(--border-radius);
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid #edf2f7;
-  font-weight: 500;
+  transition: all var(--transition-normal);
+  border: 2px solid var(--gray-200);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.time-slot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-normal);
 }
 
 .time-slot:hover {
-  background: #f7fafc;
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-2px);
+  box-shadow: var(--box-shadow-sm);
 }
 
 .time-slot.selected {
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
+  box-shadow: var(--box-shadow-sm);
 }
 
-/* Booking Form */
+.time-slot.selected::before {
+  transform: scaleX(1);
+}
+
+/* Enhanced Booking Form */
 .form-container {
   max-width: 700px;
-  margin: var(--spacing-xl) auto;
-  padding: var(--spacing-lg);
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-md);
 }
 
 .booking-form {
@@ -223,21 +362,33 @@
 
 .form-group {
   margin-bottom: var(--spacing-md);
+  position: relative;
 }
 
 .form-control {
   width: 100%;
   padding: var(--spacing-md);
-  border: 2px solid #edf2f7;
+  border: 2px solid var(--gray-200);
   border-radius: var(--border-radius);
   font-size: 1.1rem;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
+  background: var(--white);
 }
 
 .form-control:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(208, 40, 34, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-transparent);
   outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--gray-400);
+  transition: all var(--transition-normal);
+}
+
+.form-control:focus::placeholder {
+  opacity: 0.6;
+  transform: translateY(-5px);
 }
 
 textarea.form-control {
@@ -246,7 +397,7 @@ textarea.form-control {
 }
 
 .submit-btn {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: var(--white);
   padding: var(--spacing-md) var(--spacing-lg);
   border: none;
@@ -254,17 +405,41 @@ textarea.form-control {
   font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-normal);
   width: 100%;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
 }
 
 .submit-btn:hover {
-  background: #b01e19;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(208, 40, 34, 0.3);
 }
 
-/* Success Message */
+.submit-btn:hover::before {
+  opacity: 1;
+}
+
+.submit-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Enhanced Success Message */
 .success-message {
   background: var(--success);
   color: var(--white);
@@ -272,11 +447,30 @@ textarea.form-control {
   border-radius: var(--border-radius);
   text-align: center;
   margin-top: var(--spacing-lg);
-  animation: fadeIn 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+  animation: slideInUp 0.5s ease-out forwards;
+  box-shadow: var(--box-shadow-md);
 }
 
-/* Animations */
-@keyframes fadeIn {
+.success-message::before {
+  content: '✓';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Enhanced Animations */
+@keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -287,14 +481,37 @@ textarea.form-control {
   }
 }
 
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
   .container {
     padding: 0 var(--spacing-md);
   }
   
-  .carousel-content h2 {
-    font-size: 3.5rem;
+  .legend h2 {
+    font-size: 3rem;
   }
 }
 
@@ -304,11 +521,11 @@ textarea.form-control {
     --spacing-xl: 32px;
   }
 
-  .carousel-content h2 {
+  .legend h2 {
     font-size: 2.5rem;
   }
 
-  .carousel-content p {
+  .legend p {
     font-size: 1.2rem;
   }
 
@@ -335,11 +552,71 @@ textarea.form-control {
     height: 80px;
   }
 
-  .doctor-details h3 {
+  .doctor-details h4 {
     font-size: 1.2rem;
   }
 
   .form-control {
     padding: var(--spacing-sm);
   }
+}
+/* Example: Improved Doctor Card Styling */
+.doctor-card {
+  /* ... existing styles ... */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doctor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.doctor-specialties {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.specialty-tag {
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+/* Example: Form Input Labels */
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+/* ... (Your existing CSS with modifications and additions) ... */
+
+/* Icon Styling */
+.star-icon, .clock-icon, .doctor-icon, .success-icon {
+  margin-right: 5px;
+  color: var(--primary);
+}
+
+.success-icon{
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+/* Error Message Styling */
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+/* Doctor Card Icon Margin */
+.doctor-details h4 .doctor-icon{
+  margin-left: 5px;
+}
+
+/* Time Slot Icon Margin */
+.time-slot .clock-icon{
+  margin-left: 5px;
 }
