@@ -35,7 +35,7 @@ const DietTracker = () => {
     { label: 'Track Your Periods', href: '/period'},
     { label: 'Diet Tracking', href: '/diet' , active: true },
     { label: 'Recipe Suggestions', href: '/recipe' },
-    { label: 'Consultation', href: 'consultation' },
+    { label: 'Consultation', href: '/consultation' },
     { label: 'My Profile', href: '/dashboard' }
   ];
 
