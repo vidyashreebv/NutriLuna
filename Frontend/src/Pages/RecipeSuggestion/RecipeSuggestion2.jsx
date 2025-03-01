@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import "./RecipieSuggestion2.css";
-import recipesVideo from'../../assets/recipes.mp4';
+import recipesVideo from '../../assets/recipes.mp4';
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from "../../Components/Footer";
 
@@ -421,15 +421,15 @@ const RecipeSuggestion2 = () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const filteredRecipes = wellnessRecipes.filter(recipe => {
-      const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPhase = selectedPhase === 'all' || recipe.phase === selectedPhase;
       return matchesSearch && matchesPhase;
     });
 
     const start = (currentPage - 1) * itemsPerPage;
     const paginatedRecipes = filteredRecipes.slice(start, start + itemsPerPage);
-    
+
     setPaginatedRecipes(paginatedRecipes);
     setPageCount(Math.ceil(filteredRecipes.length / itemsPerPage));
     setLoading(false);
@@ -439,19 +439,19 @@ const RecipeSuggestion2 = () => {
     displayRecipes();
   }, [currentPage, searchTerm, selectedPhase]);
   const navItems = [
-    { label: 'Home', href: '/landing'},
-        { label: 'About', href: '/aboutusafter' , active: true },
-        { label: 'Blog', href: '/blogafter' },
-        { label: 'Track Your Periods', href: '/period'},
-        { label: 'Diet Tracking', href: '/diet'},
-        { label: 'Recipe Suggestions', href: '/recipe' },
-        { label: 'Consultation', href: 'consultation' },
-        { label: 'My Profile', href: '/dashboard' }
+    { label: 'Home', href: '/landing' },
+    { label: 'About', href: '/aboutusafter' },
+    { label: 'Blog', href: '/blogafter' },
+    { label: 'Track Your Periods', href: '/period' },
+    { label: 'Diet Tracking', href: '/diet' },
+    { label: 'Recipe Suggestions', href: '/recipe', active: true },
+    { label: 'Consultation', href: 'consultation' },
+    { label: 'My Profile', href: '/dashboard' }
   ];
 
   return (
     <>
-        <Navbarafter navItems={navItems}/>
+      <Navbarafter navItems={navItems} />
       <section className="recipes-intro">
         <video className="hero-video" autoPlay loop muted>
           <source src={recipesVideo} type="video/mp4" />
@@ -465,8 +465,8 @@ const RecipeSuggestion2 = () => {
 
       <div className="main-search">
         <button onClick={displayRecipes}>Discover Recipes</button>
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder="Search recipes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -484,7 +484,7 @@ const RecipeSuggestion2 = () => {
 
       <div id="recipes-container" className="book-transition">
         {paginatedRecipes.map((recipe, index) => (
-          <div key={recipe.id} className="recipe" style={{animationDelay: `${index * 0.1}s`}}>
+          <div key={recipe.id} className="recipe" style={{ animationDelay: `${index * 0.1}s` }}>
             <img src={recipe.image} alt={recipe.title} />
             <div className="recipe-content">
               <span className="phase-tag">{recipe.phase} phase</span>
@@ -512,7 +512,7 @@ const RecipeSuggestion2 = () => {
           </button>
         ))}
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 };
