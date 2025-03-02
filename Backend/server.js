@@ -38,6 +38,10 @@ app.use("/api/diettracker", dietTrackerRoutes);
 const periodRoutes = require('./pages/periodtrack');
 app.use("/api/period", periodRoutes);
 
+// Add recipe suggestion routes
+const recipeSuggestionRoutes = require('./pages/recipesuggestion');
+app.use("/api/recipesuggestion", recipeSuggestionRoutes);
+
 // Add the dashboard routes
 const dashboardRoutes = require('./pages/dashboardRoutes');
 app.use("/api/dashboard", dashboardRoutes);

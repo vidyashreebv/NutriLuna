@@ -17,6 +17,7 @@ function PeriodTracker() {
     const [monthYearText, setMonthYearText] = useState("");
     const [allPeriods, setAllPeriods] = useState([]);
     const [periodData, setPeriodData] = useState(null);
+    const [editingPeriod, setEditingPeriod] = useState(null);
 
     const navItems = [
         { label: 'Home', href: '/landing' },
@@ -269,6 +270,44 @@ function PeriodTracker() {
         generateCalendar(currentMonth, currentYear);
     };
 
+    const handleEdit = (period) => {
+        setEditingPeriod(period);
+        setLastPeriod(period.startDate);
+        setCycleLength(period.cycleLength.toString());
+        setPeriodDuration(period.duration.toString());
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDelete = async (periodId) => {
+        if (!window.confirm('Are you sure you want to delete this period log?')) {
+            return;
+        }
+
+        try {
+            const token = await auth.currentUser.getIdToken(true);
+            const response = await fetch(`http://localhost:5001/api/period/deletePeriodData/${periodId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                // Remove the deleted period from the state
+                setAllPeriods(allPeriods.filter(p => p.id !== periodId));
+                setOutput("Period log deleted successfully");
+            } else {
+                const error = await response.json();
+                setOutput(error.message || "Error deleting period log");
+            }
+        } catch (error) {
+            console.error("Error deleting period data:", error);
+            setOutput("Error deleting period log");
+        }
+    };
+
+    // Update the savePeriodData function to handle both new and edited periods
     const savePeriodData = async () => {
         if (!lastPeriod || isNaN(cycleLength) || isNaN(periodDuration)) {
             setOutput("Please provide valid inputs for all fields.");
@@ -278,39 +317,49 @@ function PeriodTracker() {
         try {
             const token = await auth.currentUser.getIdToken(true);
 
-            // Create a new period entry
-            const newPeriod = {
+            const periodData = {
                 startDate: lastPeriod,
                 duration: parseInt(periodDuration),
                 cycleLength: parseInt(cycleLength)
             };
 
-            // Update periods history
-            const updatedPeriods = [...allPeriods, newPeriod];
+            const endpoint = editingPeriod 
+                ? `http://localhost:5001/api/period/updatePeriodData/${editingPeriod.id}`
+                : "http://localhost:5001/api/period/savePeriodData";
 
-            const response = await fetch("http://localhost:5001/api/period/savePeriodData", {
-                method: "POST",
+            const method = editingPeriod ? "PUT" : "POST";
+
+            const response = await fetch(endpoint, {
+                method: method,
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    lastPeriod,
-                    cycleLength,
-                    periodDuration,
-                    periodsHistory: updatedPeriods
-                }),
+                body: JSON.stringify(periodData),
             });
 
             const result = await response.json();
             if (response.ok) {
-                setAllPeriods(updatedPeriods);
+                if (editingPeriod) {
+                    // Update the edited period in the state
+                    setAllPeriods(allPeriods.map(p => 
+                        p.id === editingPeriod.id ? { ...periodData, id: p.id } : p
+                    ));
+                    setEditingPeriod(null);
+                } else {
+                    // Add the new period to the state
+                    setAllPeriods([...allPeriods, { ...periodData, id: result.periodId }]);
+                }
                 setOutput(result.message);
+                // Reset form
+                setLastPeriod("");
+                setCycleLength("");
+                setPeriodDuration("");
             } else {
                 setOutput(result.error);
             }
         } catch (error) {
-            console.error("❌ Error saving period data:", error);
+            console.error("Error saving period data:", error);
             setOutput("Error saving period data.");
         }
     };
@@ -410,8 +459,64 @@ function PeriodTracker() {
                     <input type="number" className="input-number" value={cycleLength} onChange={(e) => setCycleLength(e.target.value)} placeholder="e.g., 28" />
                     <label className="lab-period">Period Duration (in days):</label>
                     <input type="number" className="input-number" value={periodDuration} onChange={(e) => setPeriodDuration(e.target.value)} placeholder="e.g., 5" />
-                    <button className="btn-show-calendar" onClick={() => handleShowCalendar()}>Show Calendar</button>
+                    <button className="btn-show-calendar" onClick={() => handleShowCalendar()}>
+                        {editingPeriod ? 'Update Period' : 'Add Period'}
+                    </button>
+                    {editingPeriod && (
+                        <button 
+                            className="btn-show-calendar" 
+                            onClick={() => {
+                                setEditingPeriod(null);
+                                setLastPeriod("");
+                                setCycleLength("");
+                                setPeriodDuration("");
+                            }}
+                            style={{ marginTop: '1rem', backgroundColor: '#666' }}
+                        >
+                            Cancel Edit
+                        </button>
+                    )}
                     <div className="output-box">{output}</div>
+
+                    {/* Period Logs Section */}
+                    <div className="period-logs-section">
+                        <h2 className="period-logs-title">Period History</h2>
+                        {allPeriods.length > 0 ? (
+                            allPeriods
+                                .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+                                .map((period) => (
+                                    <div key={period.id} className="period-log-item">
+                                        <div className="period-log-info">
+                                            <div className="period-log-date">
+                                                {new Date(period.startDate).toLocaleDateString()}
+                                            </div>
+                                            <div className="period-log-details">
+                                                Duration: {period.duration} days | Cycle Length: {period.cycleLength} days
+                                            </div>
+                                        </div>
+                                        <div className="period-log-actions">
+                                            <button 
+                                                className="period-log-button edit-button"
+                                                onClick={() => handleEdit(period)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button 
+                                                className="period-log-button delete-button"
+                                                onClick={() => handleDelete(period.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                        ) : (
+                            <div className="no-logs-message">
+                                No period logs available. Start tracking your periods above.
+                            </div>
+                        )}
+                    </div>
+
                     <div className="calendar-section">
                         <div className="calendar-header">
                             <button onClick={() => changeMonth(-1)}>Previous</button>

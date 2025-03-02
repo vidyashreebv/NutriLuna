@@ -164,10 +164,10 @@ const BookAppointment = () => {
 
     return (
         <div className="book-appointment-wrapper">
-          <div className='navdiv'>
-          <Navbarafter navItems={navItems} />
-          </div>
-            
+            <div className='navdiv'>
+                <Navbarafter navItems={navItems} />
+            </div>
+
 
             <section className="hero-sectionbook">
                 <Carousel
