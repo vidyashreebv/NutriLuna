@@ -35,12 +35,16 @@ app.use('/api/personalDetails', personalDetailsRoutes);
 const dietTrackerRoutes = require("./pages/diettracker");
 app.use("/api/diettracker", dietTrackerRoutes);
 
-const periodRoutes = require('./pages/periodtrack');
+const periodRoutes = require('./pages/periodtrack');  
 app.use("/api/period", periodRoutes);
 
 // Add the dashboard routes
 const dashboardRoutes = require('./pages/dashboardRoutes');
 app.use("/api/dashboard", dashboardRoutes);
+
+// Add consultation routes
+const consultationRoutes = require('./pages/consultation');
+app.use("/api/consultation", consultationRoutes);
 
 // Default Route
 app.get('/', (req, res) => {

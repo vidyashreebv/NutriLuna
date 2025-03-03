@@ -90,6 +90,7 @@
   margin: 0 auto;
   padding: 80px 30px;
   background: #f8f9fa;
+  margin-bottom: -5rem;
 }
 
 .footer {
@@ -107,15 +108,19 @@
   gap: 40px;
   flex-wrap: wrap;
   margin-bottom: 60px;
+  background:none;
+  margin-top: -2rem;
+  cursor: pointer;
 }
 
-.hero-section {
+.hero-section-consultaion {
   position: relative;
   height: 85vh;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 7.5rem;
 }
 
 .video-overlay {
@@ -150,7 +155,7 @@
   z-index: 2;
   text-align: center;
   max-width: 800px;
-  padding: 0 20px;
+  padding: 0 20px
 }
 
 .hero-content h1 {
@@ -231,7 +236,11 @@
   justify-content: space-between;
   position: relative; /* Added for pseudo-element positioning */
   overflow: hidden; /* Added to contain the top gradient bar */
+   
+
 }
+
+
 
 .plan-card:hover {
   transform: translateY(-10px);
@@ -394,3 +403,4 @@
     font-size: 32px;
   }
 }
+
