@@ -42,18 +42,7 @@ function App() {
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/bookappointment" element={<BookAppointment />} />
           </Routes>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
+
         </div>
       </Router>
     </AuthProvider>
