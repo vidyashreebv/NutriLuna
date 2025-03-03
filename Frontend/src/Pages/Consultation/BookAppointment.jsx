@@ -4,7 +4,16 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
 import './BookAppointment.css';
-import { FaCheckCircle, FaClock, FaStar, FaUserMd } from 'react-icons/fa'; // Import icons
+import { FaCheckCircle, FaClock, FaStar, FaUserMd, FaExclamationCircle } from 'react-icons/fa'; // Import icons
+import img10 from '../../assets/10.jpg';
+import img11 from '../../assets/11.jpg';
+import img12 from '../../assets/12.jpg';
+import img13 from '../../assets/13.jpg';
+import img14 from '../../assets/14.jpg';
+import { getAuth } from 'firebase/auth';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -19,19 +28,29 @@ const navItems = [
 
 const carouselItems = [
     {
-        image: "https://img.freepik.com/free-photo/young-female-doctor-white-coat-with-stethoscope-standing-hospital-corridor_1303-21212.jpg",
+        image: img10,
         title: "Expert Medical Consultation",
         description: "Connect with our experienced healthcare professionals for personalized care"
     },
     {
-        image: "https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1423-1.jpg",
+        image: img11,
         title: "Personalized Care",
         description: "Get tailored health solutions designed specifically for your unique needs"
     },
     {
-        image: "https://img.freepik.com/free-photo/medical-workers-covid-19-vaccination-concept-confident-female-doctor-physician-hospital-pointing-fingers-left-showing-way-smiling-recommend-clinic-service-banner_1258-57360.jpg",
+        image: img12,
         title: "Quality Healthcare",
         description: "Experience world-class medical services from the comfort of your home"
+    },
+    {
+        image: img13,
+        title: "Professional Guidance",
+        description: "Receive expert advice from our team of qualified healthcare specialists"
+    },
+    {
+        image: img14,
+        title: "Comprehensive Care",
+        description: "Complete healthcare solutions for your well-being and peace of mind"
     }
 ];
 
@@ -78,9 +97,12 @@ const timeSlots = [
 ];
 
 const BookAppointment = () => {
+    const navigate = useNavigate();
+    const { subscription, loading, decrementConsultation, updateSubscription } = useSubscription();
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [bookingDisabled, setBookingDisabled] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -89,6 +111,7 @@ const BookAppointment = () => {
     });
     const [formErrors, setFormErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
 
     useEffect(() => {
@@ -108,6 +131,16 @@ const BookAppointment = () => {
             selectedTimeSlot !== null
         );
     }, [formData, selectedDoctor, selectedTimeSlot]);
+
+    useEffect(() => {
+        if (!loading) {
+            if (!subscription) {
+                navigate('/subscription');
+            } else if (subscription.consultationsLeft <= 0) {
+                setBookingDisabled(true);
+            }
+        }
+    }, [subscription, loading, navigate]);
 
     const handleDoctorSelect = (doctor) => {
         if (doctor.available) {
@@ -129,7 +162,21 @@ const BookAppointment = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.name.trim()) errors.name = 'Name is required';
+        if (!formData.email.trim()) errors.email = 'Email is required';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Invalid email format';
+        if (!formData.date) errors.date = 'Date is required';
+        if (!formData.reason.trim()) errors.reason = 'Reason is required';
+        if (!selectedDoctor) errors.doctor = 'Please select a doctor';
+        if (!selectedTimeSlot) errors.timeSlot = 'Please select a time slot';
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!isFormValid) {
@@ -142,47 +189,135 @@ const BookAppointment = () => {
             return;
         }
 
-        setShowSuccess(true);
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            
+            if (!user) {
+                toast.error('Please login to book a consultation');
+                return;
+            }
 
-        setTimeout(() => {
-            setShowSuccess(false);
-            setSelectedDoctor(null);
-            setSelectedTimeSlot(null);
-            setFormData({
-                name: '',
-                email: '',
-                date: '',
-                reason: ''
+            const token = await user.getIdToken();
+
+            // First check if user has an active subscription
+            const subscriptionResponse = await fetch('http://localhost:5001/api/consultation/my-subscription', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
-            setFormErrors({});
-        }, 3000);
+
+            const subscriptionData = await subscriptionResponse.json();
+
+            if (!subscriptionData.success || !subscriptionData.data) {
+                toast.error('Please purchase a subscription first');
+                return;
+            }
+
+            // Book the consultation
+            const response = await fetch('http://localhost:5001/api/consultation/book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    doctorId: selectedDoctor.id,
+                    doctorName: selectedDoctor.name,
+                    doctorSpecialization: selectedDoctor.specialization,
+                    doctorImage: selectedDoctor.image,
+                    appointmentDate: formData.date,
+                    timeSlot: selectedTimeSlot,
+                    patientName: formData.name,
+                    email: formData.email,
+                    reason: formData.reason
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setShowSuccess(true);
+                toast.success('Consultation booked successfully!');
+
+                // Reset form after successful booking
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    setSelectedDoctor(null);
+                    setSelectedTimeSlot(null);
+                    setFormData({
+                        name: '',
+                        email: '',
+                        date: '',
+                        reason: ''
+                    });
+                    setFormErrors({});
+                }, 3000);
+            } else {
+                toast.error(data.message || 'Failed to book consultation');
+            }
+        } catch (error) {
+            console.error('Error booking consultation:', error);
+            toast.error('Failed to book consultation. Please try again.');
+        }
     };
 
     const handleCarouselChange = (index) => {
         setActiveCarouselIndex(index);
     };
 
-    return (
-        <div className="book-appointment-wrapper">
-            <div className='navdiv'>
-                <Navbarafter navItems={navItems} />
+    if (loading) {
+        return (
+            <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>Loading booking information...</p>
             </div>
+        );
+    }
 
+    if (bookingDisabled) {
+        return (
+            <div className="consultation-limit-message">
+                <h3>Consultation Limit Reached</h3>
+                <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
+                <button 
+                    className="upgrade-btn"
+                    onClick={() => navigate('/subscription?upgrade=true')}
+                >
+                    Upgrade Plan
+                </button>
+            </div>
+        );
+    }
 
-            <section className="hero-sectionbook">
+    return (
+        <div className="book-appointment-wrapper book-appointment-section">
+          <div className='navdiv'>
+          <Navbarafter navItems={navItems} />
+          </div>
+
+            <div className="hero-sectionbooks book3">
                 <Carousel
                     showArrows={true}
                     showStatus={false}
                     showThumbs={false}
                     infiniteLoop={true}
                     autoPlay={true}
-                    interval={5000}
+                    interval={3000}
+                    transitionTime={500}
+                    swipeable={true}
+                    emulateTouch={true}
+                    dynamicHeight={false}
                     className="hero-carousel"
                     selectedItem={activeCarouselIndex}
                     onChange={handleCarouselChange}
+                    stopOnHover={true}
                 >
                     {carouselItems.map((item, index) => (
-                        <div className={`carousel-slide ${activeCarouselIndex === index ? 'selected' : ''}`} key={index}>
+                        <div 
+                            className={`carousel-slide ${activeCarouselIndex === index ? 'selected' : ''}`} 
+                            key={index}
+                        >
                             <img src={item.image} alt={item.title} />
                             <div className="legend">
                                 <h2>{item.title}</h2>
@@ -191,13 +326,19 @@ const BookAppointment = () => {
                         </div>
                     ))}
                 </Carousel>
-            </section>
+            </div>
 
             <section className="booking-section">
-                <div className="container">
-                    <h2 className="section-title">Book Your Consultation</h2>
-                    <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
-                    <div className="booking-container">
+                <div className="containe">
+
+                    <div>
+                        <h2 className="section-title">Book Your Consultation</h2>
+                        <p className="section-subtitle">
+                            Connect with our expert nutritionists and reproductive health specialists for personalized care
+                        </p>
+                    </div>
+
+                    <div className="booking-containers">
                         <div className="selection-container">
                             <h3>Choose Your Doctor</h3>
                             <div className="doctors-grid">
@@ -210,12 +351,18 @@ const BookAppointment = () => {
                                         <div className="doctor-info">
                                             <img src={doctor.image} alt={doctor.name} className="doctor-avatar" />
                                             <div className="doctor-details">
-                                                <h4>{doctor.name} <FaUserMd className="doctor-icon" /></h4>
+                                                <div className='doctor-headers' >
+                                                    <FaUserMd className="doctor-icon" />
+                                                    <h4>{doctor.name} </h4>
+                                                </div>
                                                 <p>{doctor.specialization}</p>
                                                 <p>{doctor.experience}</p>
-                                                <p className="doctor-rating">
-                                                    <FaStar className="star-icon" /> {doctor.rating}/5 rating
-                                                </p>
+                                                <div className='doctor-headers2' >
+                                                    <FaStar className="star-icon" />
+                                                    <p className="doctor-rating">
+                                                         {doctor.rating}/5 rating
+                                                    </p>
+                                                </div>
                                                 {!doctor.available && <p className="availability-badge">Currently Unavailable</p>}
                                             </div>
                                         </div>
@@ -238,82 +385,127 @@ const BookAppointment = () => {
                                         className={`time-slot ${selectedTimeSlot === slot.time ? 'selected' : ''} ${slot.popularity}`}
                                         onClick={() => handleTimeSlotSelect(slot)}
                                     >
-                                        {slot.time} <FaClock className="clock-icon" />
-                                        {slot.popularity === 'high' && <span className="popularity-indicator">Popular</span>}
+                                        <div className='time-s'>
+                                            <div>
+                                                <FaClock className="clock-icon" />
+                                            </div>
+                                            <div>
+                                                {slot.time} <br />
+                                                {slot.popularity === 'high' && <span className="popularity-indicator">Popular</span>}
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                             <p className="time-zone-note">All times are in your local time zone</p>
                         </div>
 
-                        <div className="form-container">
+                        <div className={`form-container ${bookingDisabled ? 'disabled' : ''}`}>
+                            {bookingDisabled && (
+                                <div className="consultation-limit-message">
+                                    <h3>Consultation Limit Reached</h3>
+                                    <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
+                                    <button 
+                                        className="upgrade-btn"
+                                        onClick={() => navigate('/subscription?upgrade=true')}
+                                    >
+                                        Upgrade Plan
+                                    </button>
+                                </div>
+                            )}
+
                             <h3>Complete Your Booking</h3>
                             <form className="booking-form" onSubmit={handleSubmit}>
                                 <div className="form-group">
-                                    <label htmlFor="name">Full Name</label>
+                                    <label className='form-l' htmlFor="name">Full Name</label>
                                     <input
                                         type="text"
                                         id="name"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.name ? 'error' : ''}`}
                                         value={formData.name}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.name && <p className="error-message">{formErrors.name}</p>}
+                                    {formErrors.name && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.name}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="email">Email Address</label>
+                                    <label className='form-l' htmlFor="email">Email Address</label>
                                     <input
                                         type="email"
                                         id="email"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.email ? 'error' : ''}`}
                                         value={formData.email}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.email && <p className="error-message">{formErrors.email}</p>}
+                                    {formErrors.email && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.email}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="date">Appointment Date</label>
+                                    <label className='form-l' htmlFor="date">Appointment Date</label>
                                     <input
                                         type="date"
                                         id="date"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.date ? 'error' : ''}`}
                                         value={formData.date}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.date && <p className="error-message">{formErrors.date}</p>}
+                                    {formErrors.date && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.date}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="reason">Reason for Consultation</label>
+                                    <label className='form-l' htmlFor="reason">Reason for Consultation</label>
                                     <textarea
                                         id="reason"
-                                        className="form-control"
+                                        className={`form-control ${formErrors.reason ? 'error' : ''}`}
                                         rows="4"
-                                        required
                                         value={formData.reason}
                                         onChange={handleInputChange}
                                     ></textarea>
-                                    {formErrors.reason && <p className="error-message">{formErrors.reason}</p>}
+                                    {formErrors.reason && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.reason}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <button type="submit" className="submit-btn" disabled={!isFormValid}>
-                                    Confirm Booking
+                                <button 
+                                    type="submit" 
+                                    className="submit-btn" 
+                                    disabled={isLoading || !isFormValid || bookingDisabled}
+                                >
+                                    {isLoading ? 'Booking...' : 'Confirm Booking'}
                                 </button>
                             </form>
 
                             {showSuccess && (
                                 <div className="success-message">
                                     <FaCheckCircle className="success-icon" />
-                                    Your consultation has been successfully scheduled! We'll send you a confirmation email shortly.
+                                    <div className="success-content">
+                                        <h4>Booking Successful!</h4>
+                                        <p>Your consultation has been successfully scheduled. Our team will review your request and contact you shortly through email with further details.</p>
+                                        <p>Remaining consultations: {subscription?.remainingConsultations}</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
                     </div>
+
                 </div>
             </section>
 
