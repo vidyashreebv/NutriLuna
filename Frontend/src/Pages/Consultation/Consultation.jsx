@@ -26,7 +26,7 @@ const plans = {
   basic: {
     type: "basic",
     amount: 999,
-    consultationCount: 7,
+    consultationCount: 3,
     validityDays: 30
   },
   standard: {
