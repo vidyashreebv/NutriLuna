@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { db } from '../../config/firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 import { useSubscription } from '../../context/SubscriptionContext';
 
@@ -60,9 +60,35 @@ const Header = () => (
 
 const ConsultationPage = () => {
   const navigate = useNavigate();
-  const { subscription, updateSubscription } = useSubscription();
+  const { subscription, updateSubscription, checkSubscriptionStatus } = useSubscription();
   const [isLoading, setIsLoading] = useState(false);
   const auth = getAuth();
+
+  useEffect(() => {
+    const checkAndRedirect = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const currentSub = userData.currentSubscription;
+
+          if (currentSub && 
+              new Date(currentSub.endDate) > new Date() && 
+              currentSub.remainingConsultations > 0 && 
+              currentSub.isActive) {
+            navigate('/bookappointment');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    };
+
+    checkAndRedirect();
+  }, [navigate, auth]);
 
   const getPackageDetails = (packageType) => {
     switch (packageType) {
