@@ -27,19 +27,43 @@ const plans = {
     type: "basic",
     amount: 999,
     consultationCount: 3,
-    validityDays: 30
+    validityDays: 30,
+    features: [
+      'Basic health consultation',
+      'Email support',
+      'Digital prescription',
+      'Valid for 30 days',
+      '3 Consultations'
+    ]
   },
   standard: {
     type: "standard",
     amount: 1799,
-    consultationCount: 17,
-    validityDays: 60
+    consultationCount: 5,
+    validityDays: 60,
+    features: [
+      'Detailed health consultation',
+      'Priority email & chat support',
+      'Digital prescription',
+      'Follow-up sessions',
+      'Valid for 60 days',
+      '5 Consultations'
+    ]
   },
   premium: {
     type: "premium",
     amount: 2799,
-    consultationCount: 27,
-    validityDays: 90
+    consultationCount: 7,
+    validityDays: 90,
+    features: [
+      'Comprehensive health consultation',
+      '24/7 priority support',
+      'Digital prescription',
+      'Unlimited follow-ups',
+      'Health tracking',
+      'Valid for 90 days',
+      '7 Consultations'
+    ]
   }
 };
 
@@ -97,14 +121,21 @@ const ConsultationPage = () => {
           name: 'Basic Package',
           consultations: 3,
           validityDays: 30,
-          price: 1499
+          price: 999
+        };
+      case 'standard':
+        return {
+          name: 'Standard Package',
+          consultations: 5,
+          validityDays: 60,
+          price: 1799
         };
       case 'premium':
         return {
           name: 'Premium Package',
-          consultations: 5,
-          validityDays: 60,
-          price: 2499
+          consultations: 7,
+          validityDays: 90,
+          price: 2799
         };
       default:
         return null;
@@ -121,18 +152,19 @@ const ConsultationPage = () => {
         return;
       }
 
-      const packageDetails = getPackageDetails(packageType);
+      const plan = plans[packageType];
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + packageDetails.validityDays);
+      endDate.setDate(endDate.getDate() + plan.validityDays);
 
       const subscriptionData = {
         packageType: packageType,
+        amount: plan.amount,
+        consultationCount: plan.consultationCount,
+        validityDays: plan.validityDays,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        remainingConsultations: packageDetails.consultations,
-        totalConsultations: packageDetails.consultations,
-        price: packageDetails.price,
+        remainingConsultations: plan.consultationCount,
         isActive: true,
         purchasedAt: serverTimestamp()
       };
@@ -148,9 +180,7 @@ const ConsultationPage = () => {
         }
       });
 
-      // Update subscription context
       await updateSubscription(subscriptionData);
-
       toast.success('Subscription activated successfully!');
       navigate('/bookappointment');
 
@@ -196,65 +226,25 @@ const ConsultationPage = () => {
         
         <div className="container-consultation">
           <section className="plans-section">
-            <div className="plan-card">
-              <h3>Basic Package</h3>
-              <div className="plan-price">₹999<span>/month</span></div>
-              <div className="consultation-count">7 Consultations</div>
-              <ul className="plan-features">
-                <li>Basic health consultation</li>
-                <li>Email support</li>
-                <li>Digital prescription</li>
-                <li>Valid for 30 days</li>
-              </ul>
-              <button 
-                onClick={() => handleSubscriptionClick('basic')} 
-                className={`plan-btn ${isLoading ? 'loading' : ''}`}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Processing...' : 'Subscribe Now'}
-              </button>
-            </div>
-            
-            <div className="plan-card">
-              <h3>Standard Package</h3>
-              <div className="plan-price">₹1799<span>/month</span></div>
-              <div className="consultation-count">17 Consultations</div>
-              <ul className="plan-features">
-                <li>Detailed health consultation</li>
-                <li>Priority email & chat support</li>
-                <li>Digital prescription</li>
-                <li>Follow-up sessions</li>
-                <li>Valid for 60 days</li>
-              </ul>
-              <button 
-                onClick={() => handleSubscriptionClick('standard')} 
-                className={`plan-btn ${isLoading ? 'loading' : ''}`}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Processing...' : 'Subscribe Now'}
-              </button>
-            </div>
-            
-            <div className="plan-card">
-              <h3>Premium Package</h3>
-              <div className="plan-price">₹2799<span>/month</span></div>
-              <div className="consultation-count">27 Consultations</div>
-              <ul className="plan-features">
-                <li>Comprehensive health consultation</li>
-                <li>24/7 priority support</li>
-                <li>Digital prescription</li>
-                <li>Unlimited follow-ups</li>
-                <li>Health tracking</li>
-                <li>Valid for 90 days</li>
-              </ul>
-              <button 
-                onClick={() => handleSubscriptionClick('premium')} 
-                className={`plan-btn ${isLoading ? 'loading' : ''}`}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Processing...' : 'Subscribe Now'}
-              </button>
-            </div>
+            {Object.entries(plans).map(([type, plan]) => (
+              <div className="plan-card" key={type}>
+                <h3>{type.charAt(0).toUpperCase() + type.slice(1)} Package</h3>
+                <div className="plan-price">₹{plan.amount}<span>/month</span></div>
+                <div className="consultation-count">{plan.consultationCount} Consultations</div>
+                <ul className="plan-features">
+                  {plan.features.map((feature, index) => (
+                    <li key={index}>{feature}</li>
+                  ))}
+                </ul>
+                <button 
+                  onClick={() => handleSubscriptionClick(type)} 
+                  className={`plan-btn ${isLoading ? 'loading' : ''}`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Processing...' : 'Subscribe Now'}
+                </button>
+              </div>
+            ))}
           </section>
         </div>
       </div>

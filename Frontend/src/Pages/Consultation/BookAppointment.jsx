@@ -527,8 +527,10 @@ const BookAppointment = () => {
 
                             {showSuccess && (
                                 <div className="success-message">
-                                    <p>{successMessage}</p>
-                                    <p className="remaining-consultations">
+                                    <p style={{ color: '#2e7d32', fontSize: '16px', fontWeight: '500' }}>
+                                        {successMessage}
+                                    </p>
+                                    <p className="remaining-consultations" style={{ color: '#1b5e20', fontSize: '14px', fontWeight: 'bold' }}>
                                         Remaining consultations: {remainingConsultations}
                                     </p>
                                 </div>
@@ -570,6 +572,20 @@ const BookAppointment = () => {
 
                 .upgrade-button:hover {
                     background-color: #45a049;
+                }
+
+                .success-message {
+                    background-color: #e8f5e9;
+                    border: 1px solid #a5d6a7;
+                    border-radius: 8px;
+                    padding: 15px 20px;
+                    margin: 20px 0;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                }
+
+                .success-message p {
+                    margin: 8px 0;
                 }
             `}</style>
         </div>

@@ -61,23 +61,46 @@ router.post('/subscribe', async (req, res) => {
         const decodedToken = await admin.auth().verifyIdToken(token);
         const userId = decodedToken.uid;
 
-        const { 
-            packageType,  // 'basic', 'standard', 'premium'
-            amount,
-            consultationCount,
-            validityDays
-        } = req.body;
+        const { packageType } = req.body;
+
+        // Define package details
+        const packageDetails = {
+            basic: {
+                consultationCount: 3,
+                validityDays: 30,
+                amount: 999
+            },
+            standard: {
+                consultationCount: 5,
+                validityDays: 60,
+                amount: 1799
+            },
+            premium: {
+                consultationCount: 7,
+                validityDays: 90,
+                amount: 2799
+            }
+        };
+
+        if (!packageDetails[packageType]) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid package type' 
+            });
+        }
+
+        const selectedPackage = packageDetails[packageType];
 
         // Create subscription data
         const subscriptionData = {
             packageType,
-            amount,
-            consultationCount,
-            remainingConsultations: consultationCount,
-            validityDays,
+            amount: selectedPackage.amount,
+            consultationCount: selectedPackage.consultationCount,
+            remainingConsultations: selectedPackage.consultationCount,
+            validityDays: selectedPackage.validityDays,
             startDate: admin.firestore.FieldValue.serverTimestamp(),
             endDate: admin.firestore.Timestamp.fromDate(
-                new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000)
+                new Date(Date.now() + selectedPackage.validityDays * 24 * 60 * 60 * 1000)
             ),
             status: 'active',
             createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -99,7 +122,7 @@ router.post('/subscribe', async (req, res) => {
                 currentSubscription: {
                     id: subscriptionRef.id,
                     packageType,
-                    remainingConsultations: consultationCount,
+                    remainingConsultations: selectedPackage.consultationCount,
                     endDate: subscriptionData.endDate,
                     updatedAt: admin.firestore.FieldValue.serverTimestamp()
                 }
