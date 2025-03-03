@@ -13,11 +13,11 @@
 }
 
 .dashboard-content-grid {
+  margin-top: 2rem;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   padding: 1.5rem;
-  margin-top: 96px;
 }
 
 .dashboard-left-content {
@@ -400,4 +400,47 @@ body {
 .footer {
   margin: 0;
   width: 100%;
+}
+
+/* Welcome Section Styles */
+.dashboard-welcome-section {
+  background-color: #fff1f2;
+  padding: 2rem;
+  margin-top: 153px; /* Updated to match navbar height */
+  border-bottom: 1px solid #fecdd3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0;
+  margin-bottom: 1rem; /* Add space between title and button */
+  display: block; /* Ensure it's on its own line */
+  text-transform: uppercase;
+}
+
+.edit-profile-button {
+  background-color: #dc2626;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+  display: inline-block; /* Make button inline-block */
+  margin-top: 0.5rem; /* Add some space above button */
+}
+
+.edit-profile-button:hover {
+  background-color: #b91c1c;
 }

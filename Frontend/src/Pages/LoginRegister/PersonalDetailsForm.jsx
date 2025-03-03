@@ -147,6 +147,19 @@ const PersonalDetailsForm = () => {
             </div>
 
             <div className="form-card">
+        <ActivityIcon className="form-icon" />
+        <div className="form-field">
+          <label>Weight (kg)</label>
+          <input
+            type="number"
+            value={formData.basicInfo.weight}
+            onChange={(e) => handleInputChange('basicInfo', 'weight', e.target.value)}
+            placeholder="Enter your weight"
+          />
+        </div>
+      </div>
+
+            <div className="form-card">
               <HeartPulseIcon className="form-icon" />
               <div className="form-field">
                 <label>Blood Type</label>

@@ -5,6 +5,7 @@ import Navbarafter from '../../Components/Navbarafter';
 import Footer from "../../Components/Footer";
 import { useAuth } from "../../context/AuthContext";
 import './Dashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -24,6 +25,12 @@ const Dashboard = () => {
     loading: true,
     error: null
   });
+  const [userData, setUserData] = useState({
+    username: '',
+    loading: true,
+    error: null
+  });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPeriodData = async () => {
@@ -125,15 +132,57 @@ const Dashboard = () => {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser) return;
+
+      try {
+        const token = await currentUser.getIdToken(true);
+        console.log('Attempting to fetch user data with token');
+        
+        const response = await fetch("http://localhost:5001/api/user/profile", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Server responded with ${response.status}: ${errorData}`);
+        }
+
+        const data = await response.json();
+        console.log("Received user data:", data);
+
+        setUserData({
+          username: data.username || currentUser.email,
+          loading: false,
+          error: null
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUserData({
+          username: currentUser.email,
+          loading: false,
+          error: error.message
+        });
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser]);
+
   const navItems = [
     { label: 'Home', href: '/landing' },
-        { label: 'About', href: '/aboutusafter' },
-        { label: 'Blog', href: '/blogafter' },
-        { label: 'Track Your Periods', href: '/period'},
-        { label: 'Diet Tracking', href: '/diet'},
-        { label: 'Recipe Suggestions', href: '/recipe' },
-        { label: 'Consultation', href: 'consultation' },
-        { label: 'My Profile', href: '/dashboard' , active: true  }
+    { label: 'About', href: '/aboutusafter' },
+    { label: 'Blog', href: '/blogafter' },
+    { label: 'Track Your Periods', href: '/period'},
+    { label: 'Diet Tracking', href: '/diet'},
+    { label: 'Recipe Suggestions', href: '/recipe' },
+    { label: 'Consultation', href: 'consultation' },
+    { label: 'My Profile', href: '/dashboard', active: true }
   ];
 
   const calculateCycleDays = () => {
@@ -230,7 +279,28 @@ const Dashboard = () => {
   return (
     <>
     <main className="dashboard-main">
-      <Navbarafter navItems={navItems} />
+      <Navbarafter 
+        navItems={navItems} 
+        username={userData.loading 
+          ? 'USER' 
+          : userData.username?.split('@')[0].toUpperCase()}
+      />
+      
+      <div className="dashboard-welcome-section">
+        <div className="welcome-content">
+          <h1 className="welcome-title">
+            Welcome, {userData.loading 
+              ? 'Loading...' 
+              : userData.username?.split('@')[0].toUpperCase()}!
+          </h1>
+          <button 
+            onClick={() => navigate('/personaldetails')} 
+            className="edit-profile-button"
+          >
+            Edit Personal Details
+          </button>
+        </div>
+      </div>
 
       <div className="dashboard-content-grid">
         <div className="dashboard-left-content">
