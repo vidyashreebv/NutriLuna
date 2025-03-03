@@ -90,7 +90,11 @@
   margin: 0 auto;
   padding: 80px 30px;
   background: #f8f9fa;
+<<<<<<< HEAD
   margin-bottom: -5rem;
+=======
+  margin-bottom: 0;
+>>>>>>> main
 }
 
 .footer {
@@ -195,9 +199,11 @@
 
 /* Main Container Styles */
 .consultation-main-container {
+  flex: 1;
   width: 100%;
   padding: 60px 0;
   background: #f8f9fa;
+  margin-bottom: 0;
 }
 
 .section-title {
@@ -338,6 +344,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: var(--background);
 }
 
 /* Responsive Design */
@@ -404,3 +411,53 @@
   }
 }
 
+<<<<<<< HEAD
+=======
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e74c3c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Subscription Status Message */
+.subscription-status-message {
+  background: #fff3f3;
+  color: #e74c3c;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #ffcdd2;
+}
+
+footer {
+  margin-top: auto;
+  width: 100%;
+  background: #000;
+  position: relative;
+}
+
+/* End of file */
+
+>>>>>>> main

@@ -12,7 +12,7 @@
         max-width: 600px;
         margin: 2rem auto;
         padding: 1.5rem;
-        background-color: var(--card-bg);
+        background-color: rgba(233, 89, 89, 0.095);
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         margin-top: 7rem;
@@ -110,6 +110,10 @@
         transition: all 0.2s ease;
         cursor: pointer;
         padding: 5px;
+      }
+
+      .output-box{
+        color: black;
       }
       
       .day-number {
@@ -347,4 +351,88 @@
 .period-content {
     margin-top: 0;
     padding-top: 100px;
+}
+
+.period-logs-section {
+    margin-top: 2rem;
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.period-logs-title {
+    color: var(--primary-red);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.period-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+}
+
+.period-log-item:hover {
+    background-color: #f8f8f8;
+}
+
+.period-log-info {
+    flex: 1;
+}
+
+.period-log-date {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.period-log-details {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.period-log-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.period-log-button {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-button {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #357abd;
+}
+
+.delete-button {
+    background-color: #dc2626;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #b91c1c;
+}
+
+.no-logs-message {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+    font-style: italic;
 }

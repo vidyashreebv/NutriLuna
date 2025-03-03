@@ -156,12 +156,14 @@ const DietTracker = () => {
   const addMeal = async () => {
     try {
         const token = await auth.currentUser.getIdToken();
-        console.log("🔑 Firebase Token:", token); // ✅ Debugging token
+        console.log("🔑 Firebase Token:", token);
         const response = await axios.post("http://localhost:5001/api/diettracker/add", {
             mealType: document.getElementById("mealType").value,
             foodName: document.getElementById("foodName").value,
             calories: document.getElementById("calories").value,
-            date: new Date().toISOString().split("T")[0] // Ensure date is formatted properly
+            quantity: document.getElementById("quantity").value,
+            unit: document.getElementById("unit").value,
+            date: new Date().toISOString().split("T")[0]
         }, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -170,7 +172,7 @@ const DietTracker = () => {
         });
 
         console.log("Meal added successfully:", response.data);
-        fetchMealsData();  // ✅ Fetch updated logs after adding a meal
+        fetchMealsData();
 
     } catch (error) {
         console.error("Failed to add meal:", error);
@@ -271,21 +273,33 @@ const DietTracker = () => {
         <div
           ref={fixedHeaderRef}
           className={`fixed-header ${isHeaderVisible ? "header-visible" : "header-hidden"}`}
-          style={{ top: `${navbarHeight}px` }}
         >
           <div className="header-content">
             <h1 className="tracker-title">Diet Tracker</h1>
 
             <div className="meal-form">
               <div className="form-controls">
-                <input type="text" id="foodName" placeholder="Food Name" required className="food-input" />
+                <div className="food-input-wrapper"><input type="text" id="foodName" placeholder="Food Name" required className="food-input" /></div>
+                <div className="metrics-wrapper">
                 <input type="number" id="calories" placeholder="Calories" required className="calories-input" />
+                <input type="number" id="quantity" placeholder="Quantity" required className="quantity-input" min="0.1" step="0.1" />
+                
+                <select id="unit" className="unit-select">
+                  <option value="serving">Serving</option>
+                  <option value="grams">Grams</option>
+                  <option value="ml">Milliliters</option>
+                  <option value="pieces">Pieces</option>
+                  <option value="cups">Cups</option>
+                  <option value="tbsp">Tablespoons</option>
+                  <option value="tsp">Teaspoons</option>
+                </select>
                 <select id="mealType" className="meal-type-select">
                   <option value="breakfast">Breakfast</option>
                   <option value="lunch">Lunch</option>
                   <option value="dinner">Dinner</option>
                   <option value="snack">Snack</option>
                 </select>
+                </div>
                 <button
                   onClick={addMeal}
                   className="add-meal-button"
@@ -327,7 +341,7 @@ const DietTracker = () => {
           </div>
         </div>
 
-        <div className="content-container" style={{ paddingTop: `${contentPaddingTop}px` }}>
+        <div className="content-container">
           {error && (
             <div className="error-message">
               {error}
@@ -379,6 +393,7 @@ const DietTracker = () => {
                           </div>
                           <div className="meal-info">
                             <p className="meal-name">{meal.foodName}</p>
+                            <p className="meal-quantity">{meal.quantity} {meal.unit}</p>
                             <span className="calories">{meal.calories} calories</span>
                           </div>
                           <div className="meal-actions">
@@ -413,118 +428,159 @@ const DietTracker = () => {
         </button>
 
         {/* Edit Meal Modal */}
- {/* Edit Meal Modal */}
-{isEditing && (
-  <div className="modal-overlay">
-    <div className="edit-modal-red">
-      <div className="modal-header-red">
-        <h3>Edit Meal</h3>
-        <button 
-          className="close-button-red" 
-          type="button"
-          onClick={() => setIsEditing(null)}
-          aria-label="Close"
-        >
-          &times;
-        </button>
-      </div>
-      
-      <form
-        className="edit-form-red"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const meal =
-            meals.today.find((m) => m.id === isEditing) ||
-            meals.yesterday.find((m) => m.id === isEditing) ||
-            meals.earlier.find((m) => m.id === isEditing);
+        {isEditing && (
+          <div className="modal-overlay">
+            <div className="edit-modal-red">
+              <div className="modal-header-red">
+                <h3>Edit Meal</h3>
+                <button 
+                  className="close-button-red" 
+                  type="button"
+                  onClick={() => setIsEditing(null)}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+              </div>
+              
+              <form
+                className="edit-form-red"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const meal =
+                    meals.today.find((m) => m.id === isEditing) ||
+                    meals.yesterday.find((m) => m.id === isEditing) ||
+                    meals.earlier.find((m) => m.id === isEditing);
 
-          const section = meals.today.find((m) => m.id === isEditing)
-            ? "today"
-            : meals.yesterday.find((m) => m.id === isEditing)
-            ? "yesterday"
-            : "earlier";
+                  const section = meals.today.find((m) => m.id === isEditing)
+                    ? "today"
+                    : meals.yesterday.find((m) => m.id === isEditing)
+                    ? "yesterday"
+                    : "earlier";
 
-          const updatedData = {
-            foodName: e.target.foodName.value,
-            calories: Number(e.target.calories.value),
-            mealType: e.target.mealType.value,
-            time: meal.time,
-            date: meal.date,
-          };
+                  const updatedData = {
+                    foodName: e.target.foodName.value,
+                    calories: Number(e.target.calories.value),
+                    quantity: Number(e.target.quantity.value),
+                    unit: e.target.unit.value,
+                    mealType: e.target.mealType.value,
+                    time: meal.time,
+                    date: meal.date,
+                  };
 
-          editMeal(isEditing, section, updatedData);
-        }}
-      >
-        <div className="form-group-red">
-          <label htmlFor="edit-foodName">Food Name</label>
-          <input
-            id="edit-foodName"
-            name="foodName"
-            type="text"
-            defaultValue={
-              (meals.today.find((m) => m.id === isEditing) ||
-              meals.yesterday.find((m) => m.id === isEditing) ||
-              meals.earlier.find((m) => m.id === isEditing))?.foodName || ""
-            }
-            className="modal-input-red"
-            required
-          />
-        </div>
+                  editMeal(isEditing, section, updatedData);
+                }}
+              >
+                <div className="form-group-red">
+                  <label htmlFor="edit-foodName">Food Name</label>
+                  <input
+                    id="edit-foodName"
+                    name="foodName"
+                    type="text"
+                    defaultValue={
+                      (meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing))?.foodName || ""
+                    }
+                    className="modal-input-red"
+                    required
+                  />
+                </div>
 
-        <div className="form-group-red">
-          <label htmlFor="edit-calories">Calories</label>
-          <input
-            id="edit-calories"
-            name="calories"
-            type="number"
-            defaultValue={
-              (meals.today.find((m) => m.id === isEditing) ||
-              meals.yesterday.find((m) => m.id === isEditing) ||
-              meals.earlier.find((m) => m.id === isEditing))?.calories || ""
-            }
-            className="modal-input-red"
-            required
-          />
-        </div>
+                <div className="form-group-red">
+                  <label htmlFor="edit-calories">Calories</label>
+                  <input
+                    id="edit-calories"
+                    name="calories"
+                    type="number"
+                    defaultValue={
+                      (meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing))?.calories || ""
+                    }
+                    className="modal-input-red"
+                    required
+                  />
+                </div>
 
-        <div className="form-group-red">
-          <label htmlFor="edit-mealType">Meal Type</label>
-          <select
-            id="edit-mealType"
-            name="mealType"
-            defaultValue={
-              (meals.today.find((m) => m.id === isEditing) ||
-              meals.yesterday.find((m) => m.id === isEditing) ||
-              meals.earlier.find((m) => m.id === isEditing))?.mealType || "breakfast"
-            }
-            className="modal-select-red"
-          >
-            <option value="breakfast">Breakfast</option>
-            <option value="lunch">Lunch</option>
-            <option value="dinner">Dinner</option>
-            <option value="snack">Snack</option>
-          </select>
-        </div>
+                <div className="form-group-red">
+                  <label htmlFor="edit-quantity">Quantity</label>
+                  <input
+                    id="edit-quantity"
+                    name="quantity"
+                    type="number"
+                    min="0.1"
+                    step="0.1"
+                    defaultValue={
+                      (meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing))?.quantity || "1"
+                    }
+                    className="modal-input-red"
+                    required
+                  />
+                </div>
 
-        <div className="modal-actions-red">
-          <button 
-            type="button" 
-            className="cancel-button-red" 
-            onClick={() => setIsEditing(null)}
-          >
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            className="save-button-red"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+                <div className="form-group-red">
+                  <label htmlFor="edit-unit">Unit</label>
+                  <select
+                    id="edit-unit"
+                    name="unit"
+                    defaultValue={
+                      (meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing))?.unit || "serving"
+                    }
+                    className="modal-select-red"
+                  >
+                    <option value="serving">Serving</option>
+                    <option value="grams">Grams</option>
+                    <option value="ml">Milliliters</option>
+                    <option value="pieces">Pieces</option>
+                    <option value="cups">Cups</option>
+                    <option value="tbsp">Tablespoons</option>
+                    <option value="tsp">Teaspoons</option>
+                  </select>
+                </div>
+
+                <div className="form-group-red">
+                  <label htmlFor="edit-mealType">Meal Type</label>
+                  <select
+                    id="edit-mealType"
+                    name="mealType"
+                    defaultValue={
+                      (meals.today.find((m) => m.id === isEditing) ||
+                      meals.yesterday.find((m) => m.id === isEditing) ||
+                      meals.earlier.find((m) => m.id === isEditing))?.mealType || "breakfast"
+                    }
+                    className="modal-select-red"
+                  >
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snack">Snack</option>
+                  </select>
+                </div>
+
+                <div className="modal-actions-red">
+                  <button 
+                    type="button" 
+                    className="cancel-button-red" 
+                    onClick={() => setIsEditing(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="save-button-red"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
       <Footer/>
     </div>

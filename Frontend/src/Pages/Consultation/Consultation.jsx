@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Consultation.css';
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
@@ -6,6 +6,10 @@ import consultVideo from '../../assets/consult.mp4';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
+<<<<<<< HEAD
+=======
+import { useSubscription } from '../../context/SubscriptionContext';
+>>>>>>> main
 
 const navItems = [
   { label: 'Home', href: '/landing' },
@@ -49,7 +53,7 @@ const Header = () => (
     <div className="hero-content">
       <h1>Expert Medical Consultation</h1>
       <p>Get personalized healthcare guidance from experienced professionals</p>
-      <a href="#plans" className="cta-button">View Our Plans</a>
+      <button onClick={() => document.querySelector('.plans-section').scrollIntoView({ behavior: 'smooth' })} className="cta-button">View Our Plans</button>
     </div>
   </div>
 );
@@ -57,12 +61,41 @@ const Header = () => (
 const ConsultationPage = () => {
   const navigate = useNavigate();
   const auth = getAuth();
+<<<<<<< HEAD
+=======
+  const { subscription, loading } = useSubscription();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!subscription) {
+        // No subscription, redirect to subscription page
+        navigate('/subscription');
+      } else if (subscription.consultationsLeft <= 0) {
+        // No consultations left, show upgrade option
+        navigate('/subscription?upgrade=true');
+      } else {
+        // Has active subscription with consultations, go to booking
+        navigate('/book-appointment');
+      }
+    }
+  }, [subscription, loading, navigate]);
+>>>>>>> main
 
   const handleSubscription = async (planType) => {
     try {
       const user = auth.currentUser;
       if (!user) {
         toast.error('Please login to purchase a subscription');
+<<<<<<< HEAD
+=======
+        navigate('/login');
+        return;
+      }
+
+      if (subscription) {
+        toast.warning('You already have an active subscription. Please use your remaining consultations or wait for the current subscription to expire.');
+        navigate('/book-appointment');
+>>>>>>> main
         return;
       }
 
@@ -87,7 +120,11 @@ const ConsultationPage = () => {
 
       if (data.success) {
         toast.success('Subscription purchased successfully!');
+<<<<<<< HEAD
         navigate('/bookappointment');
+=======
+        navigate('/book-appointment');
+>>>>>>> main
       } else {
         toast.error(data.message || 'Failed to purchase subscription');
       }
@@ -97,15 +134,44 @@ const ConsultationPage = () => {
     }
   };
 
+<<<<<<< HEAD
+=======
+  if (loading) {
+    return (
+      <div className="consultation-wrapper">
+        <Navbarafter navItems={navItems} />
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Checking subscription status...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+>>>>>>> main
   return (
     <div className="consultation-wrapper">
       <Navbarafter navItems={navItems} />
       <Header />
       
+<<<<<<< HEAD
       <div className="consultation-main-container" id="plans">
         <div className="section-title">
           <h2>Choose Your Consultation Package</h2>
           <p>Select the plan that best fits your healthcare needs</p>
+=======
+      <div className="consultation-main-container">
+        <div className="section-title">
+          <h2>Choose Your Consultation Package</h2>
+          <p>Select the plan that best fits your healthcare needs</p>
+          {subscription && subscription.consultationsLeft === 0 && (
+            <div className="subscription-status-message">
+              Your current subscription has no remaining consultations. 
+              Please purchase a new package to continue.
+            </div>
+          )}
+>>>>>>> main
         </div>
         
         <div className="container-consultation">

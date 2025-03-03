@@ -96,7 +96,7 @@ router.post("/add", verifyToken, async (req, res) => {
         const userId = req.user.uid;
         console.log("🟢 Adding meal for user:", userId);
 
-        const { mealType, foodName, calories } = req.body;
+        const { mealType, foodName, calories, quantity, unit } = req.body;
         
         // Get today's date as string in YYYY-MM-DD format
         const today = new Date();
@@ -106,6 +106,8 @@ router.post("/add", verifyToken, async (req, res) => {
             mealType,
             foodName,
             calories: calories.toString(), // Store as string to match existing format
+            quantity: quantity || 1, // Default to 1 if not provided
+            unit: unit || "serving", // Default to "serving" if not provided
             date: dateString,
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         };
@@ -178,12 +180,19 @@ router.get("/:userId", authenticateUser, async (req, res) => {
 // **Update a diet log**
 router.put("/:logId", authenticateUser, async (req, res) => {
   const { logId } = req.params;
-  const { mealType, foodName, calories, date } = req.body;
+  const { mealType, foodName, calories, date, quantity, unit } = req.body;
   const userId = req.user.uid;
 
   try {
     const dietLogRef = db.collection("users").doc(userId).collection("dietLogs").doc(logId);
-    await dietLogRef.update({ mealType, foodName, calories, date });
+    await dietLogRef.update({ 
+        mealType, 
+        foodName, 
+        calories, 
+        date,
+        quantity: quantity || 1,
+        unit: unit || "serving"
+    });
 
     res.status(200).json({ message: "Diet log updated successfully!" });
   } catch (error) {

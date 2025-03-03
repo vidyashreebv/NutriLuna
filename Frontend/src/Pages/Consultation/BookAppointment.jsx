@@ -4,7 +4,11 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
 import './BookAppointment.css';
+<<<<<<< HEAD
 import { FaCheckCircle, FaClock, FaStar, FaUserMd } from 'react-icons/fa'; // Import icons
+=======
+import { FaCheckCircle, FaClock, FaStar, FaUserMd, FaExclamationCircle } from 'react-icons/fa'; // Import icons
+>>>>>>> main
 import img10 from '../../assets/10.jpg';
 import img11 from '../../assets/11.jpg';
 import img12 from '../../assets/12.jpg';
@@ -12,6 +16,11 @@ import img13 from '../../assets/13.jpg';
 import img14 from '../../assets/14.jpg';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
+<<<<<<< HEAD
+=======
+import { useNavigate } from 'react-router-dom';
+import { useSubscription } from '../../context/SubscriptionContext';
+>>>>>>> main
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -95,9 +104,12 @@ const timeSlots = [
 ];
 
 const BookAppointment = () => {
+    const navigate = useNavigate();
+    const { subscription, loading, decrementConsultation, updateSubscription } = useSubscription();
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [bookingDisabled, setBookingDisabled] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -106,6 +118,7 @@ const BookAppointment = () => {
     });
     const [formErrors, setFormErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
 
     useEffect(() => {
@@ -125,6 +138,16 @@ const BookAppointment = () => {
             selectedTimeSlot !== null
         );
     }, [formData, selectedDoctor, selectedTimeSlot]);
+
+    useEffect(() => {
+        if (!loading) {
+            if (!subscription) {
+                navigate('/subscription');
+            } else if (subscription.consultationsLeft <= 0) {
+                setBookingDisabled(true);
+            }
+        }
+    }, [subscription, loading, navigate]);
 
     const handleDoctorSelect = (doctor) => {
         if (doctor.available) {
@@ -146,6 +169,23 @@ const BookAppointment = () => {
         }));
     };
 
+<<<<<<< HEAD
+=======
+    const validateForm = () => {
+        const errors = {};
+        if (!formData.name.trim()) errors.name = 'Name is required';
+        if (!formData.email.trim()) errors.email = 'Email is required';
+        else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Invalid email format';
+        if (!formData.date) errors.date = 'Date is required';
+        if (!formData.reason.trim()) errors.reason = 'Reason is required';
+        if (!selectedDoctor) errors.doctor = 'Please select a doctor';
+        if (!selectedTimeSlot) errors.timeSlot = 'Please select a time slot';
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+>>>>>>> main
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -236,6 +276,30 @@ const BookAppointment = () => {
         setActiveCarouselIndex(index);
     };
 
+    if (loading) {
+        return (
+            <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>Loading booking information...</p>
+            </div>
+        );
+    }
+
+    if (bookingDisabled) {
+        return (
+            <div className="consultation-limit-message">
+                <h3>Consultation Limit Reached</h3>
+                <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
+                <button 
+                    className="upgrade-btn"
+                    onClick={() => navigate('/subscription?upgrade=true')}
+                >
+                    Upgrade Plan
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="book-appointment-wrapper book-appointment-section">
           <div className='navdiv'>
@@ -279,7 +343,13 @@ const BookAppointment = () => {
 
                     <div>
                         <h2 className="section-title">Book Your Consultation</h2>
+<<<<<<< HEAD
                         <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
+=======
+                        <p className="section-subtitle">
+                            Connect with our expert nutritionists and reproductive health specialists for personalized care
+                        </p>
+>>>>>>> main
                     </div>
 
                     <div className="booking-containers">
@@ -344,7 +414,20 @@ const BookAppointment = () => {
                             <p className="time-zone-note">All times are in your local time zone</p>
                         </div>
 
-                        <div className="form-container">
+                        <div className={`form-container ${bookingDisabled ? 'disabled' : ''}`}>
+                            {bookingDisabled && (
+                                <div className="consultation-limit-message">
+                                    <h3>Consultation Limit Reached</h3>
+                                    <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
+                                    <button 
+                                        className="upgrade-btn"
+                                        onClick={() => navigate('/subscription?upgrade=true')}
+                                    >
+                                        Upgrade Plan
+                                    </button>
+                                </div>
+                            )}
+
                             <h3>Complete Your Booking</h3>
                             <form className="booking-form" onSubmit={handleSubmit}>
                                 <div className="form-group">
@@ -352,12 +435,16 @@ const BookAppointment = () => {
                                     <input
                                         type="text"
                                         id="name"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.name ? 'error' : ''}`}
                                         value={formData.name}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.name && <p className="error-message">{formErrors.name}</p>}
+                                    {formErrors.name && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.name}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
@@ -365,12 +452,16 @@ const BookAppointment = () => {
                                     <input
                                         type="email"
                                         id="email"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.email ? 'error' : ''}`}
                                         value={formData.email}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.email && <p className="error-message">{formErrors.email}</p>}
+                                    {formErrors.email && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.email}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
@@ -378,36 +469,52 @@ const BookAppointment = () => {
                                     <input
                                         type="date"
                                         id="date"
-                                        className="form-control"
-                                        required
+                                        className={`form-control ${formErrors.date ? 'error' : ''}`}
                                         value={formData.date}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.date && <p className="error-message">{formErrors.date}</p>}
+                                    {formErrors.date && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.date}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="form-group">
                                     <label className='form-l' htmlFor="reason">Reason for Consultation</label>
                                     <textarea
                                         id="reason"
-                                        className="form-control"
+                                        className={`form-control ${formErrors.reason ? 'error' : ''}`}
                                         rows="4"
-                                        required
                                         value={formData.reason}
                                         onChange={handleInputChange}
                                     ></textarea>
-                                    {formErrors.reason && <p className="error-message">{formErrors.reason}</p>}
+                                    {formErrors.reason && (
+                                        <div className="error-message">
+                                            <FaExclamationCircle />
+                                            {formErrors.reason}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <button type="submit" className="submit-btn" disabled={!isFormValid}>
-                                    Confirm Booking
+                                <button 
+                                    type="submit" 
+                                    className="submit-btn" 
+                                    disabled={isLoading || !isFormValid || bookingDisabled}
+                                >
+                                    {isLoading ? 'Booking...' : 'Confirm Booking'}
                                 </button>
                             </form>
 
                             {showSuccess && (
                                 <div className="success-message">
                                     <FaCheckCircle className="success-icon" />
-                                    Your consultation has been successfully scheduled! We'll send you a confirmation email shortly.
+                                    <div className="success-content">
+                                        <h4>Booking Successful!</h4>
+                                        <p>Your consultation has been successfully scheduled. Our team will review your request and contact you shortly through email with further details.</p>
+                                        <p>Remaining consultations: {subscription?.remainingConsultations}</p>
+                                    </div>
                                 </div>
                             )}
                         </div>

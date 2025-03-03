@@ -513,32 +513,45 @@ textarea.form-control {
 
 /* Enhanced Success Message */
 .success-message {
-  background: var(--success);
-  color: var(--white);
-  padding: var(--spacing-lg);
-  border-radius: var(--border-radius);
-  text-align: center;
-  margin-top: var(--spacing-lg);
-  position: relative;
-  overflow: hidden;
-  animation: slideInUp 0.5s ease-out forwards;
-  box-shadow: var(--box-shadow-md);
+  display: flex;
+  align-items: flex-start;
+  background-color: #e8f5e9;
+  border: 1px solid #4caf50;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.success-message::before {
-  content: '✓';
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.success-icon {
+  color: #4caf50;
   font-size: 24px;
-  font-weight: bold;
+  margin-right: 15px;
+  margin-top: 3px;
+}
+
+.success-content {
+  flex: 1;
+}
+
+.success-content h4 {
+  color: #2e7d32;
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.success-content p {
+  color: #1b5e20;
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.success-content p:last-child {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #2e7d32;
 }
 
 /* Enhanced Animations */
@@ -777,19 +790,119 @@ textarea.form-control {
 /* Base Layout */
 .book-appointment-wrapper {
   min-height: 100vh;
+<<<<<<< HEAD
   background: var(--background);
   display: flex;
   flex-direction: column;
   align-items: center;
+=======
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+>>>>>>> main
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
+<<<<<<< HEAD
 .book-appointment-section {
   padding: 0;
   width: 100%;
   margin: 0;
+=======
+.booking-section {
+  flex: 1;
+  padding: 2rem;
+  margin-bottom: 0; /* Remove margin-bottom */
+  background: var(--white);
+}
+
+footer {
+  margin-top: auto;
+  width: 100%;
+  background: #000;
+  position: relative;
+}
+
+/* Add styles for disabled state */
+.form-container.disabled {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.form-container.disabled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  border-radius: 20px;
+}
+
+.consultation-limit-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 11;
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+.consultation-limit-message h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.consultation-limit-message p {
+  margin-bottom: 1.5rem;
+}
+
+.upgrade-btn {
+  background: var(--primary);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* Form validation styles */
+.form-control.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message i {
+  font-size: 1rem;
+>>>>>>> main
 }
 
 /* Container Improvements */
@@ -798,11 +911,21 @@ textarea.form-control {
   max-width: 100%;
   margin: 0;
   padding: 0;
+<<<<<<< HEAD
+=======
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px); /* Subtract footer height */
+>>>>>>> main
 }
 
 .booking-containers {
   width: 100%;
   padding: 0 20px;
+<<<<<<< HEAD
+=======
+  flex: 1;
+>>>>>>> main
 }
 
 /* Profile Hover Effects */
@@ -995,3 +1118,61 @@ textarea.form-control {
   }
 }
 
+<<<<<<< HEAD
+=======
+/* Update Toast Container Styles */
+.Toastify__toast-container {
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 20px !important;
+  padding: 0 !important;
+  width: auto !important;
+  max-width: 500px !important;
+  min-width: 300px !important;
+}
+
+.Toastify__toast {
+  margin: 10px !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  min-height: auto !important;
+}
+
+.Toastify__toast--success {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.Toastify__toast--error {
+  background: #dc3545 !important;
+  color: white !important;
+}
+
+.Toastify__toast--warning {
+  background: #ffc107 !important;
+  color: #333 !important;
+}
+
+.Toastify__toast--info {
+  background: #17a2b8 !important;
+  color: white !important;
+}
+
+.Toastify__close-button {
+  color: inherit !important;
+  opacity: 0.7 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+.Toastify__toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+>>>>>>> main

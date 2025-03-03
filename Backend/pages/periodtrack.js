@@ -148,4 +148,118 @@ router.post("/savePeriodData", verifyToken, async (req, res) => {
     }
 });
 
+// Update Period Data
+router.put("/updatePeriodData/:periodId", verifyToken, async (req, res) => {
+    const userId = req.user.uid;
+    const periodId = req.params.periodId;
+    const { startDate, cycleLength, duration } = req.body;
+
+    if (!startDate || !cycleLength || !duration) {
+        return res.status(400).json({ error: "All fields are required" });
+    }
+
+    try {
+        // Start a batch write
+        const batch = db.batch();
+
+        // Reference to the specific history document
+        const historyRef = db.collection("users").doc(userId)
+            .collection("periodData").doc("data")
+            .collection("history").doc(periodId);
+
+        // Reference to main document
+        const mainDocRef = db.collection("users").doc(userId)
+            .collection("periodData").doc("data");
+
+        // Update the history document
+        const historyData = {
+            startDate,
+            duration: parseInt(duration),
+            cycleLength: parseInt(cycleLength),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Update main document with the most recent period data
+        const periodData = {
+            lastPeriod: startDate,
+            cycleLength: parseInt(cycleLength),
+            periodDuration: parseInt(duration),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Add to batch
+        batch.update(historyRef, historyData);
+        batch.update(mainDocRef, periodData);
+
+        // Commit the batch
+        await batch.commit();
+
+        res.status(200).json({ 
+            message: "Period data updated successfully",
+            periodId: periodId
+        });
+    } catch (error) {
+        console.error("Error updating period data:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete Period Data
+router.delete("/deletePeriodData/:periodId", verifyToken, async (req, res) => {
+    const userId = req.user.uid;
+    const periodId = req.params.periodId;
+
+    try {
+        // Start a batch write
+        const batch = db.batch();
+
+        // Reference to the specific history document
+        const historyRef = db.collection("users").doc(userId)
+            .collection("periodData").doc("data")
+            .collection("history").doc(periodId);
+
+        // Get all period history to find the new latest period
+        const historySnapshot = await db.collection("users").doc(userId)
+            .collection("periodData").doc("data")
+            .collection("history")
+            .orderBy("startDate", "desc")
+            .get();
+
+        let newLatestPeriod = null;
+        historySnapshot.forEach(doc => {
+            if (doc.id !== periodId && !newLatestPeriod) {
+                newLatestPeriod = doc.data();
+            }
+        });
+
+        // Reference to main document
+        const mainDocRef = db.collection("users").doc(userId)
+            .collection("periodData").doc("data");
+
+        // Delete the history document
+        batch.delete(historyRef);
+
+        // Update main document with the new latest period data if available
+        if (newLatestPeriod) {
+            const mainData = {
+                lastPeriod: newLatestPeriod.startDate,
+                cycleLength: newLatestPeriod.cycleLength,
+                periodDuration: newLatestPeriod.duration,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            batch.update(mainDocRef, mainData);
+        }
+
+        // Commit the batch
+        await batch.commit();
+
+        res.status(200).json({ 
+            message: "Period data deleted successfully" 
+        });
+    } catch (error) {
+        console.error("Error deleting period data:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
