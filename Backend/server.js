@@ -5,7 +5,7 @@ const { admin, db } = require('./config/firebaseConfig'); // Import Firebase con
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enhanced CORS configuration
+// Middleware
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
   credentials: true
@@ -13,50 +13,34 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
-// Add error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server Error:', err);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
-
-// Add request logging
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Routes
+// Import routes
 const userRoutes = require('./pages/user');
-app.use('/api/user', userRoutes);
-
-const personalDetailsRoutes = require('./pages/personalDetails');
-app.use('/api/personalDetails', personalDetailsRoutes);
-
-const dietTrackerRoutes = require("./pages/diettracker");
-app.use("/api/diettracker", dietTrackerRoutes);
-
-const periodRoutes = require('./pages/periodtrack');
-app.use("/api/period", periodRoutes);
-
-// Add recipe suggestion routes
-const recipeSuggestionRoutes = require('./pages/recipesuggestion');
-app.use("/api/recipesuggestion", recipeSuggestionRoutes);
-
-// Add the dashboard routes
 const dashboardRoutes = require('./pages/dashboardRoutes');
-app.use("/api/dashboard", dashboardRoutes);
+const dietTrackerRoutes = require('./pages/diettracker');
 
-// Default Route
-app.get('/', (req, res) => {
-  res.send('Welcome to Nutri-Luna Backend API!');
+// Use routes
+app.use('/api/user', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/diettracker', dietTrackerRoutes);
+
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running' });
 });
 
-// 404 Error Handling
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route Not Found' });
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// Start Server
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

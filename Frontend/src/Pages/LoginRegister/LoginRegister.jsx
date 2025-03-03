@@ -6,8 +6,10 @@ import { doc, setDoc } from "firebase/firestore";
 import { PiUserFill, PiEnvelopeSimpleBold } from "react-icons/pi";
 import { TbPasswordUser } from "react-icons/tb";
 import "./LoginRegister.css";
+import { useAuth } from '../../context/AuthContext';
 
 const LoginRegister = () => {
+  const { currentUser } = useAuth();
   const [action, setAction] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -39,6 +41,13 @@ const LoginRegister = () => {
     setIsLoginDisabled(!(email && password));
   }, [formData]);
 
+  // Add this effect to redirect if user is already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   // 🔹 Register Function (With Firestore User Storage)
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -69,12 +78,10 @@ const LoginRegister = () => {
     const { email, password } = formData;
 
     try {
-      // Firebase Authentication
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful");
-      navigate("/dashboard"); // Navigate only after successful submission
-      
+      // The redirect will happen automatically through the useEffect above
     } catch (error) {
+      console.error('Login error:', error);
       alert(error.message);
     }
   };

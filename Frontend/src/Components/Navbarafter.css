@@ -91,3 +91,7 @@
   color: white;
   transform: translateY(-1px);
 }
+
+.nav-profile-text {
+  text-transform: uppercase;
+}
