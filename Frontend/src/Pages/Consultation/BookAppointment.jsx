@@ -5,6 +5,13 @@ import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
 import './BookAppointment.css';
 import { FaCheckCircle, FaClock, FaStar, FaUserMd } from 'react-icons/fa'; // Import icons
+import img10 from '../../assets/10.jpg';
+import img11 from '../../assets/11.jpg';
+import img12 from '../../assets/12.jpg';
+import img13 from '../../assets/13.jpg';
+import img14 from '../../assets/14.jpg';
+import { getAuth } from 'firebase/auth';
+import { toast } from 'react-toastify';
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -19,19 +26,29 @@ const navItems = [
 
 const carouselItems = [
     {
-        image: "https://img.freepik.com/free-photo/young-female-doctor-white-coat-with-stethoscope-standing-hospital-corridor_1303-21212.jpg",
+        image: img10,
         title: "Expert Medical Consultation",
         description: "Connect with our experienced healthcare professionals for personalized care"
     },
     {
-        image: "https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1423-1.jpg",
+        image: img11,
         title: "Personalized Care",
         description: "Get tailored health solutions designed specifically for your unique needs"
     },
     {
-        image: "https://img.freepik.com/free-photo/medical-workers-covid-19-vaccination-concept-confident-female-doctor-physician-hospital-pointing-fingers-left-showing-way-smiling-recommend-clinic-service-banner_1258-57360.jpg",
+        image: img12,
         title: "Quality Healthcare",
         description: "Experience world-class medical services from the comfort of your home"
+    },
+    {
+        image: img13,
+        title: "Professional Guidance",
+        description: "Receive expert advice from our team of qualified healthcare specialists"
+    },
+    {
+        image: img14,
+        title: "Comprehensive Care",
+        description: "Complete healthcare solutions for your well-being and peace of mind"
     }
 ];
 
@@ -129,7 +146,7 @@ const BookAppointment = () => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!isFormValid) {
@@ -142,20 +159,77 @@ const BookAppointment = () => {
             return;
         }
 
-        setShowSuccess(true);
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            
+            if (!user) {
+                toast.error('Please login to book a consultation');
+                return;
+            }
 
-        setTimeout(() => {
-            setShowSuccess(false);
-            setSelectedDoctor(null);
-            setSelectedTimeSlot(null);
-            setFormData({
-                name: '',
-                email: '',
-                date: '',
-                reason: ''
+            const token = await user.getIdToken();
+
+            // First check if user has an active subscription
+            const subscriptionResponse = await fetch('http://localhost:5001/api/consultation/my-subscription', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
-            setFormErrors({});
-        }, 3000);
+
+            const subscriptionData = await subscriptionResponse.json();
+
+            if (!subscriptionData.success || !subscriptionData.data) {
+                toast.error('Please purchase a subscription first');
+                return;
+            }
+
+            // Book the consultation
+            const response = await fetch('http://localhost:5001/api/consultation/book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    doctorId: selectedDoctor.id,
+                    doctorName: selectedDoctor.name,
+                    doctorSpecialization: selectedDoctor.specialization,
+                    doctorImage: selectedDoctor.image,
+                    appointmentDate: formData.date,
+                    timeSlot: selectedTimeSlot,
+                    patientName: formData.name,
+                    email: formData.email,
+                    reason: formData.reason
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setShowSuccess(true);
+                toast.success('Consultation booked successfully!');
+
+                // Reset form after successful booking
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    setSelectedDoctor(null);
+                    setSelectedTimeSlot(null);
+                    setFormData({
+                        name: '',
+                        email: '',
+                        date: '',
+                        reason: ''
+                    });
+                    setFormErrors({});
+                }, 3000);
+            } else {
+                toast.error(data.message || 'Failed to book consultation');
+            }
+        } catch (error) {
+            console.error('Error booking consultation:', error);
+            toast.error('Failed to book consultation. Please try again.');
+        }
     };
 
     const handleCarouselChange = (index) => {
@@ -163,26 +237,33 @@ const BookAppointment = () => {
     };
 
     return (
-        <div className="book-appointment-wrapper">
+        <div className="book-appointment-wrapper book-appointment-section">
           <div className='navdiv'>
           <Navbarafter navItems={navItems} />
           </div>
-            
 
-            <section className="hero-sectionbook">
+            <div className="hero-sectionbooks book3">
                 <Carousel
                     showArrows={true}
                     showStatus={false}
                     showThumbs={false}
                     infiniteLoop={true}
                     autoPlay={true}
-                    interval={5000}
+                    interval={3000}
+                    transitionTime={500}
+                    swipeable={true}
+                    emulateTouch={true}
+                    dynamicHeight={false}
                     className="hero-carousel"
                     selectedItem={activeCarouselIndex}
                     onChange={handleCarouselChange}
+                    stopOnHover={true}
                 >
                     {carouselItems.map((item, index) => (
-                        <div className={`carousel-slide ${activeCarouselIndex === index ? 'selected' : ''}`} key={index}>
+                        <div 
+                            className={`carousel-slide ${activeCarouselIndex === index ? 'selected' : ''}`} 
+                            key={index}
+                        >
                             <img src={item.image} alt={item.title} />
                             <div className="legend">
                                 <h2>{item.title}</h2>
@@ -191,13 +272,17 @@ const BookAppointment = () => {
                         </div>
                     ))}
                 </Carousel>
-            </section>
+            </div>
 
             <section className="booking-section">
-                <div className="container">
-                    <h2 className="section-title">Book Your Consultation</h2>
-                    <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
-                    <div className="booking-container">
+                <div className="containe">
+
+                    <div>
+                        <h2 className="section-title">Book Your Consultation</h2>
+                        <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
+                    </div>
+
+                    <div className="booking-containers">
                         <div className="selection-container">
                             <h3>Choose Your Doctor</h3>
                             <div className="doctors-grid">
@@ -210,12 +295,18 @@ const BookAppointment = () => {
                                         <div className="doctor-info">
                                             <img src={doctor.image} alt={doctor.name} className="doctor-avatar" />
                                             <div className="doctor-details">
-                                                <h4>{doctor.name} <FaUserMd className="doctor-icon" /></h4>
+                                                <div className='doctor-headers' >
+                                                    <FaUserMd className="doctor-icon" />
+                                                    <h4>{doctor.name} </h4>
+                                                </div>
                                                 <p>{doctor.specialization}</p>
                                                 <p>{doctor.experience}</p>
-                                                <p className="doctor-rating">
-                                                    <FaStar className="star-icon" /> {doctor.rating}/5 rating
-                                                </p>
+                                                <div className='doctor-headers2' >
+                                                    <FaStar className="star-icon" />
+                                                    <p className="doctor-rating">
+                                                         {doctor.rating}/5 rating
+                                                    </p>
+                                                </div>
                                                 {!doctor.available && <p className="availability-badge">Currently Unavailable</p>}
                                             </div>
                                         </div>
@@ -238,8 +329,15 @@ const BookAppointment = () => {
                                         className={`time-slot ${selectedTimeSlot === slot.time ? 'selected' : ''} ${slot.popularity}`}
                                         onClick={() => handleTimeSlotSelect(slot)}
                                     >
-                                        {slot.time} <FaClock className="clock-icon" />
-                                        {slot.popularity === 'high' && <span className="popularity-indicator">Popular</span>}
+                                        <div className='time-s'>
+                                            <div>
+                                                <FaClock className="clock-icon" />
+                                            </div>
+                                            <div>
+                                                {slot.time} <br />
+                                                {slot.popularity === 'high' && <span className="popularity-indicator">Popular</span>}
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -250,7 +348,7 @@ const BookAppointment = () => {
                             <h3>Complete Your Booking</h3>
                             <form className="booking-form" onSubmit={handleSubmit}>
                                 <div className="form-group">
-                                    <label htmlFor="name">Full Name</label>
+                                    <label className='form-l' htmlFor="name">Full Name</label>
                                     <input
                                         type="text"
                                         id="name"
@@ -263,7 +361,7 @@ const BookAppointment = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="email">Email Address</label>
+                                    <label className='form-l' htmlFor="email">Email Address</label>
                                     <input
                                         type="email"
                                         id="email"
@@ -276,7 +374,7 @@ const BookAppointment = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="date">Appointment Date</label>
+                                    <label className='form-l' htmlFor="date">Appointment Date</label>
                                     <input
                                         type="date"
                                         id="date"
@@ -289,7 +387,7 @@ const BookAppointment = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="reason">Reason for Consultation</label>
+                                    <label className='form-l' htmlFor="reason">Reason for Consultation</label>
                                     <textarea
                                         id="reason"
                                         className="form-control"
@@ -314,6 +412,7 @@ const BookAppointment = () => {
                             )}
                         </div>
                     </div>
+
                 </div>
             </section>
 

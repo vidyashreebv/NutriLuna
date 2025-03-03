@@ -17,12 +17,12 @@ section {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 1s ease-out;
-  clip-path: polygon(
+  /* clip-path: polygon(
     0 15%,
     100% 0,
     100% 100%,
     0 100%
-  ); /* Uniform cut for all sections */
+  ); Uniform cut for all sections */
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);

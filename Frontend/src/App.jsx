@@ -18,6 +18,8 @@ import Blogafter from './Pages/Blogafter/Blogafter';
 import RecipeSuggestion2 from './Pages/RecipeSuggestion/RecipeSuggestion2';
 import Consultation from './Pages/Consultation/Consultation';
 import BookAppointment from './Pages/Consultation/BookAppointment';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -40,6 +42,7 @@ function App() {
             <Route path="/consultation" element={<Consultation />} />
             <Route path="/bookappointment" element={<BookAppointment />} />
           </Routes>
+
         </div>
       </Router>
     </AuthProvider>
