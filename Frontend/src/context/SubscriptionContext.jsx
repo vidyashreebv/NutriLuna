@@ -1,10 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const SubscriptionContext = createContext();
 
-export const useSubscription = () => useContext(SubscriptionContext);
+export const useSubscription = () => {
+  const context = useContext(SubscriptionContext);
+  if (!context) {
+    throw new Error('useSubscription must be used within a SubscriptionProvider');
+  }
+  return context;
+};
 
 export const SubscriptionProvider = ({ children }) => {
   const [subscription, setSubscription] = useState(null);
@@ -18,7 +24,7 @@ export const SubscriptionProvider = ({ children }) => {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setSubscription(userData.subscription || null);
+          setSubscription(userData.currentSubscription || null);
         }
       } else {
         setSubscription(null);
@@ -31,54 +37,78 @@ export const SubscriptionProvider = ({ children }) => {
 
   const updateSubscription = async (planDetails) => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) return false;
 
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      subscription: {
-        ...planDetails,
-        startDate: new Date().toISOString(),
-        consultationsLeft: planDetails.totalConsultations,
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('http://localhost:5001/api/consultation/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          packageType: planDetails.planId,
+          amount: planDetails.price,
+          consultationCount: planDetails.totalConsultations,
+          validityDays: planDetails.duration === '1 month' ? 30 : 
+                       planDetails.duration === '2 months' ? 60 : 90
+        })
+      });
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message);
       }
-    });
 
-    setSubscription({
-      ...planDetails,
-      startDate: new Date().toISOString(),
-      consultationsLeft: planDetails.totalConsultations,
-    });
+      setSubscription(data.data);
+      return true;
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      return false;
+    }
   };
 
   const decrementConsultation = async () => {
-    if (!subscription || subscription.consultationsLeft <= 0) return false;
-
     const user = auth.currentUser;
-    if (!user) return false;
+    if (!user || !subscription || subscription.remainingConsultations <= 0) return false;
 
-    const userRef = doc(db, 'users', user.uid);
-    const newCount = subscription.consultationsLeft - 1;
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('http://localhost:5001/api/consultation/decrement', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-    await updateDoc(userRef, {
-      'subscription.consultationsLeft': newCount
-    });
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message);
+      }
 
-    setSubscription({
-      ...subscription,
-      consultationsLeft: newCount
-    });
+      setSubscription(prev => ({
+        ...prev,
+        remainingConsultations: prev.remainingConsultations - 1
+      }));
 
-    return true;
+      return true;
+    } catch (error) {
+      console.error('Error decrementing consultation:', error);
+      return false;
+    }
+  };
+
+  const value = {
+    subscription,
+    loading,
+    updateSubscription,
+    decrementConsultation
   };
 
   return (
-    <SubscriptionContext.Provider 
-      value={{ 
-        subscription, 
-        loading, 
-        updateSubscription,
-        decrementConsultation
-      }}
-    >
+    <SubscriptionContext.Provider value={value}>
       {children}
     </SubscriptionContext.Provider>
   );

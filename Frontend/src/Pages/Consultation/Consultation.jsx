@@ -6,10 +6,8 @@ import consultVideo from '../../assets/consult.mp4';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
-<<<<<<< HEAD
-=======
+
 import { useSubscription } from '../../context/SubscriptionContext';
->>>>>>> main
 
 const navItems = [
   { label: 'Home', href: '/landing' },
@@ -61,81 +59,50 @@ const Header = () => (
 const ConsultationPage = () => {
   const navigate = useNavigate();
   const auth = getAuth();
-<<<<<<< HEAD
-=======
-  const { subscription, loading } = useSubscription();
+  const { subscription, loading, updateSubscription } = useSubscription();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!loading) {
-      if (!subscription) {
-        // No subscription, redirect to subscription page
-        navigate('/subscription');
-      } else if (subscription.consultationsLeft <= 0) {
-        // No consultations left, show upgrade option
-        navigate('/subscription?upgrade=true');
-      } else {
-        // Has active subscription with consultations, go to booking
+      if (subscription && subscription.remainingConsultations > 0) {
         navigate('/book-appointment');
       }
     }
   }, [subscription, loading, navigate]);
->>>>>>> main
 
   const handleSubscription = async (planType) => {
     try {
       const user = auth.currentUser;
       if (!user) {
         toast.error('Please login to purchase a subscription');
-<<<<<<< HEAD
-=======
         navigate('/login');
         return;
       }
 
-      if (subscription) {
-        toast.warning('You already have an active subscription. Please use your remaining consultations or wait for the current subscription to expire.');
-        navigate('/book-appointment');
->>>>>>> main
-        return;
-      }
-
-      const token = await user.getIdToken();
+      setIsLoading(true);
       const plan = plans[planType];
-
-      const response = await fetch('http://localhost:5001/api/consultation/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          packageType: plan.type,
-          amount: plan.amount,
-          consultationCount: plan.consultationCount,
-          validityDays: plan.validityDays
-        })
+      const success = await updateSubscription({
+        planId: planType,
+        price: plan.amount,
+        totalConsultations: plan.consultationCount,
+        duration: plan.validityDays === 30 ? '1 month' : 
+                 plan.validityDays === 60 ? '2 months' : '3 months'
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (success) {
         toast.success('Subscription purchased successfully!');
-<<<<<<< HEAD
-        navigate('/bookappointment');
-=======
         navigate('/book-appointment');
->>>>>>> main
       } else {
-        toast.error(data.message || 'Failed to purchase subscription');
+        toast.error('Failed to purchase subscription');
       }
     } catch (error) {
       console.error('Error purchasing subscription:', error);
       toast.error('Failed to purchase subscription. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-<<<<<<< HEAD
-=======
   if (loading) {
     return (
       <div className="consultation-wrapper">
@@ -149,29 +116,23 @@ const ConsultationPage = () => {
     );
   }
 
->>>>>>> main
   return (
     <div className="consultation-wrapper">
       <Navbarafter navItems={navItems} />
       <Header />
       
-<<<<<<< HEAD
-      <div className="consultation-main-container" id="plans">
-        <div className="section-title">
-          <h2>Choose Your Consultation Package</h2>
-          <p>Select the plan that best fits your healthcare needs</p>
-=======
       <div className="consultation-main-container">
         <div className="section-title">
-          <h2>Choose Your Consultation Package</h2>
-          <p>Select the plan that best fits your healthcare needs</p>
-          {subscription && subscription.consultationsLeft === 0 && (
-            <div className="subscription-status-message">
-              Your current subscription has no remaining consultations. 
-              Please purchase a new package to continue.
-            </div>
-          )}
->>>>>>> main
+          <h2>
+            {subscription?.remainingConsultations <= 0 
+              ? 'Upgrade Your Plan' 
+              : 'Choose Your Consultation Package'}
+          </h2>
+          <p>
+            {subscription?.remainingConsultations <= 0 
+              ? 'You have used all your consultations. Choose a new plan to continue.' 
+              : 'Select the plan that best fits your healthcare needs'}
+          </p>
         </div>
         
         <div className="container-consultation">
@@ -186,7 +147,13 @@ const ConsultationPage = () => {
                 <li>Digital prescription</li>
                 <li>Valid for 30 days</li>
               </ul>
-              <button onClick={() => handleSubscription('basic')} className="plan-btn">Subscribe Now</button>
+              <button 
+                onClick={() => handleSubscription('basic')} 
+                className="plan-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
+              </button>
             </div>
             
             <div className="plan-card">
@@ -200,7 +167,13 @@ const ConsultationPage = () => {
                 <li>Follow-up sessions</li>
                 <li>Valid for 60 days</li>
               </ul>
-              <button onClick={() => handleSubscription('standard')} className="plan-btn">Subscribe Now</button>
+              <button 
+                onClick={() => handleSubscription('standard')} 
+                className="plan-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
+              </button>
             </div>
             
             <div className="plan-card">
@@ -215,7 +188,13 @@ const ConsultationPage = () => {
                 <li>Health tracking</li>
                 <li>Valid for 90 days</li>
               </ul>
-              <button onClick={() => handleSubscription('premium')} className="plan-btn">Subscribe Now</button>
+              <button 
+                onClick={() => handleSubscription('premium')} 
+                className="plan-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Processing...' : 'Subscribe Now'}
+              </button>
             </div>
           </section>
         </div>

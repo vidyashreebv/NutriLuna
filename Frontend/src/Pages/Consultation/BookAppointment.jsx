@@ -4,11 +4,10 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
 import './BookAppointment.css';
-<<<<<<< HEAD
-import { FaCheckCircle, FaClock, FaStar, FaUserMd } from 'react-icons/fa'; // Import icons
-=======
+
+
 import { FaCheckCircle, FaClock, FaStar, FaUserMd, FaExclamationCircle } from 'react-icons/fa'; // Import icons
->>>>>>> main
+
 import img10 from '../../assets/10.jpg';
 import img11 from '../../assets/11.jpg';
 import img12 from '../../assets/12.jpg';
@@ -16,11 +15,10 @@ import img13 from '../../assets/13.jpg';
 import img14 from '../../assets/14.jpg';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
-<<<<<<< HEAD
-=======
+
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../../context/SubscriptionContext';
->>>>>>> main
+
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -142,9 +140,13 @@ const BookAppointment = () => {
     useEffect(() => {
         if (!loading) {
             if (!subscription) {
-                navigate('/subscription');
-            } else if (subscription.consultationsLeft <= 0) {
-                setBookingDisabled(true);
+                navigate('/consultation');
+                return;
+            }
+            
+            if (subscription.remainingConsultations <= 0) {
+                navigate('/consultation');
+                return;
             }
         }
     }, [subscription, loading, navigate]);
@@ -169,8 +171,6 @@ const BookAppointment = () => {
         }));
     };
 
-<<<<<<< HEAD
-=======
     const validateForm = () => {
         const errors = {};
         if (!formData.name.trim()) errors.name = 'Name is required';
@@ -185,7 +185,6 @@ const BookAppointment = () => {
         return Object.keys(errors).length === 0;
     };
 
->>>>>>> main
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -285,19 +284,8 @@ const BookAppointment = () => {
         );
     }
 
-    if (bookingDisabled) {
-        return (
-            <div className="consultation-limit-message">
-                <h3>Consultation Limit Reached</h3>
-                <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
-                <button 
-                    className="upgrade-btn"
-                    onClick={() => navigate('/subscription?upgrade=true')}
-                >
-                    Upgrade Plan
-                </button>
-            </div>
-        );
+    if (!subscription || subscription.remainingConsultations <= 0) {
+        return null;
     }
 
     return (
@@ -343,13 +331,13 @@ const BookAppointment = () => {
 
                     <div>
                         <h2 className="section-title">Book Your Consultation</h2>
-<<<<<<< HEAD
+
                         <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
-=======
+
                         <p className="section-subtitle">
                             Connect with our expert nutritionists and reproductive health specialists for personalized care
                         </p>
->>>>>>> main
+
                     </div>
 
                     <div className="booking-containers">

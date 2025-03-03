@@ -27,16 +27,13 @@
   --navbar-height: 4px;
 }
 
-
-
-.navdiv {
+.container-consultation {
   width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  background: var(--white);
-  box-shadow: var(--box-shadow-sm);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 30px;
+  background: #f8f9fa;
+  margin-bottom: 0;
 }
 
 /* Enhanced Hero Section */
@@ -790,27 +787,14 @@ textarea.form-control {
 /* Base Layout */
 .book-appointment-wrapper {
   min-height: 100vh;
-<<<<<<< HEAD
-  background: var(--background);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-=======
   display: flex;
   flex-direction: column;
   background: var(--background);
->>>>>>> main
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
-<<<<<<< HEAD
-.book-appointment-section {
-  padding: 0;
-  width: 100%;
-  margin: 0;
-=======
 .booking-section {
   flex: 1;
   padding: 2rem;
@@ -902,7 +886,6 @@ footer {
 
 .error-message i {
   font-size: 1rem;
->>>>>>> main
 }
 
 /* Container Improvements */
@@ -911,21 +894,11 @@ footer {
   max-width: 100%;
   margin: 0;
   padding: 0;
-<<<<<<< HEAD
-=======
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 60px); /* Subtract footer height */
->>>>>>> main
 }
 
 .booking-containers {
   width: 100%;
   padding: 0 20px;
-<<<<<<< HEAD
-=======
-  flex: 1;
->>>>>>> main
 }
 
 /* Profile Hover Effects */
@@ -1118,8 +1091,44 @@ footer {
   }
 }
 
-<<<<<<< HEAD
-=======
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e74c3c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Subscription Status Message */
+.subscription-status-message {
+  background: #fff3f3;
+  color: #e74c3c;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #ffcdd2;
+}
+
 /* Update Toast Container Styles */
 .Toastify__toast-container {
   z-index: 9999 !important;
@@ -1174,5 +1183,3 @@ footer {
   padding: 0 !important;
   margin: 0 !important;
 }
-
->>>>>>> main

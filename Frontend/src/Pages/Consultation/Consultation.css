@@ -90,11 +90,7 @@
   margin: 0 auto;
   padding: 80px 30px;
   background: #f8f9fa;
-<<<<<<< HEAD
-  margin-bottom: -5rem;
-=======
   margin-bottom: 0;
->>>>>>> main
 }
 
 .footer {
@@ -142,10 +138,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.7),
-    rgba(0, 0, 0, 0.5)
-  );
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
 }
 
 .background-video {
@@ -159,7 +152,7 @@
   z-index: 2;
   text-align: center;
   max-width: 800px;
-  padding: 0 20px
+  padding: 0 20px;
 }
 
 .hero-content h1 {
@@ -190,6 +183,8 @@
   transition: all 0.3s ease;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  border: none;
+  cursor: pointer;
 }
 
 .cta-button:hover {
@@ -331,6 +326,8 @@
   font-weight: 600;
   transition: all 0.3s ease;
   margin-top: 20px;
+  border: none;
+  cursor: pointer;
 }
 
 .plan-btn:hover {
@@ -339,12 +336,25 @@
   box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
 }
 
+.plan-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.plan-btn:disabled:hover {
+  background: #cccccc;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Special class for consultation wrapper */
 .consultation-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--background);
+  background: #f8f9fa;
 }
 
 /* Responsive Design */
@@ -356,16 +366,16 @@
   .plan-card {
     flex: 0 1 calc(33.333% - 20px);
   }
+  
+  .hero-content h1 {
+    font-size: 48px;
+  }
 }
 
 @media (max-width: 992px) {
   .plan-card {
     flex: 0 1 calc(50% - 20px);
     max-width: 400px;
-  }
-  
-  .hero-content h1 {
-    font-size: 48px;
   }
 }
 
@@ -378,10 +388,6 @@
     flex: 0 1 100%;
     max-width: 400px;
     margin-bottom: 30px;
-  }
-  
-  .plans-section {
-    gap: 20px;
   }
   
   .hero-content h1 {
@@ -411,8 +417,6 @@
   }
 }
 
-<<<<<<< HEAD
-=======
 /* Loading Container */
 .loading-container {
   display: flex;
@@ -459,5 +463,3 @@ footer {
 }
 
 /* End of file */
-
->>>>>>> main
