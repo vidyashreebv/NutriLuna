@@ -50,7 +50,7 @@ router.get('/verify-token', async (req, res) => {
     }
 });
 
-// Purchase subscription
+// Purchase subscription - This will be stored inside user's document
 router.post('/subscribe', async (req, res) => {
     try {
         const token = req.headers.authorization?.split('Bearer ')[1];
@@ -62,7 +62,7 @@ router.post('/subscribe', async (req, res) => {
         const userId = decodedToken.uid;
 
         const { 
-            packageType,
+            packageType,  // 'basic', 'standard', 'premium'
             amount,
             consultationCount,
             validityDays
@@ -83,51 +83,46 @@ router.post('/subscribe', async (req, res) => {
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        // Start a batch write
-        const batch = db.batch();
-
-        // 1. Create subscription in main subscriptions collection
-        const mainSubscriptionRef = db.collection('subscriptions').doc();
-        batch.set(mainSubscriptionRef, {
-            ...subscriptionData,
-            userId,
-            subscriptionId: mainSubscriptionRef.id
-        });
-
-        // 2. Create subscription in user's subscriptions subcollection
-        const userRef = db.collection('users').doc(userId);
-        const userSubscriptionRef = userRef.collection('subscriptions').doc(mainSubscriptionRef.id);
-        batch.set(userSubscriptionRef, subscriptionData);
-
-        // 3. Update user document with current subscription
-        batch.update(userRef, {
-            currentSubscription: {
-                id: mainSubscriptionRef.id,
-                packageType,
-                remainingConsultations: consultationCount,
-                endDate: subscriptionData.endDate,
+        try {
+            // First, try to create/update the user document if it doesn't exist
+            const userRef = db.collection('users').doc(userId);
+            await userRef.set({
+                email: decodedToken.email,
                 updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            },
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
+            }, { merge: true }); // Using merge: true to not overwrite existing data
 
-        // Commit all changes
-        await batch.commit();
+            // Now create the subscriptions subcollection
+            const subscriptionRef = await userRef.collection('subscriptions').add(subscriptionData);
 
-        console.log('Subscription created successfully:', {
-            userId,
-            subscriptionId: mainSubscriptionRef.id,
-            packageType
-        });
+            // Update the user document with current subscription
+            await userRef.update({
+                currentSubscription: {
+                    id: subscriptionRef.id,
+                    packageType,
+                    remainingConsultations: consultationCount,
+                    endDate: subscriptionData.endDate,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                }
+            });
 
-        res.status(201).json({
-            success: true,
-            message: 'Subscription purchased successfully',
-            data: {
-                id: mainSubscriptionRef.id,
-                ...subscriptionData
-            }
-        });
+            console.log('Subscription created successfully:', {
+                userId,
+                subscriptionId: subscriptionRef.id,
+                packageType
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Subscription purchased successfully',
+                data: {
+                    id: subscriptionRef.id,
+                    ...subscriptionData
+                }
+            });
+        } catch (dbError) {
+            console.error('Database operation failed:', dbError);
+            throw new Error('Failed to store subscription data');
+        }
     } catch (error) {
         console.error('Error purchasing subscription:', error);
         res.status(500).json({
@@ -201,7 +196,7 @@ router.post('/book', async (req, res) => {
         const decodedToken = await admin.auth().verifyIdToken(token);
         const userId = decodedToken.uid;
 
-        // Get user document to check subscription
+        // Check user's subscription
         const userRef = db.collection('users').doc(userId);
         const userDoc = await userRef.get();
 
@@ -210,88 +205,54 @@ router.post('/book', async (req, res) => {
         }
 
         const userData = userDoc.data();
-        if (!userData.currentSubscription || userData.currentSubscription.remainingConsultations <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'No active subscription found or no consultations remaining'
+        const subscription = userData.currentSubscription;
+
+        if (!subscription || !subscription.isActive) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No active subscription found' 
             });
         }
 
-        const {
-            doctorId,
-            appointmentDate,
-            timeSlot,
-            patientName,
-            email,
-            reason
-        } = req.body;
-
-        // Check if the time slot is available
-        const consultationsRef = db.collection('consultations');
-        const existingBooking = await consultationsRef
-            .where('doctorId', '==', doctorId)
-            .where('appointmentDate', '==', appointmentDate)
-            .where('timeSlot', '==', timeSlot)
-            .where('status', 'in', ['pending', 'confirmed'])
-            .get();
-
-        if (!existingBooking.empty) {
-            return res.status(400).json({
-                success: false,
-                message: 'This time slot is already booked'
+        if (subscription.remainingConsultations <= 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No consultations remaining' 
             });
         }
 
-        // Create new consultation in the consultations collection
-        const consultationData = {
-            userId,
-            doctorId,
-            appointmentDate,
-            timeSlot,
-            patientName,
-            email,
-            reason,
-            status: 'pending',
-            packageType: userData.currentSubscription.packageType,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            // Add doctor details
-            doctorDetails: {
-                name: req.body.doctorName,
-                specialization: req.body.doctorSpecialization,
-                image: req.body.doctorImage
-            }
-        };
-
-        // Start a transaction to update both consultation and user's subscription
+        // Create consultation and update subscription in a transaction
         await db.runTransaction(async (transaction) => {
             // Create consultation
-            const consultationRef = consultationsRef.doc();
-            transaction.set(consultationRef, consultationData);
+            const consultationRef = db.collection('consultations').doc();
+            transaction.set(consultationRef, {
+                ...req.body,
+                userId,
+                status: 'pending',
+                createdAt: admin.firestore.FieldValue.serverTimestamp()
+            });
 
-            // Update user's remaining consultations
+            // Update user's subscription
+            const newRemainingConsultations = subscription.remainingConsultations - 1;
+            const isActive = newRemainingConsultations > 0;
+            
             transaction.update(userRef, {
-                'currentSubscription.remainingConsultations': admin.firestore.FieldValue.increment(-1)
+                'currentSubscription.remainingConsultations': newRemainingConsultations,
+                'currentSubscription.isActive': isActive
             });
-
-            // Also update the subscription document in the subcollection
-            const subscriptionRef = userRef.collection('subscriptions').doc(userData.currentSubscription.id);
-            transaction.update(subscriptionRef, {
-                remainingConsultations: admin.firestore.FieldValue.increment(-1)
-            });
-
-            return consultationRef;
         });
 
-        res.status(201).json({
+        res.status(200).json({
             success: true,
-            message: 'Consultation booked successfully',
-            data: consultationData
+            message: 'Consultation booked successfully'
         });
+
     } catch (error) {
         console.error('Error booking consultation:', error);
         res.status(500).json({
             success: false,
-            message: 'Error booking consultation'
+            message: 'Error booking consultation',
+            error: error.message
         });
     }
 });

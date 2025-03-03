@@ -6,6 +6,8 @@ import consultVideo from '../../assets/consult.mp4';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
+import { db } from '../../config/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 import { useSubscription } from '../../context/SubscriptionContext';
 
@@ -58,58 +60,89 @@ const Header = () => (
 
 const ConsultationPage = () => {
   const navigate = useNavigate();
-  const auth = getAuth();
-  const { subscription, loading, updateSubscription } = useSubscription();
+  const { subscription, updateSubscription } = useSubscription();
   const [isLoading, setIsLoading] = useState(false);
+  const auth = getAuth();
 
-  useEffect(() => {
-    if (!loading) {
-      if (subscription && subscription.remainingConsultations > 0) {
-        navigate('/book-appointment');
-      }
+  const getPackageDetails = (packageType) => {
+    switch (packageType) {
+      case 'basic':
+        return {
+          name: 'Basic Package',
+          consultations: 3,
+          validityDays: 30,
+          price: 1499
+        };
+      case 'premium':
+        return {
+          name: 'Premium Package',
+          consultations: 5,
+          validityDays: 60,
+          price: 2499
+        };
+      default:
+        return null;
     }
-  }, [subscription, loading, navigate]);
+  };
 
-  const handleSubscription = async (planType) => {
+  const handleSubscriptionClick = async (packageType) => {
+    setIsLoading(true);
     try {
       const user = auth.currentUser;
       if (!user) {
-        toast.error('Please login to purchase a subscription');
+        toast.error('Please login to subscribe');
         navigate('/login');
         return;
       }
 
-      setIsLoading(true);
-      const plan = plans[planType];
-      const success = await updateSubscription({
-        planId: planType,
-        price: plan.amount,
-        totalConsultations: plan.consultationCount,
-        duration: plan.validityDays === 30 ? '1 month' : 
-                 plan.validityDays === 60 ? '2 months' : '3 months'
+      const packageDetails = getPackageDetails(packageType);
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + packageDetails.validityDays);
+
+      const subscriptionData = {
+        packageType: packageType,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        remainingConsultations: packageDetails.consultations,
+        totalConsultations: packageDetails.consultations,
+        price: packageDetails.price,
+        isActive: true,
+        purchasedAt: serverTimestamp()
+      };
+
+      // Update user document with subscription
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        currentSubscription: subscriptionData,
+        subscriptionHistory: {
+          lastUpdated: serverTimestamp(),
+          package: packageType,
+          purchaseDate: serverTimestamp()
+        }
       });
 
-      if (success) {
-        toast.success('Subscription purchased successfully!');
-        navigate('/book-appointment');
-      } else {
-        toast.error('Failed to purchase subscription');
-      }
+      // Update subscription context
+      await updateSubscription(subscriptionData);
+
+      toast.success('Subscription activated successfully!');
+      navigate('/bookappointment');
+
     } catch (error) {
-      console.error('Error purchasing subscription:', error);
-      toast.error('Failed to purchase subscription. Please try again.');
+      console.error('Error in subscription:', error);
+      toast.error('Failed to process subscription');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="consultation-wrapper">
         <Navbarafter navItems={navItems} />
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Checking subscription status...</p>
+          <p>Loading...</p>
         </div>
         <Footer />
       </div>
@@ -148,8 +181,8 @@ const ConsultationPage = () => {
                 <li>Valid for 30 days</li>
               </ul>
               <button 
-                onClick={() => handleSubscription('basic')} 
-                className="plan-btn"
+                onClick={() => handleSubscriptionClick('basic')} 
+                className={`plan-btn ${isLoading ? 'loading' : ''}`}
                 disabled={isLoading}
               >
                 {isLoading ? 'Processing...' : 'Subscribe Now'}
@@ -168,8 +201,8 @@ const ConsultationPage = () => {
                 <li>Valid for 60 days</li>
               </ul>
               <button 
-                onClick={() => handleSubscription('standard')} 
-                className="plan-btn"
+                onClick={() => handleSubscriptionClick('standard')} 
+                className={`plan-btn ${isLoading ? 'loading' : ''}`}
                 disabled={isLoading}
               >
                 {isLoading ? 'Processing...' : 'Subscribe Now'}
@@ -189,8 +222,8 @@ const ConsultationPage = () => {
                 <li>Valid for 90 days</li>
               </ul>
               <button 
-                onClick={() => handleSubscription('premium')} 
-                className="plan-btn"
+                onClick={() => handleSubscriptionClick('premium')} 
+                className={`plan-btn ${isLoading ? 'loading' : ''}`}
                 disabled={isLoading}
               >
                 {isLoading ? 'Processing...' : 'Subscribe Now'}

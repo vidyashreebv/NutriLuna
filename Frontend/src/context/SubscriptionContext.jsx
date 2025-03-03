@@ -1,115 +1,120 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth, db } from '../config/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '../config/firebase';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { toast } from 'react-toastify';
 
 const SubscriptionContext = createContext();
 
-export const useSubscription = () => {
-  const context = useContext(SubscriptionContext);
-  if (!context) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
-  }
-  return context;
-};
+export function SubscriptionProvider({ children }) {
+    const [subscription, setSubscription] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export const SubscriptionProvider = ({ children }) => {
-  const [subscription, setSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const checkSubscriptionStatus = async (userId) => {
+        try {
+            const userDoc = await getDoc(doc(db, 'users', userId));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const currentSub = userData.currentSubscription;
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setSubscription(userData.currentSubscription || null);
+                if (currentSub) {
+                    const endDate = new Date(currentSub.endDate);
+                    const isActive = endDate > new Date() && currentSub.remainingConsultations > 0;
+
+                    if (!isActive || currentSub.remainingConsultations === 0) {
+                        // Deactivate subscription
+                        await updateDoc(doc(db, 'users', userId), {
+                            'currentSubscription.isActive': false
+                        });
+                        setSubscription(null);
+                        toast.info('Your subscription has expired or no consultations remaining');
+                        return false;
+                    }
+
+                    setSubscription(currentSub);
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error checking subscription:', error);
+            toast.error('Error checking subscription status');
+            return false;
         }
-      } else {
-        setSubscription(null);
-      }
-      setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    const updateSubscription = async (newSubscriptionData) => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            
+            if (!user) throw new Error('No user logged in');
 
-  const updateSubscription = async (planDetails) => {
-    const user = auth.currentUser;
-    if (!user) return false;
+            const userRef = doc(db, 'users', user.uid);
+            
+            // Get the latest data before updating
+            const userDoc = await getDoc(userRef);
+            const currentData = userDoc.data();
+            
+            // Merge with existing data
+            const updatedSubscription = {
+                ...currentData.currentSubscription,
+                ...newSubscriptionData,
+                lastUpdated: serverTimestamp()
+            };
 
-    try {
-      const token = await user.getIdToken();
-      const response = await fetch('http://localhost:5001/api/consultation/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          packageType: planDetails.planId,
-          amount: planDetails.price,
-          consultationCount: planDetails.totalConsultations,
-          validityDays: planDetails.duration === '1 month' ? 30 : 
-                       planDetails.duration === '2 months' ? 60 : 90
-        })
-      });
+            await updateDoc(userRef, {
+                currentSubscription: updatedSubscription
+            });
 
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message);
-      }
-
-      setSubscription(data.data);
-      return true;
-    } catch (error) {
-      console.error('Error updating subscription:', error);
-      return false;
-    }
-  };
-
-  const decrementConsultation = async () => {
-    const user = auth.currentUser;
-    if (!user || !subscription || subscription.remainingConsultations <= 0) return false;
-
-    try {
-      const token = await user.getIdToken();
-      const response = await fetch('http://localhost:5001/api/consultation/decrement', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+            setSubscription(updatedSubscription);
+            return true;
+        } catch (error) {
+            console.error('Error updating subscription:', error);
+            toast.error('Error updating subscription');
+            return false;
         }
-      });
+    };
 
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message);
-      }
+    // Add this function to refresh subscription data
+    const refreshSubscriptionData = async () => {
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser;
+            
+            if (!user) return;
 
-      setSubscription(prev => ({
-        ...prev,
-        remainingConsultations: prev.remainingConsultations - 1
-      }));
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.currentSubscription) {
+                    setSubscription(userData.currentSubscription);
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing subscription data:', error);
+        }
+    };
 
-      return true;
-    } catch (error) {
-      console.error('Error decrementing consultation:', error);
-      return false;
-    }
-  };
+    // Add useEffect to refresh data periodically
+    useEffect(() => {
+        const interval = setInterval(refreshSubscriptionData, 5000); // Refresh every 5 seconds
+        return () => clearInterval(interval);
+    }, []);
 
-  const value = {
-    subscription,
-    loading,
-    updateSubscription,
-    decrementConsultation
-  };
+    return (
+        <SubscriptionContext.Provider value={{
+            subscription,
+            setSubscription,
+            checkSubscriptionStatus,
+            updateSubscription,
+            loading,
+            setLoading
+        }}>
+            {children}
+        </SubscriptionContext.Provider>
+    );
+}
 
-  return (
-    <SubscriptionContext.Provider value={value}>
-      {children}
-    </SubscriptionContext.Provider>
-  );
-}; 
+export const useSubscription = () => useContext(SubscriptionContext); 

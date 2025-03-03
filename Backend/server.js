@@ -5,65 +5,60 @@ const { admin, db } = require('./config/firebaseConfig'); // Import Firebase con
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Enhanced error handling middleware
-const errorHandler = (err, req, res, next) => {
-  console.error('Server Error:', err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-};
-
-// Middleware
+// Enhanced CORS configuration
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
 app.use(bodyParser.json());
 
-// Request logging middleware
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Add request logging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Import routes
+// Routes
 const userRoutes = require('./pages/user');
-const consultationRoutes = require('./pages/consultation');
-const dashboardRoutes = require('./pages/dashboardRoutes');
-const dietTrackerRoutes = require('./pages/diettracker');
+app.use('/api/user', userRoutes);
 
-// Health check route
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
+const personalDetailsRoutes = require('./pages/personalDetails');
+app.use('/api/personalDetails', personalDetailsRoutes);
+
+const dietTrackerRoutes = require("./pages/diettracker");
+app.use("/api/diettracker", dietTrackerRoutes);
+
+const periodRoutes = require('./pages/periodtrack');  
+app.use("/api/period", periodRoutes);
+
+// Add the dashboard routes
+const dashboardRoutes = require('./pages/dashboardRoutes');
+app.use("/api/dashboard", dashboardRoutes);
+
+// Add consultation routes
+const consultationRoutes = require('./pages/consultation');
+app.use("/api/consultation", consultationRoutes);
+
+// Default Route
+app.get('/', (req, res) => {
+  res.send('Welcome to Nutri-Luna Backend API!');
 });
 
-// Use routes
-app.use('/api/user', userRoutes);
-app.use('/api/consultation', consultationRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/diettracker', dietTrackerRoutes);
+// 404 Error Handling
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route Not Found' });
+});
 
-// Error handling middleware
-app.use(errorHandler);
-
-// Start server with error handling
+// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-}).on('error', (err) => {
-  console.error('Server failed to start:', err);
-  process.exit(1);
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  process.exit(1);
 });

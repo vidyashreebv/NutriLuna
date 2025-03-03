@@ -4,10 +4,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from '../../Components/Footer';
 import './BookAppointment.css';
-
-
-import { FaCheckCircle, FaClock, FaStar, FaUserMd, FaExclamationCircle } from 'react-icons/fa'; // Import icons
-
+import { FaCheckCircle, FaClock, FaStar, FaUserMd } from 'react-icons/fa'; // Import icons
 import img10 from '../../assets/10.jpg';
 import img11 from '../../assets/11.jpg';
 import img12 from '../../assets/12.jpg';
@@ -15,10 +12,10 @@ import img13 from '../../assets/13.jpg';
 import img14 from '../../assets/14.jpg';
 import { getAuth } from 'firebase/auth';
 import { toast } from 'react-toastify';
-
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../../context/SubscriptionContext';
-
+import { db } from '../../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -103,10 +100,11 @@ const timeSlots = [
 
 const BookAppointment = () => {
     const navigate = useNavigate();
-    const { subscription, loading, decrementConsultation, updateSubscription } = useSubscription();
+    const { subscription, checkSubscriptionStatus, updateSubscription } = useSubscription();
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     const [bookingDisabled, setBookingDisabled] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -118,6 +116,34 @@ const BookAppointment = () => {
     const [isFormValid, setIsFormValid] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
+    const [remainingConsultations, setRemainingConsultations] = useState(0);
+    const auth = getAuth();
+
+    useEffect(() => {
+        const verifySubscription = async () => {
+            const user = auth.currentUser;
+            if (!user) {
+                toast.error('Please login first');
+                navigate('/login');
+                return;
+            }
+
+            const hasActiveSubscription = await checkSubscriptionStatus(user.uid);
+            if (!hasActiveSubscription) {
+                toast.info('Please subscribe to book a consultation');
+                navigate('/consultation');
+                return;
+            }
+
+            if (subscription?.remainingConsultations === 0) {
+                toast.info('No consultations remaining. Please upgrade your plan.');
+                navigate('/consultation');
+                return;
+            }
+        };
+
+        verifySubscription();
+    }, []);
 
     useEffect(() => {
         const dateInput = document.getElementById('date');
@@ -138,18 +164,26 @@ const BookAppointment = () => {
     }, [formData, selectedDoctor, selectedTimeSlot]);
 
     useEffect(() => {
-        if (!loading) {
-            if (!subscription) {
-                navigate('/consultation');
-                return;
+        const fetchRemainingConsultations = async () => {
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const currentSub = userData.currentSubscription;
+                    if (currentSub) {
+                        setRemainingConsultations(currentSub.remainingConsultations);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching remaining consultations:', error);
             }
-            
-            if (subscription.remainingConsultations <= 0) {
-                navigate('/consultation');
-                return;
-            }
-        }
-    }, [subscription, loading, navigate]);
+        };
+
+        fetchRemainingConsultations();
+    }, [subscription]);
 
     const handleDoctorSelect = (doctor) => {
         if (doctor.available) {
@@ -171,103 +205,94 @@ const BookAppointment = () => {
         }));
     };
 
-    const validateForm = () => {
-        const errors = {};
-        if (!formData.name.trim()) errors.name = 'Name is required';
-        if (!formData.email.trim()) errors.email = 'Email is required';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Invalid email format';
-        if (!formData.date) errors.date = 'Date is required';
-        if (!formData.reason.trim()) errors.reason = 'Reason is required';
-        if (!selectedDoctor) errors.doctor = 'Please select a doctor';
-        if (!selectedTimeSlot) errors.timeSlot = 'Please select a time slot';
-
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            email: '',
+            date: '',
+            reason: ''
+        });
+        setSelectedDoctor(null);
+        setSelectedTimeSlot(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!isFormValid) {
-            setFormErrors({
-                name: formData.name.trim() === '' ? 'Name is required' : '',
-                email: formData.email.trim() === '' ? 'Email is required' : '',
-                date: formData.date.trim() === '' ? 'Date is required' : '',
-                reason: formData.reason.trim() === '' ? 'Reason is required' : '',
-            });
-            return;
-        }
-
         try {
-            const auth = getAuth();
             const user = auth.currentUser;
-            
             if (!user) {
                 toast.error('Please login to book a consultation');
                 return;
             }
 
-            const token = await user.getIdToken();
-
-            // First check if user has an active subscription
-            const subscriptionResponse = await fetch('http://localhost:5001/api/consultation/my-subscription', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const subscriptionData = await subscriptionResponse.json();
-
-            if (!subscriptionData.success || !subscriptionData.data) {
-                toast.error('Please purchase a subscription first');
+            // Check subscription status again before booking
+            const hasActiveSubscription = await checkSubscriptionStatus(user.uid);
+            if (!hasActiveSubscription) {
+                toast.info('Please subscribe to book a consultation');
+                navigate('/consultation');
                 return;
             }
 
-            // Book the consultation
+            const token = await user.getIdToken();
+            const requestPayload = {
+                userId: user.uid,
+                doctorId: selectedDoctor.id,
+                appointmentDate: formData.date,
+                timeSlot: selectedTimeSlot,
+                patientDetails: {
+                    name: formData.name,
+                    email: formData.email,
+                    reason: formData.reason
+                },
+                doctorDetails: {
+                    name: selectedDoctor.name,
+                    specialization: selectedDoctor.specialization,
+                    image: selectedDoctor.image
+                }
+            };
+
             const response = await fetch('http://localhost:5001/api/consultation/book', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    doctorId: selectedDoctor.id,
-                    doctorName: selectedDoctor.name,
-                    doctorSpecialization: selectedDoctor.specialization,
-                    doctorImage: selectedDoctor.image,
-                    appointmentDate: formData.date,
-                    timeSlot: selectedTimeSlot,
-                    patientName: formData.name,
-                    email: formData.email,
-                    reason: formData.reason
-                })
+                body: JSON.stringify(requestPayload)
             });
 
             const data = await response.json();
 
             if (data.success) {
+                // Update subscription in context and show success message
+                if (subscription) {
+                    const newRemainingConsultations = subscription.remainingConsultations - 1;
+                    await updateSubscription({
+                        ...subscription,
+                        remainingConsultations: newRemainingConsultations,
+                        isActive: newRemainingConsultations > 0
+                    });
+                }
+
+                setSuccessMessage('Your consultation has been successfully booked! Our team will contact you via email.');
                 setShowSuccess(true);
                 toast.success('Consultation booked successfully!');
 
-                // Reset form after successful booking
-                setTimeout(() => {
-                    setShowSuccess(false);
-                    setSelectedDoctor(null);
-                    setSelectedTimeSlot(null);
-                    setFormData({
-                        name: '',
-                        email: '',
-                        date: '',
-                        reason: ''
-                    });
-                    setFormErrors({});
-                }, 3000);
+                // Clear form
+                resetForm();
+
+                // If no consultations remaining, redirect after a delay
+                if (subscription?.remainingConsultations <= 1) {
+                    setTimeout(() => {
+                        navigate('/consultation');
+                    }, 3000);
+                }
             } else {
-                toast.error(data.message || 'Failed to book consultation');
+                throw new Error(data.message || 'Failed to book consultation');
             }
         } catch (error) {
             console.error('Error booking consultation:', error);
-            toast.error('Failed to book consultation. Please try again.');
+            toast.error(error.message || 'Failed to book consultation');
         }
     };
 
@@ -275,7 +300,7 @@ const BookAppointment = () => {
         setActiveCarouselIndex(index);
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="loading-container">
                 <div className="loading-spinner"></div>
@@ -284,8 +309,19 @@ const BookAppointment = () => {
         );
     }
 
-    if (!subscription || subscription.remainingConsultations <= 0) {
-        return null;
+    if (bookingDisabled) {
+        return (
+            <div className="consultation-limit-message">
+                <h3>Consultation Limit Reached</h3>
+                <p>You have used all your consultations. Please upgrade your plan to continue booking.</p>
+                <button 
+                    className="upgrade-btn"
+                    onClick={() => navigate('/subscription?upgrade=true')}
+                >
+                    Upgrade Plan
+                </button>
+            </div>
+        );
     }
 
     return (
@@ -331,13 +367,7 @@ const BookAppointment = () => {
 
                     <div>
                         <h2 className="section-title">Book Your Consultation</h2>
-
                         <p className="section-subtitle">Connect with our expert nutritionists and reproductive health specialists for personalized care</p>
-
-                        <p className="section-subtitle">
-                            Connect with our expert nutritionists and reproductive health specialists for personalized care
-                        </p>
-
                     </div>
 
                     <div className="booking-containers">
@@ -497,12 +527,10 @@ const BookAppointment = () => {
 
                             {showSuccess && (
                                 <div className="success-message">
-                                    <FaCheckCircle className="success-icon" />
-                                    <div className="success-content">
-                                        <h4>Booking Successful!</h4>
-                                        <p>Your consultation has been successfully scheduled. Our team will review your request and contact you shortly through email with further details.</p>
-                                        <p>Remaining consultations: {subscription?.remainingConsultations}</p>
-                                    </div>
+                                    <p>{successMessage}</p>
+                                    <p className="remaining-consultations">
+                                        Remaining consultations: {remainingConsultations}
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -512,6 +540,38 @@ const BookAppointment = () => {
             </section>
 
             <Footer />
+
+            
+
+            <style jsx>{`
+                .consultation-status {
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: #f5f5f5;
+                    border-radius: 8px;
+                    text-align: center;
+                }
+
+                .consultation-status p {
+                    font-size: 16px;
+                    color: #333;
+                    margin-bottom: 10px;
+                }
+
+                .upgrade-button {
+                    background-color:rgb(8, 155, 13);
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+
+                .upgrade-button:hover {
+                    background-color: #45a049;
+                }
+            `}</style>
         </div>
     );
 };
