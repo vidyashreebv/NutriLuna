@@ -20,6 +20,8 @@ import RecipeSuggestion2 from './Pages/RecipeSuggestion/RecipeSuggestion2';
 import Consultation from './Pages/Consultation/Consultation';
 import BookAppointment from './Pages/Consultation/BookAppointment';
 import Loading from './Components/Loading';
+import { AuthProvider } from './context/AuthContext';
+import { SubscriptionProvider } from './context/SubscriptionContext';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,33 +41,37 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        <Route 
-          path="/" 
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <Landing />} 
-        />
-        <Route 
-          path="/login" 
-          element={currentUser ? <Navigate to="/dashboard" replace /> : <LoginRegister />} 
-        />
-        <Route 
-          path="/dashboard" 
-          element={currentUser ? <Dashboard /> : <Navigate to="/login" replace />} 
-        />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/diet" element={<DietTracking />} />
-        <Route path="/period" element={<PeriodTracker />} />
-        <Route path="/aboutusafter" element={<AboutUsAfter />} />
-        <Route path="/personaldetails" element={<PersonalDetailsForm />} />
-        <Route path="/blogafter" element={<Blogafter />} />
-        <Route path="/navbarafter" element={<Navbarafter />} />
-        <Route path="/recipe" element={<RecipeSuggestion2 />} />
-        <Route path="/consultation" element={<Consultation />} />
-        <Route path="/bookappointment" element={<BookAppointment />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <SubscriptionProvider>
+        <Router>
+          <Routes>
+            <Route 
+              path="/" 
+              element={currentUser ? <Navigate to="/dashboard" replace /> : <Landing />} 
+            />
+            <Route 
+              path="/login" 
+              element={currentUser ? <Navigate to="/dashboard" replace /> : <LoginRegister />} 
+            />
+            <Route 
+              path="/dashboard" 
+              element={currentUser ? <Dashboard /> : <Navigate to="/login" replace />} 
+            />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/diet" element={<DietTracking />} />
+            <Route path="/period" element={<PeriodTracker />} />
+            <Route path="/aboutusafter" element={<AboutUsAfter />} />
+            <Route path="/personaldetails" element={<PersonalDetailsForm />} />
+            <Route path="/blogafter" element={<Blogafter />} />
+            <Route path="/navbarafter" element={<Navbarafter />} />
+            <Route path="/recipe" element={<RecipeSuggestion2 />} />
+            <Route path="/consultation" element={<Consultation />} />
+            <Route path="/bookappointment" element={<BookAppointment />} />
+          </Routes>
+        </Router>
+      </SubscriptionProvider>
+    </AuthProvider>
   );
 }
 

@@ -90,6 +90,7 @@
   margin: 0 auto;
   padding: 80px 30px;
   background: #f8f9fa;
+  margin-bottom: 0;
 }
 
 .footer {
@@ -107,15 +108,19 @@
   gap: 40px;
   flex-wrap: wrap;
   margin-bottom: 60px;
+  background:none;
+  margin-top: -2rem;
+  cursor: pointer;
 }
 
-.hero-section {
+.hero-section-consultaion {
   position: relative;
   height: 85vh;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 7.5rem;
 }
 
 .video-overlay {
@@ -133,10 +138,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.7),
-    rgba(0, 0, 0, 0.5)
-  );
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
 }
 
 .background-video {
@@ -181,6 +183,8 @@
   transition: all 0.3s ease;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  border: none;
+  cursor: pointer;
 }
 
 .cta-button:hover {
@@ -190,9 +194,11 @@
 
 /* Main Container Styles */
 .consultation-main-container {
+  flex: 1;
   width: 100%;
   padding: 60px 0;
   background: #f8f9fa;
+  margin-bottom: 0;
 }
 
 .section-title {
@@ -231,7 +237,11 @@
   justify-content: space-between;
   position: relative; /* Added for pseudo-element positioning */
   overflow: hidden; /* Added to contain the top gradient bar */
+   
+
 }
+
+
 
 .plan-card:hover {
   transform: translateY(-10px);
@@ -316,6 +326,8 @@
   font-weight: 600;
   transition: all 0.3s ease;
   margin-top: 20px;
+  border: none;
+  cursor: pointer;
 }
 
 .plan-btn:hover {
@@ -324,11 +336,25 @@
   box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
 }
 
+.plan-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.plan-btn:disabled:hover {
+  background: #cccccc;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Special class for consultation wrapper */
 .consultation-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: #f8f9fa;
 }
 
 /* Responsive Design */
@@ -340,16 +366,16 @@
   .plan-card {
     flex: 0 1 calc(33.333% - 20px);
   }
+  
+  .hero-content h1 {
+    font-size: 48px;
+  }
 }
 
 @media (max-width: 992px) {
   .plan-card {
     flex: 0 1 calc(50% - 20px);
     max-width: 400px;
-  }
-  
-  .hero-content h1 {
-    font-size: 48px;
   }
 }
 
@@ -362,10 +388,6 @@
     flex: 0 1 100%;
     max-width: 400px;
     margin-bottom: 30px;
-  }
-  
-  .plans-section {
-    gap: 20px;
   }
   
   .hero-content h1 {
@@ -393,4 +415,128 @@
   .hero-content h1 {
     font-size: 32px;
   }
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e74c3c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Subscription Status Message */
+.subscription-status-message {
+  background: #fff3f3;
+  color: #e74c3c;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #ffcdd2;
+}
+
+footer {
+  margin-top: auto;
+  width: 100%;
+  background: #000;
+  position: relative;
+}
+
+/* End of file */
+
+.full-page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loader-logo {
+  width: 150px;
+  height: 150px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loader-text {
+  font-size: 24px;
+  color: #333;
+  font-weight: 500;
+  animation: fadeInOut 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* Ensure the page starts from top when content loads */
+.consultation-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+/* Add this to ensure page starts from top */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  scroll-behavior: smooth;
 }
