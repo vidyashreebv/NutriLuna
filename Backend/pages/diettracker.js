@@ -154,21 +154,65 @@ router.get("/:userId", authenticateUser, async (req, res) => {
       const data = doc.data();
       return {
         id: doc.id,
-        ...data,
-        date: data.date.toDate ? data.date.toDate() : new Date(data.date) // Convert Firestore timestamp
+        ...data
       };
     });
 
     console.log("🟢 Retrieved logs:", JSON.stringify(dietLogs, null, 2));
 
-    const todayDate = new Date().toDateString();
-    const yesterdayDate = new Date(Date.now() - 86400000).toDateString();
+    // Get today's date at midnight for comparison
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    res.status(200).json({
-      today: dietLogs.filter(log => log.date.toDateString() === todayDate),
-      yesterday: dietLogs.filter(log => log.date.toDateString() === yesterdayDate),
-      earlier: dietLogs.filter(log => log.date.toDateString() < yesterdayDate)
+    console.log("🟢 Reference dates:", {
+      now: now.toISOString(),
+      today: today.toISOString(),
+      yesterday: yesterday.toISOString()
     });
+
+    // Categorize meals
+    const categorizedMeals = {
+      today: [],
+      yesterday: [],
+      earlier: []
+    };
+
+    dietLogs.forEach(log => {
+      console.log("🟢 Processing log:", {
+        id: log.id,
+        originalDate: log.date,
+        mealType: log.mealType,
+        foodName: log.foodName
+      });
+
+      const logDate = new Date(log.date);
+      logDate.setHours(0, 0, 0, 0);
+
+      console.log("🟢 Date comparison:", {
+        logDate: logDate.toISOString(),
+        logTimestamp: logDate.getTime(),
+        todayTimestamp: today.getTime(),
+        yesterdayTimestamp: yesterday.getTime(),
+        isToday: logDate.getTime() === today.getTime(),
+        isYesterday: logDate.getTime() === yesterday.getTime()
+      });
+
+      if (logDate.getTime() === today.getTime()) {
+        console.log("➡️ Categorizing as TODAY");
+        categorizedMeals.today.push(log);
+      } else if (logDate.getTime() === yesterday.getTime()) {
+        console.log("➡️ Categorizing as YESTERDAY");
+        categorizedMeals.yesterday.push(log);
+      } else {
+        console.log("➡️ Categorizing as EARLIER");
+        categorizedMeals.earlier.push(log);
+      }
+    });
+
+    console.log("🟢 Categorized meals:", JSON.stringify(categorizedMeals, null, 2));
+    res.status(200).json(categorizedMeals);
 
   } catch (error) {
     console.error("❌ Error fetching diet logs:", error);

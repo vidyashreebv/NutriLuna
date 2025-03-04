@@ -27,13 +27,14 @@ const DietTracker = () => {
   // Refs
   const navbarRef = useRef(null);
   const fixedHeaderRef = useRef(null);
+  const targetRef = useRef(null);
 
   const navItems = [
     { label: 'Home', href: '/landing' },
     { label: 'About', href: '/aboutusafter' },
     { label: 'Blog', href: '/blogafter' },
-    { label: 'Track Your Periods', href: '/period'},
-    { label: 'Diet Tracking', href: '/diet' , active: true },
+    { label: 'Track Your Periods', href: '/period' },
+    { label: 'Diet Tracking', href: '/diet', active: true },
     { label: 'Recipe Suggestions', href: '/recipe' },
     { label: 'Consultation', href: '/consultation' },
     { label: 'My Profile', href: '/dashboard' }
@@ -78,8 +79,19 @@ const DietTracker = () => {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setShowScrollTop(currentScrollY > 200);
-      setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 100);
+      targetRef.current?.scrollIntoView({ behavior: "smooth" });
+      // Show scroll-to-top button after scrolling down 300px
+      setShowScrollTop(currentScrollY > 300);
+
+      // Header visibility logic
+      if (currentScrollY < 100) {
+        // Always show header near the top
+        setIsHeaderVisible(true);
+      } else {
+        // Hide header when scrolling down, show when scrolling up
+        setIsHeaderVisible(currentScrollY <= lastScrollY);
+      }
+
       setLastScrollY(currentScrollY);
     };
 
@@ -87,16 +99,41 @@ const DietTracker = () => {
     updateNavbarHeight();
     setTimeout(updateHeaderHeight, 100);
 
-    // Event listeners
+    // Throttled scroll handler
+    let ticking = false;
+    const scrollListener = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener('resize', handleResize);
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", scrollListener, { passive: true });
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", scrollListener);
     };
   }, [lastScrollY]);
- 
+
+  const handleSectionClick = (section) => {
+    setActiveSection(section);
+    document.querySelector(`#${section}`).scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  };
 
   // Fetch user and set state
   useEffect(() => {
@@ -113,7 +150,7 @@ const DietTracker = () => {
       setIsLoading(true);
       setError(null);
       const userId = auth.currentUser?.uid; // Use the logged-in user's ID
-    
+
       if (!userId) {
         throw new Error('User ID is not available');
       }
@@ -130,15 +167,24 @@ const DietTracker = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
+      console.log("✅ Raw server response:", response);
       console.log("✅ Fetched meals data:", response.data);
 
-      // Make sure response.data contains the expected structure
-      if (!response.data || typeof response.data !== "object") {
+      // Validate the response data structure
+      if (!response.data || typeof response.data !== 'object') {
         throw new Error("Invalid response format");
       }
 
-      setMeals(response.data); // Directly set the fetched data
+      // Ensure all required categories exist
+      const categorizedMeals = {
+        today: Array.isArray(response.data.today) ? response.data.today : [],
+        yesterday: Array.isArray(response.data.yesterday) ? response.data.yesterday : [],
+        earlier: Array.isArray(response.data.earlier) ? response.data.earlier : []
+      };
+
+      console.log("Final categorized meals:", categorizedMeals);
+      setMeals(categorizedMeals);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch meals');
       console.error('❌ Error fetching meals:', err);
@@ -146,7 +192,7 @@ const DietTracker = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Call fetchMeals only when user is available
   useEffect(() => {
     if (user) fetchMealsData();
@@ -155,27 +201,27 @@ const DietTracker = () => {
   // Meal management functions
   const addMeal = async () => {
     try {
-        const token = await auth.currentUser.getIdToken();
-        console.log("🔑 Firebase Token:", token);
-        const response = await axios.post("http://localhost:5001/api/diettracker/add", {
-            mealType: document.getElementById("mealType").value,
-            foodName: document.getElementById("foodName").value,
-            calories: document.getElementById("calories").value,
-            quantity: document.getElementById("quantity").value,
-            unit: document.getElementById("unit").value,
-            date: new Date().toISOString().split("T")[0]
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+      const token = await auth.currentUser.getIdToken();
+      console.log("🔑 Firebase Token:", token);
+      const response = await axios.post("http://localhost:5001/api/diettracker/add", {
+        mealType: document.getElementById("mealType").value,
+        foodName: document.getElementById("foodName").value,
+        calories: document.getElementById("calories").value,
+        quantity: document.getElementById("quantity").value,
+        unit: document.getElementById("unit").value,
+        date: new Date().toISOString().split("T")[0]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-        console.log("Meal added successfully:", response.data);
-        fetchMealsData();
+      console.log("Meal added successfully:", response.data);
+      fetchMealsData();
 
     } catch (error) {
-        console.error("Failed to add meal:", error);
+      console.error("Failed to add meal:", error);
     }
   };
 
@@ -188,13 +234,13 @@ const DietTracker = () => {
   const onDeleteMeal = async (mealId) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      
+
       await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       console.log("Meal deleted successfully");
       // Refresh meals data after deletion
       fetchMealsData();
@@ -208,9 +254,9 @@ const DietTracker = () => {
   const editMeal = async (id, section, updatedData) => {
     try {
       const token = await auth.currentUser.getIdToken();
-      
+
       console.log("Updating meal:", id, "with data:", updatedData);
-      
+
       await axios.put(`http://localhost:5001/api/diettracker/${id}`, updatedData, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -232,6 +278,7 @@ const DietTracker = () => {
     setActiveSection(sectionId);
     const section = document.getElementById(sectionId);
     if (section) {
+      console.log("Navbar Height:", navbarHeight, "Header Height:", headerHeight);
       const totalOffset = navbarHeight + (isHeaderVisible ? headerHeight : 0);
       const scrollPosition = section.offsetTop - totalOffset - 20;
 
@@ -242,10 +289,6 @@ const DietTracker = () => {
         });
       }, 50);
     }
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // UI event handlers
@@ -266,24 +309,20 @@ const DietTracker = () => {
   }
 
   return (
-    <div className="App">
+    <div className="diet-tracker">
       <Navbarafter navItems={navItems} />
 
-      <div className="diet-tracker-container">
-        <div
-          ref={fixedHeaderRef}
-          className={`fixed-header ${isHeaderVisible ? "header-visible" : "header-hidden"}`}
-        >
-          <div className="header-content">
-            <h1 className="tracker-title">Diet Tracker</h1>
+      <div className="fixed-header">
+        <div className="header-content">
+          <h1 className="tracker-title">Diet Tracker</h1>
 
-            <div className="meal-form">
-              <div className="form-controls">
-                <div className="food-input-wrapper"><input type="text" id="foodName" placeholder="Food Name" required className="food-input" /></div>
-                <div className="metrics-wrapper">
+          <div className="meal-form">
+            <div className="form-controls">
+              <div className="food-input-wrapper"><input type="text" id="foodName" placeholder="Food Name" required className="food-input" /></div>
+              <div className="metrics-wrapper">
                 <input type="number" id="calories" placeholder="Calories" required className="calories-input" />
                 <input type="number" id="quantity" placeholder="Quantity" required className="quantity-input" min="0.1" step="0.1" />
-                
+
                 <select id="unit" className="unit-select">
                   <option value="serving">Serving</option>
                   <option value="grams">Grams</option>
@@ -299,290 +338,287 @@ const DietTracker = () => {
                   <option value="dinner">Dinner</option>
                   <option value="snack">Snack</option>
                 </select>
-                </div>
-                <button
-                  onClick={addMeal}
-                  className="add-meal-button"
-                  onMouseEnter={() => setIsAddButtonHovered(true)}
-                  onMouseLeave={() => setIsAddButtonHovered(false)}
-                >
-                  {isAddButtonHovered ? (
-                    <span className="flex items-center">
-                      <Plus size={16} className="mr-2" />
-                      Add Meal
-                    </span>
-                  ) : (
-                    "Add Meal"
-                  )}
-                </button>
               </div>
-            </div>
-
-            <div className="timeline-nav">
               <button
-                onClick={() => scrollToSection("today")}
-                className={`nav-button ${activeSection === "today" ? "active" : ""}`}
+                onClick={addMeal}
+                className="add-meal-button"
+                onMouseEnter={() => setIsAddButtonHovered(true)}
+                onMouseLeave={() => setIsAddButtonHovered(false)}
               >
-                Today
-              </button>
-              <button
-                onClick={() => scrollToSection("yesterday")}
-                className={`nav-button ${activeSection === "yesterday" ? "active" : ""}`}
-              >
-                Yesterday
-              </button>
-              <button
-                onClick={() => scrollToSection("earlier")}
-                className={`nav-button ${activeSection === "earlier" ? "active" : ""}`}
-              >
-                Last 7 Days
+                {isAddButtonHovered ? (
+                  <span className="flex items-center">
+                    <Plus size={16} className="mr-2" />
+                    Add Meal
+                  </span>
+                ) : (
+                  "Add Meal"
+                )}
               </button>
             </div>
           </div>
+
+          <div className="timeline-nav">
+            <button
+              className={activeSection === "today" ? "nav-button active" : "nav-button"}
+              onClick={() => handleSectionClick("today")}
+            >
+              Today
+            </button>
+            <button
+              className={activeSection === "yesterday" ? "nav-button active" : "nav-button"}
+              onClick={() => handleSectionClick("yesterday")}
+            >
+              Yesterday
+            </button>
+            <button
+              className={activeSection === "earlier" ? "nav-button active" : "nav-button"}
+              onClick={() => handleSectionClick("earlier")}
+            >
+              Last 7 Days
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div className="content-container">
-          {error && (
-            <div className="error-message">
-              {error}
-              <button onClick={() => setError(null)}>Dismiss</button>
-            </div>
-          )}
+      <div className="content-container">
+        {error && (
+          <div className="error-message">
+            {error}
+            <button onClick={() => setError(null)}>Dismiss</button>
+          </div>
+        )}
 
-          {Object.keys(meals).length === 0 ? (
-            <p>Loading meals...</p>
-          ) : (
-            ["today", "yesterday", "earlier"].map((section) => (
-              <div
-                key={section}
-                id={section}
-                className="day-section"
-                onMouseEnter={() => handleSectionMouseEnter(section)}
-                onMouseLeave={handleSectionMouseLeave}
-              >
-                <div className="day-header">
-                  <h2 className="day-title">
-                    {section === "today" ? "Today" : section === "yesterday" ? "Yesterday" : "Last 7 Days"}
-                  </h2>
-                  <span className="day-date">
-                    {section === "today"
-                      ? formatDate(new Date())
-                      : section === "yesterday"
+        {Object.keys(meals).length === 0 ? (
+          <p>Loading meals...</p>
+        ) : (
+          ["today", "yesterday", "earlier"].map((section) => (
+            <div
+              key={section}
+              id={section}
+              className={`day-section ${activeSection === section ? "active" : ""}`}
+            >
+              <div className="day-header">
+                <h2 className="day-title">
+                  {section === "today" ? "Today" : section === "yesterday" ? "Yesterday" : "Last 7 Days"}
+                </h2>
+                <span className="day-date">
+                  {section === "today"
+                    ? formatDate(new Date())
+                    : section === "yesterday"
                       ? formatDate(new Date(new Date().setDate(new Date().getDate() - 1)))
                       : formatDate(new Date(new Date().setDate(new Date().getDate() - 7)))}
-                  </span>
-                </div>
+                </span>
+              </div>
 
-                <div className="day-summary">
-                  <p className="summary-text">
-                    Total Calories:{" "}
-                    {Array.isArray(meals[section])
-                      ? meals[section].reduce((total, meal) => total + Number(meal.calories), 0)
-                      : 0}{" "}
-                    | Meals: {Array.isArray(meals[section]) ? meals[section].length : 0}
-                  </p>
-                </div>
+              <div className="day-summary">
+                <p className="summary-text">
+                  Total Calories:{" "}
+                  {Array.isArray(meals[section])
+                    ? meals[section].reduce((total, meal) => total + Number(meal.calories), 0)
+                    : 0}{" "}
+                  | Meals: {Array.isArray(meals[section]) ? meals[section].length : 0}
+                </p>
+              </div>
 
-                <div className="meal-list">
-                  {meals[section] && Array.isArray(meals[section]) ? (
-                    meals[section].length > 0 ? (
-                      meals[section].map((meal) => (
-                        <div key={meal.id} className="meal-card">
-                          <div className="meal-header">
-                            <span className="meal-type">{meal.mealType}</span>
-                          </div>
-                          <div className="meal-info">
-                            <p className="meal-name">{meal.foodName}</p>
-                            <p className="meal-quantity">{meal.quantity} {meal.unit}</p>
-                            <span className="calories">{meal.calories} calories</span>
-                          </div>
-                          <div className="meal-actions">
-                            <button className="edit-btn" onClick={() => onEditMeal(meal)}>✏️</button>
-                            <button className="delete-btn" onClick={() => onDeleteMeal(meal.id)}>🗑️</button>
-                          </div>
+              <div className="meal-list">
+                {meals[section] && Array.isArray(meals[section]) ? (
+                  meals[section].length > 0 ? (
+                    meals[section].map((meal) => (
+                      <div key={meal.id} className="meal-card">
+                        <div className="meal-header">
+                          <span className="meal-type">{meal.mealType}</span>
                         </div>
-                      ))
-                    ) : (
-                      <p className="empty-state">
-                        No meals logged for {section}.
-                        {section === "today" && " Add your first meal above!"}
-                      </p>
-                    )
+                        <div className="meal-info">
+                          <p className="meal-name">{meal.foodName}</p>
+                          <p className="meal-quantity">{meal.quantity} {meal.unit}</p>
+                          <span className="calories">{meal.calories} calories</span>
+                        </div>
+                        <div className="meal-actions">
+                          <button className="edit-btn" onClick={() => onEditMeal(meal)}>✏️</button>
+                          <button className="delete-btn" onClick={() => onDeleteMeal(meal.id)}>🗑️</button>
+                        </div>
+                      </div>
+                    ))
                   ) : (
-                    <p>Adding your meal...</p>
-                  )}
-                </div>
+                    <p className="empty-state">
+                      No meals logged for {section}.
+                      {section === "today" && " Add your first meal above!"}
+                    </p>
+                  )
+                ) : (
+                  <p>Adding your meal...</p>
+                )}
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          ))
+        )}
+      </div>
 
-        <button
-          onClick={scrollToTop}
-          className={`scroll-top-button ${showScrollTop ? "visible" : "hidden"}`}
-          aria-label="Scroll to top"
-          onMouseEnter={() => setIsScrollButtonHovered(true)}
-          onMouseLeave={() => setIsScrollButtonHovered(false)}
-        >
-          <ChevronUp size={isScrollButtonHovered ? 26 : 24} />
-        </button>
+      <button
+        onClick={scrollToTop}
+        className={`scroll-top-button ${showScrollTop ? "visible" : "hidden"}`}
+        aria-label="Scroll to top"
+        onMouseEnter={() => setIsScrollButtonHovered(true)}
+        onMouseLeave={() => setIsScrollButtonHovered(false)}
+      >
+        <ChevronUp size={isScrollButtonHovered ? 26 : 24} />
+      </button>
 
-        {/* Edit Meal Modal */}
-        {isEditing && (
-          <div className="modal-overlay">
-            <div className="edit-modal-red">
-              <div className="modal-header-red">
-                <h3>Edit Meal</h3>
-                <button 
-                  className="close-button-red" 
-                  type="button"
-                  onClick={() => setIsEditing(null)}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-              </div>
-              
-              <form
-                className="edit-form-red"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const meal =
-                    meals.today.find((m) => m.id === isEditing) ||
-                    meals.yesterday.find((m) => m.id === isEditing) ||
-                    meals.earlier.find((m) => m.id === isEditing);
+      {/* Edit Meal Modal */}
+      {isEditing && (
+        <div className="modal-overlay">
+          <div className="edit-modal-red">
+            <div className="modal-header-red">
+              <h3>Edit Meal</h3>
+              <button
+                className="close-button-red"
+                type="button"
+                onClick={() => setIsEditing(null)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
 
-                  const section = meals.today.find((m) => m.id === isEditing)
-                    ? "today"
-                    : meals.yesterday.find((m) => m.id === isEditing)
+            <form
+              className="edit-form-red"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const meal =
+                  meals.today.find((m) => m.id === isEditing) ||
+                  meals.yesterday.find((m) => m.id === isEditing) ||
+                  meals.earlier.find((m) => m.id === isEditing);
+
+                const section = meals.today.find((m) => m.id === isEditing)
+                  ? "today"
+                  : meals.yesterday.find((m) => m.id === isEditing)
                     ? "yesterday"
                     : "earlier";
 
-                  const updatedData = {
-                    foodName: e.target.foodName.value,
-                    calories: Number(e.target.calories.value),
-                    quantity: Number(e.target.quantity.value),
-                    unit: e.target.unit.value,
-                    mealType: e.target.mealType.value,
-                    time: meal.time,
-                    date: meal.date,
-                  };
+                const updatedData = {
+                  foodName: e.target.foodName.value,
+                  calories: Number(e.target.calories.value),
+                  quantity: Number(e.target.quantity.value),
+                  unit: e.target.unit.value,
+                  mealType: e.target.mealType.value,
+                  time: meal.time,
+                  date: meal.date,
+                };
 
-                  editMeal(isEditing, section, updatedData);
-                }}
-              >
-                <div className="form-group-red">
-                  <label htmlFor="edit-foodName">Food Name</label>
-                  <input
-                    id="edit-foodName"
-                    name="foodName"
-                    type="text"
-                    defaultValue={
-                      (meals.today.find((m) => m.id === isEditing) ||
+                editMeal(isEditing, section, updatedData);
+              }}
+            >
+              <div className="form-group-red">
+                <label htmlFor="edit-foodName">Food Name</label>
+                <input
+                  id="edit-foodName"
+                  name="foodName"
+                  type="text"
+                  defaultValue={
+                    (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
                       meals.earlier.find((m) => m.id === isEditing))?.foodName || ""
-                    }
-                    className="modal-input-red"
-                    required
-                  />
-                </div>
+                  }
+                  className="modal-input-red"
+                  required
+                />
+              </div>
 
-                <div className="form-group-red">
-                  <label htmlFor="edit-calories">Calories</label>
-                  <input
-                    id="edit-calories"
-                    name="calories"
-                    type="number"
-                    defaultValue={
-                      (meals.today.find((m) => m.id === isEditing) ||
+              <div className="form-group-red">
+                <label htmlFor="edit-calories">Calories</label>
+                <input
+                  id="edit-calories"
+                  name="calories"
+                  type="number"
+                  defaultValue={
+                    (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
                       meals.earlier.find((m) => m.id === isEditing))?.calories || ""
-                    }
-                    className="modal-input-red"
-                    required
-                  />
-                </div>
+                  }
+                  className="modal-input-red"
+                  required
+                />
+              </div>
 
-                <div className="form-group-red">
-                  <label htmlFor="edit-quantity">Quantity</label>
-                  <input
-                    id="edit-quantity"
-                    name="quantity"
-                    type="number"
-                    min="0.1"
-                    step="0.1"
-                    defaultValue={
-                      (meals.today.find((m) => m.id === isEditing) ||
+              <div className="form-group-red">
+                <label htmlFor="edit-quantity">Quantity</label>
+                <input
+                  id="edit-quantity"
+                  name="quantity"
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  defaultValue={
+                    (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
                       meals.earlier.find((m) => m.id === isEditing))?.quantity || "1"
-                    }
-                    className="modal-input-red"
-                    required
-                  />
-                </div>
+                  }
+                  className="modal-input-red"
+                  required
+                />
+              </div>
 
-                <div className="form-group-red">
-                  <label htmlFor="edit-unit">Unit</label>
-                  <select
-                    id="edit-unit"
-                    name="unit"
-                    defaultValue={
-                      (meals.today.find((m) => m.id === isEditing) ||
+              <div className="form-group-red">
+                <label htmlFor="edit-unit">Unit</label>
+                <select
+                  id="edit-unit"
+                  name="unit"
+                  defaultValue={
+                    (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
                       meals.earlier.find((m) => m.id === isEditing))?.unit || "serving"
-                    }
-                    className="modal-select-red"
-                  >
-                    <option value="serving">Serving</option>
-                    <option value="grams">Grams</option>
-                    <option value="ml">Milliliters</option>
-                    <option value="pieces">Pieces</option>
-                    <option value="cups">Cups</option>
-                    <option value="tbsp">Tablespoons</option>
-                    <option value="tsp">Teaspoons</option>
-                  </select>
-                </div>
+                  }
+                  className="modal-select-red"
+                >
+                  <option value="serving">Serving</option>
+                  <option value="grams">Grams</option>
+                  <option value="ml">Milliliters</option>
+                  <option value="pieces">Pieces</option>
+                  <option value="cups">Cups</option>
+                  <option value="tbsp">Tablespoons</option>
+                  <option value="tsp">Teaspoons</option>
+                </select>
+              </div>
 
-                <div className="form-group-red">
-                  <label htmlFor="edit-mealType">Meal Type</label>
-                  <select
-                    id="edit-mealType"
-                    name="mealType"
-                    defaultValue={
-                      (meals.today.find((m) => m.id === isEditing) ||
+              <div className="form-group-red">
+                <label htmlFor="edit-mealType">Meal Type</label>
+                <select
+                  id="edit-mealType"
+                  name="mealType"
+                  defaultValue={
+                    (meals.today.find((m) => m.id === isEditing) ||
                       meals.yesterday.find((m) => m.id === isEditing) ||
                       meals.earlier.find((m) => m.id === isEditing))?.mealType || "breakfast"
-                    }
-                    className="modal-select-red"
-                  >
-                    <option value="breakfast">Breakfast</option>
-                    <option value="lunch">Lunch</option>
-                    <option value="dinner">Dinner</option>
-                    <option value="snack">Snack</option>
-                  </select>
-                </div>
+                  }
+                  className="modal-select-red"
+                >
+                  <option value="breakfast">Breakfast</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="dinner">Dinner</option>
+                  <option value="snack">Snack</option>
+                </select>
+              </div>
 
-                <div className="modal-actions-red">
-                  <button 
-                    type="button" 
-                    className="cancel-button-red" 
-                    onClick={() => setIsEditing(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="save-button-red"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="modal-actions-red">
+                <button
+                  type="button"
+                  className="cancel-button-red"
+                  onClick={() => setIsEditing(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="save-button-red"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
-      <Footer/>
+        </div>
+      )}
+      <Footer />
     </div>
   );
 };

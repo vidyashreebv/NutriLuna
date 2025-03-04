@@ -1,19 +1,24 @@
 import React from 'react';
-
 import './Navbarafter.css';
 import logo from '../assets/logo.svg';
+import { useAuth } from '../context/AuthContext';
 
-const Navbarafter = ({ navItems, username }) => {
-  console.log('Navbar rendering:', navItems);
+const Navbarafter = ({ navItems }) => {
+  const { currentUser } = useAuth();
+
+  // Get username from email or displayName
+  const username = currentUser ?
+    (currentUser.displayName || currentUser.email?.split('@')[0] || 'User') :
+    'User';
 
   // Update the nav items that are passed in
   const updatedNavItems = navItems.map(item => {
     if (item.label === 'My Profile') {
       return {
         ...item,
-        label: `${username}'s Profile`,
+        label: `${username.toUpperCase()}'s Profile`,
         href: '/dashboard',
-        active: true
+        active: window.location.pathname === '/dashboard'
       };
     }
     return item;
@@ -24,7 +29,7 @@ const Navbarafter = ({ navItems, username }) => {
       <div className="navbarafter-top-line" />
       <div className="navbarafter-logo-container">
         <div className="navbarafter-logo">
-          <img src={logo} />
+          <img src={logo} alt="NutriLuna Logo" />
         </div>
         <div className="navbarafter-brand">NutriLuna</div>
       </div>

@@ -23,11 +23,15 @@ app.use((req, res, next) => {
 const userRoutes = require('./pages/user');
 const dashboardRoutes = require('./pages/dashboardRoutes');
 const dietTrackerRoutes = require('./pages/diettracker');
+const periodRoutes = require('./pages/periodtrack');
+const recipeSuggestionRoutes = require('./pages/recipesuggestion');
 
 // Use routes
 app.use('/api/user', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/diettracker', dietTrackerRoutes);
+app.use('/api/period', periodRoutes);
+app.use('/api/recipesuggestion', recipeSuggestionRoutes);
 
 // Test route
 app.get('/test', (req, res) => {
