@@ -2,6 +2,7 @@ import React from 'react';
 import './../Aboutusafter/Aboutusafter.css';
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
+import { useLoading } from '../../context/LoadingContext';
 
 const AboutUs = () => {
   const navItems = [
@@ -10,6 +11,7 @@ const AboutUs = () => {
     { label: 'Blog', href: '/blog' },
     { label: 'Login', href: '/login' }
   ];
+
 
   return (
     <div>
@@ -80,7 +82,7 @@ const AboutUs = () => {
           <a href="/login" className="cta-button">Get Started</a>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };

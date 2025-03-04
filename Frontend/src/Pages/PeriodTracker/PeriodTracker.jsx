@@ -4,6 +4,7 @@ import { auth } from "../../config/firebaseConfig";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
+import { useLoading } from '../../context/LoadingContext';
 
 function PeriodTracker() {
     const [lastPeriod, setLastPeriod] = useState("");
@@ -18,6 +19,7 @@ function PeriodTracker() {
     const [allPeriods, setAllPeriods] = useState([]);
     const [periodData, setPeriodData] = useState(null);
     const [editingPeriod, setEditingPeriod] = useState(null);
+    const { showLoader, hideLoader } = useLoading();
 
     const navItems = [
         { label: 'Home', href: '/landing' },
@@ -26,7 +28,7 @@ function PeriodTracker() {
         { label: 'Track Your Periods', href: '/period', active: true },
         { label: 'Diet Tracking', href: '/diet' },
         { label: 'Recipe Suggestions', href: '/recipe' },
-        { label: 'Consultation', href: 'consultation' },
+        { label: 'Consultation', href: '/consultation' },
         { label: 'My Profile', href: '/dashboard' }
     ];
 
@@ -55,6 +57,7 @@ function PeriodTracker() {
         if (!currentUser) return;
 
         try {
+            showLoader();
             const token = await auth.currentUser.getIdToken(true);
             const response = await fetch("http://localhost:5001/api/period/getPeriodData", {
                 method: "GET",
@@ -87,13 +90,15 @@ function PeriodTracker() {
             }
         } catch (error) {
             console.error("❌ Error fetching period data:", error);
+        } finally {
+            hideLoader();
         }
     };
 
     // Helper to get the most recent period
     const getMostRecentPeriod = () => {
         if (!allPeriods || allPeriods.length === 0) return null;
-        
+
         return allPeriods.reduce((latest, current) => {
             const currentDate = new Date(current.startDate);
             const latestDate = new Date(latest.startDate);
@@ -109,7 +114,7 @@ function PeriodTracker() {
         const startDate = new Date(mostRecentPeriod.startDate);
         const cycleLength = mostRecentPeriod.cycleLength;
         const ovulationDay = Math.floor(cycleLength / 2) - 2;
-        
+
         return {
             ovulationDate: new Date(startDate.getTime() + (ovulationDay * 24 * 60 * 60 * 1000)),
             fertileWindowStart: new Date(startDate.getTime() + ((ovulationDay - 5) * 24 * 60 * 60 * 1000)),
@@ -149,7 +154,7 @@ function PeriodTracker() {
                 const startDate = new Date(period.startDate);
                 const endDate = new Date(startDate);
                 endDate.setDate(startDate.getDate() + parseInt(period.duration));
-                
+
                 const checkDateObj = new Date(date);
                 return checkDateObj >= startDate && checkDateObj <= endDate;
             });
@@ -171,9 +176,9 @@ function PeriodTracker() {
     const generateCalendar = (month, year) => {
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
+
         setMonthYearText(`${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`);
-        
+
         const calendarDays = [];
 
         // Add weekday headers
@@ -184,32 +189,32 @@ function PeriodTracker() {
                 </div>
             );
         });
-        
+
         // Add empty cells for days before the first of the month
         for (let i = 0; i < firstDay; i++) {
             calendarDays.push(
                 <div key={`empty-${i}`} className="day empty"></div>
             );
         }
-        
+
         // Add the days of the month
         for (let day = 1; day <= daysInMonth; day++) {
             const currentDate = new Date(year, month, day);
             const cyclePhases = calculateCyclePhases(currentDate);
-            
+
             let className = "day";
             let emoji = "";
             let label = "";
-            
+
             // Check if it's a period day (logged or predicted)
             if (isPeriodDay(currentDate)) {
                 className += " period-day";
                 emoji = "🌺";
-                
+
                 // Add predicted class if it's a predicted period
                 const nextPeriod = getNextPeriod();
-                if (nextPeriod && 
-                    currentDate >= nextPeriod.startDate && 
+                if (nextPeriod &&
+                    currentDate >= nextPeriod.startDate &&
                     currentDate <= nextPeriod.endDate) {
                     className += " predicted";
                     label = "Predicted Period";
@@ -220,14 +225,14 @@ function PeriodTracker() {
             // Then check for ovulation and fertile window
             else if (cyclePhases) {
                 const dayStr = currentDate.toISOString().split('T')[0];
-                
+
                 if (dayStr === cyclePhases.ovulationDate.toISOString().split('T')[0]) {
                     className += " ovulation-day";
                     emoji = "🥚";
                     label = "Ovulation Day";
                 }
                 else if (
-                    currentDate >= cyclePhases.fertileWindowStart && 
+                    currentDate >= cyclePhases.fertileWindowStart &&
                     currentDate <= cyclePhases.fertileWindowEnd
                 ) {
                     className += " fertile-day";
@@ -235,9 +240,9 @@ function PeriodTracker() {
                     label = "Fertile Window";
                 }
             }
-            
+
             calendarDays.push(
-                <div 
+                <div
                     key={`day-${day}`}
                     className={className}
                     title={label}
@@ -249,7 +254,7 @@ function PeriodTracker() {
                 </div>
             );
         }
-        
+
         setCalendarHTML(calendarDays);
     };
 
@@ -284,6 +289,7 @@ function PeriodTracker() {
         }
 
         try {
+            showLoader();
             const token = await auth.currentUser.getIdToken(true);
             const response = await fetch(`http://localhost:5001/api/period/deletePeriodData/${periodId}`, {
                 method: "DELETE",
@@ -304,6 +310,8 @@ function PeriodTracker() {
         } catch (error) {
             console.error("Error deleting period data:", error);
             setOutput("Error deleting period log");
+        } finally {
+            hideLoader();
         }
     };
 
@@ -315,6 +323,7 @@ function PeriodTracker() {
         }
 
         try {
+            showLoader();
             const token = await auth.currentUser.getIdToken(true);
 
             const periodData = {
@@ -323,7 +332,7 @@ function PeriodTracker() {
                 cycleLength: parseInt(cycleLength)
             };
 
-            const endpoint = editingPeriod 
+            const endpoint = editingPeriod
                 ? `http://localhost:5001/api/period/updatePeriodData/${editingPeriod.id}`
                 : "http://localhost:5001/api/period/savePeriodData";
 
@@ -342,7 +351,7 @@ function PeriodTracker() {
             if (response.ok) {
                 if (editingPeriod) {
                     // Update the edited period in the state
-                    setAllPeriods(allPeriods.map(p => 
+                    setAllPeriods(allPeriods.map(p =>
                         p.id === editingPeriod.id ? { ...periodData, id: p.id } : p
                     ));
                     setEditingPeriod(null);
@@ -361,6 +370,8 @@ function PeriodTracker() {
         } catch (error) {
             console.error("Error saving period data:", error);
             setOutput("Error saving period data.");
+        } finally {
+            hideLoader();
         }
     };
 
@@ -418,7 +429,7 @@ function PeriodTracker() {
                     Period Tracker
                 </h1>
                 <div className="period-tracker-container">
-                    
+
                     {/* Add Period Status Card */}
                     {periodData && periodData.lastPeriod && (
                         <div className="period-status-section">
@@ -427,7 +438,7 @@ function PeriodTracker() {
                                     periodData.lastPeriod,
                                     periodData.cycleLength
                                 );
-                                
+
                                 if (!status) return null;
 
                                 return (
@@ -463,8 +474,8 @@ function PeriodTracker() {
                         {editingPeriod ? 'Update Period' : 'Add Period'}
                     </button>
                     {editingPeriod && (
-                        <button 
-                            className="btn-show-calendar" 
+                        <button
+                            className="btn-show-calendar"
                             onClick={() => {
                                 setEditingPeriod(null);
                                 setLastPeriod("");
@@ -495,13 +506,13 @@ function PeriodTracker() {
                                             </div>
                                         </div>
                                         <div className="period-log-actions">
-                                            <button 
+                                            <button
                                                 className="period-log-button edit-button"
                                                 onClick={() => handleEdit(period)}
                                             >
                                                 Edit
                                             </button>
-                                            <button 
+                                            <button
                                                 className="period-log-button delete-button"
                                                 onClick={() => handleDelete(period.id)}
                                             >

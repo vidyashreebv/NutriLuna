@@ -23,6 +23,7 @@ import PinVerification from './Components/PinVerification/PinVerification';
 import axios from 'axios';
 import { AuthProvider } from './context/AuthContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
+import { LoadingProvider } from './context/LoadingContext';
 
 // Wrapper component to handle PIN verification
 const ProtectedRoute = ({ children }) => {
@@ -102,11 +103,20 @@ const ProtectedRoute = ({ children }) => {
           // Always check PIN verification with a time-based approach
           const lastPinVerificationTime = localStorage.getItem('lastPinVerificationTime');
           const currentTime = Date.now();
-          const PIN_VERIFICATION_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+          const PIN_VERIFICATION_EXPIRY = 30 * 60 * 1000; // 30 minutes
 
           console.log('PIN Set:', isPinSet);
           console.log('Last PIN Verification Time:', lastPinVerificationTime);
           console.log('Current Time:', currentTime);
+
+          // Clear verification on new session
+          if (!sessionStorage.getItem('sessionStarted')) {
+            console.log('New session detected, clearing PIN verification');
+            localStorage.removeItem('lastPinVerificationTime');
+            localStorage.removeItem('lastPinVerificationPath');
+            localStorage.removeItem('pinVerified');
+            sessionStorage.setItem('sessionStarted', 'true');
+          }
 
           // Determine if we need to show PIN verification
           const shouldShowPinVerification = isPinSet && (
@@ -114,17 +124,11 @@ const ProtectedRoute = ({ children }) => {
             (currentTime - parseInt(lastPinVerificationTime) > PIN_VERIFICATION_EXPIRY)
           );
 
-          // Additional check to prevent repeated verifications
-          const lastPinVerificationPath = localStorage.getItem('lastPinVerificationPath');
-          const isNewPath = lastPinVerificationPath !== location.pathname;
-
           console.log('Should Show PIN Verification:', shouldShowPinVerification);
-          console.log('Is New Path:', isNewPath);
 
-          if (shouldShowPinVerification && isNewPath) {
-            console.log('ProtectedRoute: PIN is set, FORCING verification');
+          if (shouldShowPinVerification) {
+            console.log('ProtectedRoute: PIN verification required');
             localStorage.setItem('intendedPath', location.pathname);
-            localStorage.setItem('lastPinVerificationPath', location.pathname);
             localStorage.removeItem('pinVerified');
             setIsPinRequired(true);
           }
@@ -188,129 +192,131 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <SubscriptionProvider>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route 
-              path="/login" 
-              element={currentUser ? <Navigate to="/landing" replace /> : <LoginRegister />} 
-            />
-            <Route 
-              path="/" 
-              element={currentUser ? <Navigate to="/landing" replace /> : <Landing />} 
-            />
+    <Router>
+      <AuthProvider>
+        <SubscriptionProvider>
+          <LoadingProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route 
+                path="/login" 
+                element={currentUser ? <Navigate to="/landing" replace /> : <LoginRegister />} 
+              />
+              <Route 
+                path="/" 
+                element={currentUser ? <Navigate to="/landing" replace /> : <Landing />} 
+              />
 
-            {/* Protected routes */}
-            <Route 
-              path="/landing" 
-              element={
-                <ProtectedRoute>
-                  {currentUser ? <Landingafter /> : <Navigate to="/login" replace />}
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  {currentUser ? <Dashboard /> : <Navigate to="/login" replace />}
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/about" 
-              element={
-                <ProtectedRoute>
-                  <AboutUs />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/blog" 
-              element={
-                <ProtectedRoute>
-                  <BlogPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/diet" 
-              element={
-                <ProtectedRoute>
-                  <DietTracking />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/period" 
-              element={
-                <ProtectedRoute>
-                  <PeriodTracker />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/aboutusafter" 
-              element={
-                <ProtectedRoute>
-                  <AboutUsAfter />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/personaldetails" 
-              element={
-                <ProtectedRoute>
-                  <PersonalDetailsForm />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/blogafter" 
-              element={
-                <ProtectedRoute>
-                  <Blogafter />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/navbarafter" 
-              element={
-                <ProtectedRoute>
-                  <Navbarafter />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/recipe" 
-              element={
-                <ProtectedRoute>
-                  <RecipeSuggestion2 />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/consultation" 
-              element={
-                <ProtectedRoute>
-                  <Consultation />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/bookappointment" 
-              element={
-                <ProtectedRoute>
-                  <BookAppointment />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </Router>
-      </SubscriptionProvider>
-    </AuthProvider>
+              {/* Protected routes */}
+              <Route 
+                path="/landing" 
+                element={
+                  <ProtectedRoute>
+                    {currentUser ? <Landingafter /> : <Navigate to="/login" replace />}
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    {currentUser ? <Dashboard /> : <Navigate to="/login" replace />}
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/about" 
+                element={
+                  <ProtectedRoute>
+                    <AboutUs />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/blog" 
+                element={
+                  <ProtectedRoute>
+                    <BlogPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/diet" 
+                element={
+                  <ProtectedRoute>
+                    <DietTracking />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/period" 
+                element={
+                  <ProtectedRoute>
+                    <PeriodTracker />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/aboutusafter" 
+                element={
+                  <ProtectedRoute>
+                    <AboutUsAfter />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/personaldetails" 
+                element={
+                  <ProtectedRoute>
+                    <PersonalDetailsForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/blogafter" 
+                element={
+                  <ProtectedRoute>
+                    <Blogafter />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/navbarafter" 
+                element={
+                  <ProtectedRoute>
+                    <Navbarafter />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/recipe" 
+                element={
+                  <ProtectedRoute>
+                    <RecipeSuggestion2 />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/consultation" 
+                element={
+                  <ProtectedRoute>
+                    <Consultation />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bookappointment" 
+                element={
+                  <ProtectedRoute>
+                    <BookAppointment />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </LoadingProvider>
+        </SubscriptionProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

@@ -1,0 +1,110 @@
+.landingafter-container {
+    position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.landingafter-carousel {
+    height: 100%;
+  position: relative;
+}
+
+.landingafter-carousel-slide {
+    position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  background-size: cover;
+  background-position: center;
+}
+
+.landingafter-carousel-slide.active {
+    opacity: 1;
+}
+
+.landingafter-carousel-content {
+    position: absolute;
+  bottom: 20%;
+  left: 10%;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+}
+
+.landingafter-content-place {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .landingafter-content-title-1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .landingafter-content-title-2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .landingafter-content-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 1rem;
+    border-radius: 8px;
+  }
+.landingafter-carousel-prev, 
+.landingafter-carousel-next {
+    position: absolute;
+  top: 99%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: none;
+  padding: 0.2rem;
+  cursor: pointer;
+  font-size: 1.5rem;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  z-index: 10;
+}
+
+.landingafter-carousel-prev{
+    left: 2rem;
+}
+
+.landingafter-carousel-next{
+    right: 2rem;
+}
+
+.landingafter-carousel-prev:hover,
+.landingafter-carousel-next:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.landingafter-carousel-dots {
+    position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.landingafter-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.landingafter-dot.active {
+    background-color: white;
+}

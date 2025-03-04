@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, db } from "../../config/firebase"; // Import Firebase
+import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { PiUserFill, PiEnvelopeSimpleBold } from "react-icons/pi";
 import { TbPasswordUser } from "react-icons/tb";
 import "./LoginRegister.css";
 import { useAuth } from '../../context/AuthContext';
+import { useLoading } from '../../context/LoadingContext';
+import axios from 'axios';
 
 const LoginRegister = () => {
   const { currentUser } = useAuth();
+  const { showLoader, hideLoader } = useLoading();
   const [action, setAction] = useState("");
   const [formData, setFormData] = useState({
     name: "",
@@ -28,14 +31,14 @@ const LoginRegister = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Check if all Register fields are filled & passwords match
+  // Check if all Register fields are filled & passwords match
   useEffect(() => {
     const { name, email, password, confirmPassword } = formData;
     setIsRegisterDisabled(!(name && email && password && confirmPassword && password === confirmPassword));
     setPasswordMismatch(password && confirmPassword && password !== confirmPassword);
   }, [formData]);
 
-  // ✅ Check if all Login fields are filled
+  // Check if all Login fields are filled
   useEffect(() => {
     const { email, password } = formData;
     setIsLoginDisabled(!(email && password));
@@ -44,16 +47,20 @@ const LoginRegister = () => {
   // Add this effect to redirect if user is already logged in
   useEffect(() => {
     if (currentUser) {
-      navigate('/dashboard', { replace: true });
+      // Clear any existing PIN verification on login
+      localStorage.removeItem('pinVerified');
+      localStorage.removeItem('intendedPath');
+      navigate('/landing', { replace: true });
     }
   }, [currentUser, navigate]);
 
-  // 🔹 Register Function (With Firestore User Storage)
+  // Register Function (With Firestore User Storage)
   const handleRegister = async (event) => {
     event.preventDefault();
-    const { name, email, password } = formData;
-
     try {
+      showLoader();
+      const { name, email, password } = formData;
+
       // Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -62,27 +69,67 @@ const LoginRegister = () => {
       await setDoc(doc(db, "users", user.uid), {
         username: name,
         email: email,
+        isNewUser: true
       });
 
+      // Clear any existing PIN verification
+      localStorage.removeItem('pinVerified');
+      localStorage.removeItem('intendedPath');
+      
       alert("Registration successful");
-      navigate("/personaldetails"); // Redirect after login
-       // Switch back to login form
+      navigate("/personaldetails");
     } catch (error) {
       alert(error.message);
+    } finally {
+      hideLoader();
     }
   };
 
-  // 🔹 Login Function
+  // Login Function
   const handleLogin = async (event) => {
     event.preventDefault();
-    const { email, password } = formData;
-
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // The redirect will happen automatically through the useEffect above
+      showLoader();
+      const { email, password } = formData;
+
+      // Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Get user data from Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+
+      // Clear any existing PIN verification
+      localStorage.removeItem('pinVerified');
+      localStorage.removeItem('intendedPath');
+
+      // Check if user has set up PIN before
+      try {
+        const token = await user.getIdToken();
+        const response = await axios.get('http://localhost:5001/api/pin/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (userData?.isNewUser || !response.data.isPinSet) {
+          // New user or PIN not set - show PIN setup
+          navigate('/landing', { state: { requirePinSetup: true } });
+        } else {
+          // Existing user - show PIN verification
+          navigate('/landing');
+        }
+      } catch (error) {
+        console.error('Error checking PIN status:', error);
+        // If error in checking PIN status, just go to landing
+        navigate('/landing');
+      }
     } catch (error) {
       console.error('Login error:', error);
       alert(error.message);
+    } finally {
+      hideLoader();
     }
   };
 

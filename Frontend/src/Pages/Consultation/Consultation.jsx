@@ -10,12 +10,13 @@ import { db } from '../../config/firebase';
 import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 import { useSubscription } from '../../context/SubscriptionContext';
+import { useLoading } from '../../context/LoadingContext';
 
 const navItems = [
   { label: 'Home', href: '/landing' },
   { label: 'About', href: '/aboutusafter' },
   { label: 'Blog', href: '/blogafter' },
-  { label: 'Track Your Periods', href: '/period'},
+  { label: 'Track Your Periods', href: '/period' },
   { label: 'Diet Tracking', href: '/diet' },
   { label: 'Recipe Suggestions', href: '/recipe' },
   { label: 'Consultation', href: '/consultation', active: true },
@@ -85,6 +86,7 @@ const Header = () => (
 const ConsultationPage = () => {
   const navigate = useNavigate();
   const { subscription, updateSubscription, checkSubscriptionStatus } = useSubscription();
+  const { showLoader, hideLoader } = useLoading();
   const [isLoading, setIsLoading] = useState(false);
   const auth = getAuth();
 
@@ -99,10 +101,10 @@ const ConsultationPage = () => {
           const userData = userDoc.data();
           const currentSub = userData.currentSubscription;
 
-          if (currentSub && 
-              new Date(currentSub.endDate) > new Date() && 
-              currentSub.remainingConsultations > 0 && 
-              currentSub.isActive) {
+          if (currentSub &&
+            new Date(currentSub.endDate) > new Date() &&
+            currentSub.remainingConsultations > 0 &&
+            currentSub.isActive) {
             navigate('/bookappointment');
           }
         }
@@ -113,6 +115,19 @@ const ConsultationPage = () => {
 
     checkAndRedirect();
   }, [navigate, auth]);
+
+  useEffect(() => {
+    const fetchConsultationData = async () => {
+      try {
+        showLoader();
+        // Your existing data fetching code
+      } finally {
+        hideLoader();
+      }
+    };
+
+    fetchConsultationData();
+  }, []);
 
   const getPackageDetails = (packageType) => {
     switch (packageType) {
@@ -209,21 +224,21 @@ const ConsultationPage = () => {
     <div className="consultation-wrapper">
       <Navbarafter navItems={navItems} />
       <Header />
-      
+
       <div className="consultation-main-container">
         <div className="section-title">
           <h2>
-            {subscription?.remainingConsultations <= 0 
-              ? 'Upgrade Your Plan' 
+            {subscription?.remainingConsultations <= 0
+              ? 'Upgrade Your Plan'
               : 'Choose Your Consultation Package'}
           </h2>
           <p>
-            {subscription?.remainingConsultations <= 0 
-              ? 'You have used all your consultations. Choose a new plan to continue.' 
+            {subscription?.remainingConsultations <= 0
+              ? 'You have used all your consultations. Choose a new plan to continue.'
               : 'Select the plan that best fits your healthcare needs'}
           </p>
         </div>
-        
+
         <div className="container-consultation">
           <section className="plans-section">
             {Object.entries(plans).map(([type, plan]) => (
@@ -236,8 +251,8 @@ const ConsultationPage = () => {
                     <li key={index}>{feature}</li>
                   ))}
                 </ul>
-                <button 
-                  onClick={() => handleSubscriptionClick(type)} 
+                <button
+                  onClick={() => handleSubscriptionClick(type)}
                   className={`plan-btn ${isLoading ? 'loading' : ''}`}
                   disabled={isLoading}
                 >
@@ -248,11 +263,10 @@ const ConsultationPage = () => {
           </section>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
 };
 
 export default ConsultationPage;
-

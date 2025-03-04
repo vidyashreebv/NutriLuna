@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { useLoading } from '../../context/LoadingContext';
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -120,6 +121,7 @@ const CustomPopup = ({ message, onClose }) => {
 const BookAppointment = () => {
     const navigate = useNavigate();
     const { subscription, checkSubscriptionStatus, updateSubscription } = useSubscription();
+    const { showLoader, hideLoader } = useLoading();
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -311,12 +313,8 @@ const BookAppointment = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
-
         try {
+            showLoader();
             const user = auth.currentUser;
             if (!user) {
                 showPopup('Please login to book a consultation');
@@ -399,6 +397,8 @@ const BookAppointment = () => {
         } catch (error) {
             console.error('Error booking consultation:', error);
             showPopup(error.message || 'Failed to book consultation');
+        } finally {
+            hideLoader();
         }
     };
 

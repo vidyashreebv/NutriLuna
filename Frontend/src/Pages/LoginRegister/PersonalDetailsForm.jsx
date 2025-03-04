@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-
-
+import { useLoading } from '../../context/LoadingContext';
 
 import { 
   CalendarIcon, 
@@ -75,6 +74,7 @@ const PersonalDetailsForm = () => {
     }));
   };
   const navigate = useNavigate(); // Initialize navigation
+  const { showLoader, hideLoader } = useLoading();
 
   const handleNext = (e) => {
     e.preventDefault(); // Prevent any accidental form submission
@@ -86,29 +86,33 @@ const PersonalDetailsForm = () => {
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (currentSection < sections.length - 1) {
-      return; // Prevent submission if not on the last section
-    }
-  
-    const user = auth.currentUser;
-  
-    if (!user) {
-      alert("User not logged in! Please log in first.");
-      return;
-    }
-  
     try {
-      const userRef = doc(db, "users", user.uid, "personalDetails", "profile");
-      await setDoc(userRef, formData, { merge: true });
+      showLoader();
+      if (currentSection < sections.length - 1) {
+        return; // Prevent submission if not on the last section
+      }
   
-      console.log("Personal details saved successfully!");
-      alert("Personal details saved!");
-      navigate("/login")
-      
-    } catch (error) {
-      console.error("Error saving details:", error);
-      alert("Failed to save details: " + error.message);
+      const user = auth.currentUser;
+  
+      if (!user) {
+        alert("User not logged in! Please log in first.");
+        return;
+      }
+  
+      try {
+        const userRef = doc(db, "users", user.uid, "personalDetails", "profile");
+        await setDoc(userRef, formData, { merge: true });
+  
+        console.log("Personal details saved successfully!");
+        alert("Personal details saved!");
+        navigate("/login")
+        
+      } catch (error) {
+        console.error("Error saving details:", error);
+        alert("Failed to save details: " + error.message);
+      }
+    } finally {
+      hideLoader();
     }
   };
   

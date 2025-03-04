@@ -5,6 +5,7 @@ import "./dietTracking.css";
 import axios from "axios";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
+import { useLoading } from '../../context/LoadingContext';
 
 const DietTracker = () => {
   // State management
@@ -23,6 +24,8 @@ const DietTracker = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(null);
+
+  const { showLoader, hideLoader } = useLoading();
 
   // Refs
   const navbarRef = useRef(null);
@@ -161,6 +164,7 @@ const DietTracker = () => {
         return;
       }
 
+      showLoader();
       const token = await auth.currentUser.getIdToken();
       const response = await axios.get(`http://localhost:5001/api/diettracker/${userId}`, {
         headers: {
@@ -190,6 +194,7 @@ const DietTracker = () => {
       console.error('❌ Error fetching meals:', err);
     } finally {
       setIsLoading(false);
+      hideLoader();
     }
   };
 
@@ -201,6 +206,7 @@ const DietTracker = () => {
   // Meal management functions
   const addMeal = async () => {
     try {
+      showLoader();
       const token = await auth.currentUser.getIdToken();
       console.log("🔑 Firebase Token:", token);
       const response = await axios.post("http://localhost:5001/api/diettracker/add", {
@@ -222,6 +228,8 @@ const DietTracker = () => {
 
     } catch (error) {
       console.error("Failed to add meal:", error);
+    } finally {
+      hideLoader();
     }
   };
 
@@ -233,6 +241,7 @@ const DietTracker = () => {
   // New function to handle delete button click
   const onDeleteMeal = async (mealId) => {
     try {
+      showLoader();
       const token = await auth.currentUser.getIdToken();
 
       await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
@@ -247,12 +256,15 @@ const DietTracker = () => {
     } catch (err) {
       console.error("Error deleting meal:", err);
       setError(err.response?.data?.error || 'Failed to delete meal');
+    } finally {
+      hideLoader();
     }
   };
 
   // Updated editMeal function
   const editMeal = async (id, section, updatedData) => {
     try {
+      showLoader();
       const token = await auth.currentUser.getIdToken();
 
       console.log("Updating meal:", id, "with data:", updatedData);
@@ -270,6 +282,8 @@ const DietTracker = () => {
     } catch (err) {
       console.error("Error updating meal:", err);
       setError(err.response?.data?.error || 'Failed to update meal');
+    } finally {
+      hideLoader();
     }
   };
 

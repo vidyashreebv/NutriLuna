@@ -1,17 +1,18 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { admin, db } = require("../config/firebaseConfig");
-const axios = require("axios");
+const admin = require('firebase-admin');
+const axios = require('axios');
+const db = admin.firestore();
+
+// Edamam API configuration
+const EDAMAM_APP_ID = "3a186b10";
+const EDAMAM_APP_KEY = "bb5cc41f92beda348e8de336d17d222d";
 
 // Cache configuration
 const CACHE_DURATION = 3600000; // 1 hour in milliseconds
 const recipeCache = new Map();
 
-// Retry configuration
-const MAX_RETRIES = 3;
-const INITIAL_RETRY_DELAY = 2000; // 2 seconds
-
-// Default recipes for when API is unavailable
+// Default recipes for fallback
 const DEFAULT_RECIPES = {
     follicular: [
         {
@@ -57,6 +58,98 @@ const DEFAULT_RECIPES = {
             calories: 550,
             servings: 1,
             url: "https://www.example.com/quinoa-buddha-bowl"
+        },
+        {
+            id: "default-follicular-3",
+            title: "Iron-Rich Breakfast Bowl",
+            description: "A nutrient-packed breakfast to support iron levels during the follicular phase.",
+            image: "https://images.unsplash.com/photo-1490474504059-bf2db5ab2348?auto=format&fit=crop&w=800&q=80",
+            benefits: ["iron-rich", "protein-packed", "energy-boosting"],
+            nutrients: {
+                iron: { quantity: 8, unit: "mg" },
+                protein: { quantity: 22, unit: "g" },
+                vitaminC: { quantity: 65, unit: "mg" }
+            },
+            ingredients: [
+                "1 cup cooked quinoa",
+                "2 soft-boiled eggs",
+                "1 cup sautéed spinach",
+                "1/2 avocado",
+                "1 tbsp pumpkin seeds",
+                "Lemon-tahini dressing"
+            ],
+            calories: 550,
+            servings: 1,
+            url: "https://www.example.com/iron-rich-breakfast"
+        },
+        {
+            id: "default-follicular-4",
+            title: "Citrus and Kale Power Salad",
+            description: "Vitamin C-rich salad that helps iron absorption.",
+            image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80",
+            benefits: ["vitamin C", "iron absorption", "antioxidants"],
+            nutrients: {
+                vitaminC: { quantity: 100, unit: "mg" },
+                iron: { quantity: 4, unit: "mg" },
+                fiber: { quantity: 7, unit: "g" }
+            },
+            ingredients: [
+                "3 cups chopped kale",
+                "1 orange, segmented",
+                "1 grapefruit, segmented",
+                "1/4 cup pomegranate seeds",
+                "2 tbsp olive oil",
+                "1 tbsp citrus vinaigrette"
+            ],
+            calories: 320,
+            servings: 2,
+            url: "https://www.example.com/citrus-kale-salad"
+        },
+        {
+            id: "default-follicular-5",
+            title: "Energizing Green Smoothie",
+            description: "Iron-rich smoothie with vitamin C for better absorption.",
+            image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=800&q=80",
+            benefits: ["energy-boosting", "iron-rich", "vitamin C"],
+            nutrients: {
+                iron: { quantity: 5, unit: "mg" },
+                vitaminC: { quantity: 80, unit: "mg" },
+                protein: { quantity: 15, unit: "g" }
+            },
+            ingredients: [
+                "2 cups spinach",
+                "1 green apple",
+                "1 banana",
+                "1 tbsp spirulina",
+                "1 cup coconut water",
+                "1 tbsp hemp seeds"
+            ],
+            calories: 280,
+            servings: 1,
+            url: "https://www.example.com/green-smoothie"
+        },
+        {
+            id: "default-follicular-6",
+            title: "Mediterranean Chickpea Bowl",
+            description: "Plant-based iron and protein-rich meal.",
+            image: "https://images.unsplash.com/photo-1529059997568-3d847b1154f0?auto=format&fit=crop&w=800&q=80",
+            benefits: ["plant-based iron", "protein", "mediterranean"],
+            nutrients: {
+                iron: { quantity: 6, unit: "mg" },
+                protein: { quantity: 18, unit: "g" },
+                fiber: { quantity: 12, unit: "g" }
+            },
+            ingredients: [
+                "2 cups chickpeas",
+                "1 cup cherry tomatoes",
+                "1 cucumber, diced",
+                "1/4 cup olives",
+                "Fresh herbs",
+                "Lemon-olive oil dressing"
+            ],
+            calories: 450,
+            servings: 2,
+            url: "https://www.example.com/chickpea-bowl"
         }
     ],
     ovulation: [
@@ -105,31 +198,98 @@ const DEFAULT_RECIPES = {
             calories: 600,
             servings: 2,
             url: "https://www.example.com/raw-veggie-platter"
-        }
-    ],
-    menstrual: [
+        },
         {
-            id: "default-menstrual-1",
-            title: "Iron-Rich Lentil Soup",
-            description: "Warming soup rich in iron and B12, perfect for the menstrual phase.",
-            image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80",
-            benefits: ["iron-rich", "warming", "comforting"],
+            id: "default-ovulation-3",
+            title: "Fertility-Boosting Salmon Bowl",
+            description: "Rich in omega-3s and antioxidants for optimal fertility.",
+            image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80",
+            benefits: ["omega-3 rich", "antioxidants", "protein"],
             nutrients: {
-                iron: { quantity: 12, unit: "mg" },
-                vitaminB12: { quantity: 2.4, unit: "mcg" },
-                protein: { quantity: 18, unit: "g" }
+                omega3: { quantity: 2.5, unit: "g" },
+                protein: { quantity: 28, unit: "g" },
+                vitaminD: { quantity: 600, unit: "IU" }
             },
             ingredients: [
-                "1 cup red lentils",
-                "2 cups spinach",
-                "1 onion",
-                "2 carrots",
-                "4 cups vegetable broth",
-                "Spices to taste"
+                "6 oz wild-caught salmon",
+                "1 cup brown rice",
+                "2 cups mixed greens",
+                "1 avocado",
+                "Sesame ginger dressing",
+                "Nori strips"
             ],
             calories: 650,
+            servings: 1,
+            url: "https://www.example.com/salmon-bowl"
+        },
+        {
+            id: "default-ovulation-4",
+            title: "Antioxidant Power Bowl",
+            description: "Packed with fertility-supporting antioxidants.",
+            image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80",
+            benefits: ["antioxidant-rich", "anti-inflammatory", "nutrient-dense"],
+            nutrients: {
+                vitaminC: { quantity: 95, unit: "mg" },
+                vitaminE: { quantity: 18, unit: "mg" },
+                fiber: { quantity: 10, unit: "g" }
+            },
+            ingredients: [
+                "2 cups mixed berries",
+                "1 cup Greek yogurt",
+                "1/4 cup walnuts",
+                "2 tbsp honey",
+                "1 tbsp chia seeds",
+                "Fresh mint"
+            ],
+            calories: 420,
+            servings: 1,
+            url: "https://www.example.com/antioxidant-bowl"
+        },
+        {
+            id: "default-ovulation-5",
+            title: "Fertility Green Juice",
+            description: "Fresh juice packed with fertility-supporting nutrients.",
+            image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=800&q=80",
+            benefits: ["detoxifying", "nutrient-rich", "alkalizing"],
+            nutrients: {
+                vitaminC: { quantity: 75, unit: "mg" },
+                folate: { quantity: 200, unit: "mcg" },
+                potassium: { quantity: 500, unit: "mg" }
+            },
+            ingredients: [
+                "2 green apples",
+                "1 cucumber",
+                "4 celery stalks",
+                "1 inch ginger",
+                "1 lemon",
+                "2 cups spinach"
+            ],
+            calories: 180,
             servings: 2,
-            url: "https://www.example.com/lentil-soup"
+            url: "https://www.example.com/fertility-juice"
+        },
+        {
+            id: "default-ovulation-6",
+            title: "Superfood Quinoa Salad",
+            description: "Nutrient-dense salad supporting reproductive health.",
+            image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=800&q=80",
+            benefits: ["protein-rich", "antioxidants", "healthy fats"],
+            nutrients: {
+                protein: { quantity: 15, unit: "g" },
+                iron: { quantity: 4, unit: "mg" },
+                omega3: { quantity: 1.5, unit: "g" }
+            },
+            ingredients: [
+                "1 cup quinoa",
+                "1 cup edamame",
+                "1 bell pepper",
+                "1/4 cup pumpkin seeds",
+                "Seaweed flakes",
+                "Ginger-miso dressing"
+            ],
+            calories: 480,
+            servings: 2,
+            url: "https://www.example.com/superfood-salad"
         }
     ],
     luteal: [
@@ -155,404 +315,598 @@ const DEFAULT_RECIPES = {
             calories: 550,
             servings: 1,
             url: "https://www.example.com/chocolate-oats"
+        },
+        {
+            id: "default-luteal-2",
+            title: "Serotonin-Boosting Buddha Bowl",
+            description: "Complex carbs and protein to support mood and energy.",
+            image: "https://images.unsplash.com/photo-1543340904-0b1d843bccda?auto=format&fit=crop&w=800&q=80",
+            benefits: ["mood-balancing", "blood sugar stable", "satisfying"],
+            nutrients: {
+                carbs: { quantity: 65, unit: "g" },
+                protein: { quantity: 20, unit: "g" },
+                magnesium: { quantity: 120, unit: "mg" }
+            },
+            ingredients: [
+                "1 cup brown rice",
+                "1 cup roasted sweet potato",
+                "1 cup black beans",
+                "1 cup roasted broccoli",
+                "Tahini sauce",
+                "Pumpkin seeds"
+            ],
+            calories: 580,
+            servings: 1,
+            url: "https://www.example.com/buddha-bowl"
+        },
+        {
+            id: "default-luteal-3",
+            title: "Calming Chamomile Smoothie",
+            description: "Soothing smoothie with magnesium-rich ingredients.",
+            image: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=800&q=80",
+            benefits: ["calming", "anti-inflammatory", "hormone-balancing"],
+            nutrients: {
+                magnesium: { quantity: 100, unit: "mg" },
+                calcium: { quantity: 250, unit: "mg" },
+                protein: { quantity: 12, unit: "g" }
+            },
+            ingredients: [
+                "1 cup chamomile tea",
+                "1 banana",
+                "1 cup almond milk",
+                "1 tbsp almond butter",
+                "1 date",
+                "1/4 tsp cinnamon"
+            ],
+            calories: 320,
+            servings: 1,
+            url: "https://www.example.com/calming-smoothie"
+        },
+        {
+            id: "default-luteal-4",
+            title: "Magnesium-Rich Dinner Bowl",
+            description: "Evening meal to support sleep and relaxation.",
+            image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+            benefits: ["sleep-supporting", "magnesium-rich", "balanced"],
+            nutrients: {
+                magnesium: { quantity: 150, unit: "mg" },
+                protein: { quantity: 25, unit: "g" },
+                fiber: { quantity: 8, unit: "g" }
+            },
+            ingredients: [
+                "2 cups leafy greens",
+                "1 cup quinoa",
+                "1 cup roasted chickpeas",
+                "1/2 avocado",
+                "Pumpkin seeds",
+                "Lemon-herb dressing"
+            ],
+            calories: 520,
+            servings: 1,
+            url: "https://www.example.com/dinner-bowl"
+        },
+        {
+            id: "default-luteal-5",
+            title: "Anti-Bloat Green Soup",
+            description: "Digestive-friendly soup with anti-inflammatory properties.",
+            image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+            benefits: ["anti-bloating", "digestive support", "hydrating"],
+            nutrients: {
+                fiber: { quantity: 10, unit: "g" },
+                potassium: { quantity: 800, unit: "mg" },
+                vitaminC: { quantity: 45, unit: "mg" }
+            },
+            ingredients: [
+                "2 cups zucchini",
+                "2 cups spinach",
+                "1 cup coconut milk",
+                "1 inch ginger",
+                "Fresh herbs",
+                "Bone broth"
+            ],
+            calories: 280,
+            servings: 2,
+            url: "https://www.example.com/green-soup"
+        }
+    ],
+    menstrual: [
+        {
+            id: "default-menstrual-1",
+            title: "Iron-Rich Lentil Soup",
+            description: "Warming soup rich in iron and B12, perfect for the menstrual phase.",
+            image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80",
+            benefits: ["iron-rich", "warming", "comforting"],
+            nutrients: {
+                iron: { quantity: 12, unit: "mg" },
+                vitaminB12: { quantity: 2.4, unit: "mcg" },
+                protein: { quantity: 18, unit: "g" }
+            },
+            ingredients: [
+                "1 cup red lentils",
+                "2 cups spinach",
+                "1 onion",
+                "2 carrots",
+                "4 cups vegetable broth",
+                "Spices to taste"
+            ],
+            calories: 650,
+            servings: 2,
+            url: "https://www.example.com/lentil-soup"
+        },
+        {
+            id: "default-menstrual-2",
+            title: "Iron-Replenishing Breakfast",
+            description: "Warm and nourishing breakfast to replenish iron stores.",
+            image: "https://images.unsplash.com/photo-1543340904-0b1d843bccda?auto=format&fit=crop&w=800&q=80",
+            benefits: ["iron-rich", "warming", "energy-sustaining"],
+            nutrients: {
+                iron: { quantity: 10, unit: "mg" },
+                protein: { quantity: 15, unit: "g" },
+                vitaminC: { quantity: 45, unit: "mg" }
+            },
+            ingredients: [
+                "1 cup oatmeal",
+                "2 tbsp molasses",
+                "1 apple, diced",
+                "1/4 cup walnuts",
+                "Cinnamon",
+                "Plant-based milk"
+            ],
+            calories: 420,
+            servings: 1,
+            url: "https://www.example.com/iron-breakfast"
+        },
+        {
+            id: "default-menstrual-3",
+            title: "Anti-Inflammatory Golden Milk",
+            description: "Soothing turmeric drink to reduce inflammation and cramps.",
+            image: "https://images.unsplash.com/photo-1578020190125-f4f7c18bc9cb?auto=format&fit=crop&w=800&q=80",
+            benefits: ["anti-inflammatory", "pain-reducing", "warming"],
+            nutrients: {
+                curcumin: { quantity: 200, unit: "mg" },
+                calcium: { quantity: 300, unit: "mg" },
+                vitaminD: { quantity: 400, unit: "IU" }
+            },
+            ingredients: [
+                "2 cups plant milk",
+                "1 tsp turmeric",
+                "1/2 tsp ginger",
+                "1/4 tsp black pepper",
+                "1 tbsp honey",
+                "1/4 tsp cinnamon"
+            ],
+            calories: 180,
+            servings: 2,
+            url: "https://www.example.com/golden-milk"
+        },
+        {
+            id: "default-menstrual-4",
+            title: "Iron-Rich Veggie Stir-Fry",
+            description: "Quick and easy iron-rich dinner with vitamin C for absorption.",
+            image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=800&q=80",
+            benefits: ["iron-rich", "quick energy", "anti-inflammatory"],
+            nutrients: {
+                iron: { quantity: 8, unit: "mg" },
+                vitaminC: { quantity: 70, unit: "mg" },
+                protein: { quantity: 16, unit: "g" }
+            },
+            ingredients: [
+                "2 cups tempeh",
+                "2 cups broccoli",
+                "1 bell pepper",
+                "1 cup snap peas",
+                "Ginger-garlic sauce",
+                "Sesame seeds"
+            ],
+            calories: 480,
+            servings: 2,
+            url: "https://www.example.com/veggie-stirfry"
+        },
+        {
+            id: "default-menstrual-5",
+            title: "Comforting Red Lentil Dahl",
+            description: "Iron-rich and comforting dish perfect for the menstrual phase.",
+            image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80",
+            benefits: ["iron-rich", "protein", "comforting"],
+            nutrients: {
+                iron: { quantity: 9, unit: "mg" },
+                protein: { quantity: 18, unit: "g" },
+                fiber: { quantity: 11, unit: "g" }
+            },
+            ingredients: [
+                "1 cup red lentils",
+                "1 can coconut milk",
+                "2 tomatoes",
+                "Indian spices",
+                "Fresh cilantro",
+                "Brown rice"
+            ],
+            calories: 550,
+            servings: 2,
+            url: "https://www.example.com/lentil-dahl"
         }
     ]
 };
 
-// Helper function to implement exponential backoff
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const DEFAULT_RECIPE_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkhlYWx0aHkgUmVjaXBlPC90ZXh0Pjwvc3ZnPg==';
 
-// Helper function to get cached recipes with improved error handling
-const getCachedRecipes = (cacheKey) => {
-    try {
-        const cached = recipeCache.get(cacheKey);
-        if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-            console.log("Cache hit for:", cacheKey);
-            return cached.data;
-        }
-        console.log("Cache miss for:", cacheKey);
-        return null;
-    } catch (error) {
-        console.error("Error accessing cache:", error);
-        return null;
+// Helper function to get cached recipes
+function getCachedRecipes(key) {
+    const cached = recipeCache.get(key);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log('Using cached recipes for:', key);
+        return cached.data;
     }
-};
+    return null;
+}
 
 // Helper function to cache recipes
-const cacheRecipes = (cacheKey, data) => {
-    recipeCache.set(cacheKey, {
+function cacheRecipes(key, recipes) {
+    recipeCache.set(key, {
         timestamp: Date.now(),
-        data
+        data: recipes
     });
-};
+}
 
-// Helper function to make API call with improved retry logic
-const makeEdamamRequest = async (url, headers, retryCount = 0) => {
-    try {
-        const response = await axios.get(url, { 
-            headers,
-            timeout: 15000 // Increased to 15 seconds
-        });
-        return response;
-    } catch (error) {
-        console.log(`API request attempt ${retryCount + 1} failed:`, error.message);
-        
-        if (error.response?.status === 429 && retryCount < MAX_RETRIES) {
-            const retryAfter = parseInt(error.response.headers['retry-after']) || Math.pow(2, retryCount + 1) * INITIAL_RETRY_DELAY;
-            console.log(`Rate limited. Retrying in ${retryAfter}ms...`);
-            await wait(retryAfter);
-            return makeEdamamRequest(url, headers, retryCount + 1);
-        }
-
-        throw {
-            ...error,
-            retryAttempts: retryCount,
-            lastAttemptTime: new Date().toISOString()
-        };
+// Helper function to get fallback recipes
+function getFallbackRecipes(phase) {
+    console.log('Getting fallback recipes for phase:', phase);
+    if (phase && phase !== 'all' && DEFAULT_RECIPES[phase]) {
+        return DEFAULT_RECIPES[phase];
     }
-};
-
-// Edamam API configuration
-const EDAMAM_APP_ID = "271cf725";
-const EDAMAM_APP_KEY = "67adde6572e8ad9a2ce72b17b8e2625d";
-const EDAMAM_USER_ID = "9Htsc8m4hGUm5Nkr8BwrqpiZbv23"; // Using the Firebase user ID as Edamam user ID
+    return Object.values(DEFAULT_RECIPES).flat().slice(0, 6);
+}
 
 // Middleware to verify token
 const verifyToken = async (req, res, next) => {
     try {
-        if (!req.headers.authorization) {
-            return res.status(403).json({ error: "No authorization header" });
-        }
-
-        const token = req.headers.authorization.split("Bearer ")[1];
+        const token = req.headers.authorization?.split('Bearer ')[1];
         if (!token) {
-            return res.status(403).json({ error: "No token provided" });
+            return res.status(401).json({ success: false, error: 'No token provided' });
         }
 
         const decodedToken = await admin.auth().verifyIdToken(token);
         req.user = decodedToken;
         next();
     } catch (error) {
-        console.error("Authentication error:", error);
-        res.status(403).json({ error: "Authentication failed" });
+        console.error('Token verification error:', error);
+        res.status(401).json({ success: false, error: 'Invalid token' });
     }
 };
 
 // Helper function to get nutritional requirements based on menstrual phase
-const getNutritionalRequirements = (phase) => {
-    switch (phase) {
-        case "menstrual":
-            return {
-                nutrients: {
-                    "Iron": "HIGH",
-                    "Vitamin B12": "HIGH",
-                    "Magnesium": "HIGH",
-                    "Omega-3": "MEDIUM"
-                },
-                avoid: ["caffeine", "alcohol", "salt"],
-                prefer: ["warm", "comforting", "iron-rich"]
-            };
-        case "follicular":
-            return {
-                nutrients: {
-                    "Vitamin D": "HIGH",
-                    "Zinc": "HIGH",
-                    "Vitamin B6": "MEDIUM"
-                },
-                avoid: ["processed foods"],
-                prefer: ["light", "fresh", "protein-rich"]
-            };
-        case "ovulation":
-            return {
-                nutrients: {
-                    "Vitamin E": "HIGH",
-                    "Selenium": "HIGH",
-                    "Vitamin C": "HIGH"
-                },
-                avoid: ["inflammatory foods"],
-                prefer: ["antioxidant-rich", "raw vegetables"]
-            };
-        case "luteal":
-            return {
-                nutrients: {
-                    "Magnesium": "HIGH",
-                    "Calcium": "HIGH",
-                    "Vitamin B6": "HIGH"
-                },
-                avoid: ["sugar", "salt", "caffeine"],
-                prefer: ["complex carbs", "lean protein"]
-            };
-        default:
-            return {
-                nutrients: {},
-                avoid: [],
-                prefer: []
-            };
-    }
-};
-
-// Helper function to analyze user's diet logs
-const analyzeDietLogs = async (userId) => {
-    try {
-        const today = new Date();
-        const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-        const logsSnapshot = await db
-            .collection("users")
-            .doc(userId)
-            .collection("dietLogs")
-            .where("date", ">=", lastWeek.toISOString().split('T')[0])
-            .get();
-
-        let nutritionSummary = {
-            totalCalories: 0,
-            mealTypes: {},
-            commonFoods: {},
-            averageCaloriesPerDay: 0
-        };
-
-        logsSnapshot.forEach(doc => {
-            const meal = doc.data();
-            nutritionSummary.totalCalories += Number(meal.calories);
-            nutritionSummary.mealTypes[meal.mealType] = (nutritionSummary.mealTypes[meal.mealType] || 0) + 1;
-            nutritionSummary.commonFoods[meal.foodName] = (nutritionSummary.commonFoods[meal.foodName] || 0) + 1;
-        });
-
-        nutritionSummary.averageCaloriesPerDay = nutritionSummary.totalCalories / 7;
-
-        return nutritionSummary;
-    } catch (error) {
-        console.error("Error analyzing diet logs:", error);
-        return null;
-    }
-};
-
-// Helper function to calculate current menstrual phase
-const calculateMenstrualPhase = (periodData) => {
-    if (!periodData || !periodData.lastPeriod || !periodData.cycleLength) {
-        return "follicular"; // default phase
-    }
-
-    const today = new Date();
-    const lastPeriod = new Date(periodData.lastPeriod);
-    const cycleLength = parseInt(periodData.cycleLength);
-    const daysSinceLastPeriod = Math.floor((today - lastPeriod) / (1000 * 60 * 60 * 24));
-    const currentCycleDay = (daysSinceLastPeriod % cycleLength) + 1;
-
-    // Phase lengths based on average 28-day cycle
-    const menstrualPhaseLength = 5;  // Days 1-5
-    const follicularPhaseLength = 9; // Days 6-14
-    const ovulationPhaseLength = 5;  // Days 14-18
-    // Luteal phase is the remainder
-
-    if (currentCycleDay <= menstrualPhaseLength) {
-        return "menstrual";
-    } else if (currentCycleDay <= menstrualPhaseLength + follicularPhaseLength) {
-        return "follicular";
-    } else if (currentCycleDay <= menstrualPhaseLength + follicularPhaseLength + ovulationPhaseLength) {
-        return "ovulation";
-    } else {
-        return "luteal";
-    }
-};
-
-// Helper function to analyze diet patterns and make recommendations
-const analyzeDietPatterns = (dietAnalysis, requirements) => {
-    const recommendations = {
-        nutrients: Object.entries(requirements.nutrients).map(([nutrient, level]) => ({
-            nutrient,
-            level
-        })),
-        preferences: requirements.prefer || [],
-        adjustments: []
+function getNutritionalRequirements(phase) {
+    const requirements = {
+        follicular: {
+            prefer: [
+                'iron-rich foods',
+                'vitamin C',
+                'lean proteins',
+                'leafy greens'
+            ],
+            avoid: [
+                'processed foods',
+                'excessive salt',
+                'caffeine'
+            ]
+        },
+        ovulation: {
+            prefer: [
+                'antioxidant-rich foods',
+                'fiber-rich foods',
+                'healthy fats',
+                'whole grains'
+            ],
+            avoid: [
+                'refined sugars',
+                'processed foods',
+                'excessive dairy'
+            ]
+        },
+        luteal: {
+            prefer: [
+                'complex carbohydrates',
+                'magnesium-rich foods',
+                'calcium-rich foods',
+                'vitamin B6'
+            ],
+            avoid: [
+                'salty foods',
+                'caffeine',
+                'alcohol',
+                'sugary foods'
+            ]
+        },
+        menstrual: {
+            prefer: [
+                'iron-rich foods',
+                'vitamin B12',
+                'omega-3 fatty acids',
+                'water-rich foods'
+            ],
+            avoid: [
+                'fatty foods',
+                'excessive salt',
+                'caffeine',
+                'alcohol'
+            ]
+        }
     };
 
-    // Analyze caloric intake
-    const TARGET_DAILY_CALORIES = 2000; // This should be personalized based on user profile
-    if (dietAnalysis.averageCaloriesPerDay < TARGET_DAILY_CALORIES * 0.8) {
-        recommendations.adjustments.push("increase_calories");
-    } else if (dietAnalysis.averageCaloriesPerDay > TARGET_DAILY_CALORIES * 1.2) {
-        recommendations.adjustments.push("decrease_calories");
+    // If no phase specified or invalid phase, return empty requirements
+    if (!phase || !requirements[phase]) {
+        return {
+            prefer: [],
+            avoid: []
+        };
     }
 
-    // Analyze meal distribution
-    const mealTypes = dietAnalysis.mealTypes;
-    if (!mealTypes.breakfast || mealTypes.breakfast < 5) { // Less than 5 breakfasts in a week
-        recommendations.adjustments.push("add_breakfast");
+    return requirements[phase];
+}
+
+// Helper function to get user's health profile
+async function getUserHealthProfile(userId) {
+    try {
+        const userRef = db.collection('users').doc(userId);
+        const profileRef = userRef.collection('personalDetails').doc('profile');
+        const profileDoc = await profileRef.get();
+
+        if (!profileDoc.exists) {
+            console.log('No health profile found for user, using default');
+            return getDefaultHealthProfile();
+        }
+
+        const profileData = profileDoc.data() || {};
+        console.log('Raw profile data:', profileData);
+
+        // Get data from correct paths
+        const diet = profileData.diet || {};
+        const health = profileData.health || {};
+
+        return {
+            dietType: diet.dietType || '',
+            medicalConditions: Array.isArray(health.medicalConditions) ? health.medicalConditions : [],
+            allergies: health.allergies || [],
+            preferences: {
+                waterIntake: diet.waterIntake || '',
+                caffeineIntake: diet.caffeineIntake || '',
+                supplements: diet.supplements || ''
+            },
+            phase: 'follicular' // Default phase if not specified
+        };
+    } catch (error) {
+        console.error('Error getting user health profile:', error);
+        return getDefaultHealthProfile();
+    }
+}
+
+// Helper function to get default health profile
+function getDefaultHealthProfile() {
+    return {
+        dietType: '',
+        medicalConditions: [],
+        allergies: [],
+        preferences: {
+            waterIntake: '',
+            caffeineIntake: '',
+            supplements: ''
+        },
+        phase: 'follicular'
+    };
+}
+
+// Helper function to make Edamam API request
+async function makeEdamamRequest(query, healthProfile, requirements, phase) {
+    try {
+        // Clean and format the search query - only allow letters, numbers and spaces
+        const cleanQuery = query.replace(/[^a-zA-Z0-9\s]/g, ' ')
+            .split(' ')
+            .filter(word => word.length > 0)
+            .join(' ')
+            .trim();
+        console.log('Cleaned search query:', cleanQuery);
+
+        // Base URL and parameters
+        const baseUrl = 'https://api.edamam.com/api/recipes/v2';
+        const params = new URLSearchParams();
+
+        // Required parameters
+        params.append('type', 'public');
+        params.append('q', cleanQuery);
+        params.append('app_id', EDAMAM_APP_ID);
+        params.append('app_key', EDAMAM_APP_KEY);
+        params.append('random', 'true');
+
+        // Add basic diet restrictions - only use what's allowed in free tier
+        if (healthProfile?.dietType) {
+            const dietType = healthProfile.dietType.toLowerCase();
+            if (dietType === 'vegetarian') {
+                params.append('health', 'vegetarian');
+            } else if (dietType === 'vegan') {
+                params.append('health', 'vegan');
+            }
+        }
+
+        const url = `${baseUrl}?${params.toString()}`;
+        console.log('Making Edamam API request to:', url);
+
+        try {
+            const response = await axios.get(url, {
+                timeout: 5000 // 5 second timeout
+            });
+            console.log('Edamam API response status:', response.status);
+
+            if (!response.data || !response.data.hits) {
+                console.log('No recipes found in API response, using defaults');
+                return getDefaultRecipes(phase, healthProfile);
+            }
+
+            // Transform recipes and apply additional filtering in memory
+            const recipes = response.data.hits.map(hit => {
+                const recipe = hit.recipe;
+                return {
+                    title: recipe.label || '',
+                    image: recipe.image || DEFAULT_RECIPE_IMAGE,
+                    url: recipe.url || '',
+                    ingredients: recipe.ingredientLines || [],
+                    calories: Math.round(recipe.calories) || 0,
+                    servings: recipe.yield || 4,
+                    healthLabels: recipe.healthLabels || [],
+                    dietLabels: recipe.dietLabels || [],
+                    nutrients: recipe.totalNutrients || {},
+                    totalDaily: recipe.totalDaily || {},
+                    cuisineType: recipe.cuisineType || [],
+                    mealType: recipe.mealType || [],
+                    dishType: recipe.dishType || []
+                };
+            });
+
+            // Apply PCOS-specific filtering in memory
+            if (Array.isArray(healthProfile?.medicalConditions) &&
+                healthProfile.medicalConditions.some(condition =>
+                    condition && condition.toLowerCase().includes('pcos'))) {
+                return recipes.filter(recipe => {
+                    const sugar = recipe.nutrients?.SUGAR?.quantity || 0;
+                    const fiber = recipe.nutrients?.FIBTG?.quantity || 0;
+                    const isLowSugar = sugar < 10;
+                    const isHighFiber = fiber >= 5;
+                    return isLowSugar && isHighFiber;
+                });
+            }
+
+            return recipes;
+        } catch (apiError) {
+            console.error('Edamam API request failed:', apiError.message);
+            if (apiError.response?.status === 429) {
+                console.log('Rate limit exceeded, using default recipes');
+            }
+            return getDefaultRecipes(phase, healthProfile);
+        }
+    } catch (error) {
+        console.error('Error in recipe suggestion:', error);
+        return getDefaultRecipes(phase, healthProfile);
+    }
+}
+
+// Helper function to get default recipes based on phase
+function getDefaultRecipes(phase, healthProfile) {
+    const recipes = DEFAULT_RECIPES[phase] || [];
+
+    // Apply PCOS filtering to default recipes if needed
+    if (healthProfile?.medicalConditions?.some(c => c?.toLowerCase().includes('pcos'))) {
+        return recipes.filter(recipe => {
+            const sugar = recipe.nutrients?.SUGAR?.quantity || 0;
+            const fiber = recipe.nutrients?.FIBTG?.quantity || 0;
+            return sugar < 10 && fiber >= 5;
+        });
     }
 
-    // Check for variety in diet
-    const uniqueFoods = Object.keys(dietAnalysis.commonFoods).length;
-    if (uniqueFoods < 10) { // Less than 10 different foods in a week
-        recommendations.adjustments.push("increase_variety");
-    }
+    return recipes;
+}
 
-    return recommendations;
-};
-
-// Helper function to get fallback recipes
-const getFallbackRecipes = (phase, requirements) => {
-    const defaultRecipesForPhase = DEFAULT_RECIPES[phase] || DEFAULT_RECIPES.follicular;
-    return defaultRecipesForPhase.map(recipe => ({
-        ...recipe,
-        phase,
-        benefits: requirements.prefer || []
-    }));
-};
-
-// Get personalized recipe suggestions
+// Main recipe suggestion endpoint
 router.get("/suggestions", verifyToken, async (req, res) => {
     try {
         const userId = req.user.uid;
-        const { phase } = req.query;
+        const { phase = 'follicular' } = req.query;
 
-        console.log("1. Starting recipe request for user:", userId);
+        // Get user's health profile
+        const healthProfile = await getUserHealthProfile(userId);
+        console.log('User health profile:', healthProfile);
 
-        // Get user's period data and calculate phase
-        const periodDoc = await db
-            .collection("users")
-            .doc(userId)
-            .collection("periodData")
-            .doc("data")
-            .get();
+        // Get base requirements for the phase
+        const requirements = getNutritionalRequirements(phase);
 
-        console.log("2. Period data fetched:", periodDoc.exists ? "exists" : "does not exist");
-
-        const periodData = periodDoc.exists ? periodDoc.data() : null;
-        console.log("3. Period data:", periodData);
-        
-        // Calculate current phase if not specified
-        const currentPhase = phase || calculateMenstrualPhase(periodData) || "follicular";
-        console.log("4. Calculated phase:", currentPhase);
-
-        // Get nutritional requirements for the phase
-        const requirements = getNutritionalRequirements(currentPhase);
-        console.log("5. Requirements:", requirements);
-
-        // Analyze user's recent diet
-        const dietAnalysis = await analyzeDietLogs(userId) || {
-            totalCalories: 0,
-            mealTypes: {},
-            commonFoods: {},
-            averageCaloriesPerDay: 0
-        };
-        console.log("7. Diet analysis:", dietAnalysis);
-
-        // Get diet recommendations based on analysis
-        const dietRecommendations = analyzeDietPatterns(dietAnalysis, requirements);
-        console.log("8. Diet recommendations:", dietRecommendations);
-
-        let recipes;
-        let fromCache = false;
-        let fromFallback = false;
-
-        try {
-            // Build optimized search terms - limit to most important terms
-            const baseTerms = requirements.prefer.slice(0, 2); // Take top 2 preferred terms
-            let searchTerms = [...baseTerms];
-            
-            // Add at most 2 additional terms based on diet recommendations
-            if (dietRecommendations.adjustments.includes("increase_calories")) {
-                searchTerms.push("high-protein");
-            }
-            if (dietRecommendations.adjustments.includes("increase_variety")) {
-                searchTerms.push("seasonal");
-            }
-
-            console.log("9. Search terms:", searchTerms);
-
-            // Create cache key based on search parameters
-            const cacheKey = `${currentPhase}-${searchTerms.join("-")}`;
-            
-            // Check cache first
-            const cachedResult = getCachedRecipes(cacheKey);
-            if (cachedResult) {
-                console.log("10. Using cached recipes");
-                recipes = cachedResult;
-                fromCache = true;
-            } else {
-                // Try to get recipes from API with optimized query
-                const queryParams = new URLSearchParams({
-                    app_id: EDAMAM_APP_ID,
-                    app_key: EDAMAM_APP_KEY,
-                    q: searchTerms.join(" ").trim(),
-                    random: 'true',
-                    imageSize: 'REGULAR'
-                });
-
-                if (dietRecommendations.adjustments.includes("decrease_calories")) {
-                    queryParams.append("calories", "0-500");
-                } else if (dietRecommendations.adjustments.includes("increase_calories")) {
-                    queryParams.append("calories", "500-800");
+        // Try to get cached recipes first
+        const cacheKey = `${userId}-${phase}-${healthProfile.medicalConditions.join('-')}`;
+        const cachedRecipes = getCachedRecipes(cacheKey);
+        if (cachedRecipes) {
+            console.log('Using cached recipes');
+            return res.json({
+                success: true,
+                data: {
+                    recipes: cachedRecipes,
+                    requirements,
+                    healthProfile,
+                    dietAnalysis: {
+                        averageCaloriesPerDay: 2000,
+                        mealTypes: { breakfast: 1, lunch: 1, dinner: 1 }
+                    }
                 }
+            });
+        }
 
-                const apiUrl = `https://api.edamam.com/api/recipes/v2?beta=true&type=public&${queryParams.toString()}`;
-                console.log("11. API URL:", apiUrl);
+        // Construct search terms
+        let searchTerms = [];
 
-                const edamamResponse = await makeEdamamRequest(apiUrl, {
-                    'Accept': 'application/json',
-                    'Accept-Language': 'en',
-                    'Edamam-Account-User': userId
-                });
+        // Add phase-specific terms first
+        if (phase === 'follicular') {
+            searchTerms.push('iron rich');
+        } else if (phase === 'ovulation') {
+            searchTerms.push('protein rich');
+        } else if (phase === 'luteal') {
+            searchTerms.push('magnesium rich');
+        } else if (phase === 'menstrual') {
+            searchTerms.push('iron rich');
+        }
 
-                if (edamamResponse.data?.hits) {
-                    recipes = edamamResponse.data.hits.map(hit => {
-                        const recipe = hit.recipe;
-                        return {
-                            id: recipe.uri ? recipe.uri.split("#")[1] : Date.now().toString(),
-                            title: recipe.label || "Untitled Recipe",
-                            description: recipe.healthLabels ? recipe.healthLabels.join(", ") : "",
-                            image: recipe.image || "",
-                            phase: currentPhase,
-                            benefits: requirements.prefer || [],
-                            nutrients: recipe.totalNutrients || {},
-                            ingredients: recipe.ingredientLines || [],
-                            url: recipe.url || "",
-                            calories: Math.round(recipe.calories || 0),
-                            servings: recipe.yield || 1
-                        };
-                    }).filter(recipe => recipe !== null);
+        // Add diet type if present
+        if (healthProfile.dietType) {
+            searchTerms.push(healthProfile.dietType);
+        }
 
-                    // Cache successful API results
-                    if (recipes.length > 0) {
-                        cacheRecipes(cacheKey, recipes);
+        // Add PCOS-specific terms if needed
+        if (Array.isArray(healthProfile.medicalConditions) &&
+            healthProfile.medicalConditions.some(condition =>
+                condition && condition.toLowerCase().includes('pcos'))) {
+            searchTerms.push('low glycemic');
+            searchTerms.push('high fiber');
+        }
+
+        // Create search query
+        const searchQuery = searchTerms.join(' ');
+        console.log('Final search query:', searchQuery);
+
+        // Get recipes from Edamam API
+        let recipes = await makeEdamamRequest(searchQuery, healthProfile, requirements, phase);
+        console.log('Received recipes from API:', recipes ? recipes.length : 0);
+
+        // If no recipes found, use fallback recipes
+        if (!recipes || recipes.length === 0) {
+            console.log('No recipes found, using fallback recipes');
+            recipes = getFallbackRecipes(phase).map(recipe => ({
+                ...recipe,
+                image: recipe.image || DEFAULT_RECIPE_IMAGE
+            }));
+        }
+
+        // Cache the recipes
+        cacheRecipes(cacheKey, recipes);
+
+        res.json({
+            success: true,
+            data: {
+                recipes,
+                requirements,
+                healthProfile,
+                dietAnalysis: {
+                    averageCaloriesPerDay: 2000,
+                    mealTypes: {
+                        breakfast: 1,
+                        lunch: 1,
+                        dinner: 1
                     }
                 }
             }
-        } catch (error) {
-            console.log("Using fallback recipes due to error:", error.message);
-            recipes = getFallbackRecipes(currentPhase, requirements);
-            fromFallback = true;
-        }
-
-        // If we still don't have recipes, use fallback
-        if (!recipes || recipes.length === 0) {
-            console.log("No recipes found, using fallback recipes");
-            recipes = getFallbackRecipes(currentPhase, requirements);
-            fromFallback = true;
-        }
-
-        return res.status(200).json({
-            phase: currentPhase,
-            requirements,
-            dietAnalysis,
-            dietRecommendations,
-            recipes,
-            fromCache,
-            fromFallback
         });
-
     } catch (error) {
-        console.error("❌ Error in recipe suggestions:", error);
-        console.error("Stack trace:", error.stack);
-        
-        return res.status(500).json({
-            error: "Failed to get recipe suggestions",
-            details: error.message,
-            type: error.name,
-            code: error.code
+        console.error('Error in recipe suggestions:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get recipe suggestions',
+            details: error.message
         });
     }
 });
 
-module.exports = router; 
+module.exports = router;

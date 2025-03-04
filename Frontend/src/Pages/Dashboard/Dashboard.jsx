@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, MessageSquare, Droplet, Heart, Activity, Smile } from 'lucide-react';
+import { Bell, MessageSquare, Droplet, Heart, Activity, Smile, LogOut } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import Navbarafter from '../../Components/Navbarafter';
 import Footer from "../../Components/Footer";
 import { useAuth } from "../../context/AuthContext";
+import { useLoading } from '../../context/LoadingContext';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, signOut } = useAuth();
+  const { showLoader, hideLoader } = useLoading();
   const [periodData, setPeriodData] = useState({
     data: {
       lastPeriod: "Not available",
@@ -34,40 +36,48 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchPeriodData = async () => {
-      if (!currentUser) {
-        console.log("No current user found");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const token = await currentUser.getIdToken(true);
-        console.log("Fetching data with token:", token.substring(0, 10) + "...");
-
-        const response = await fetch("http://localhost:5001/api/dashboard/data", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`Server responded with ${response.status}: ${errorData}`);
+        showLoader();
+        if (!currentUser) {
+          console.log("No current user found");
+          setLoading(false);
+          return;
         }
 
-        const data = await response.json();
-        console.log("Received data:", data);
+        try {
+          const token = await currentUser.getIdToken(true);
+          console.log("Fetching data with token:", token.substring(0, 10) + "...");
 
-        setPeriodData(data.periodData);
-        setChartData(data.chartData);
+          const response = await fetch("http://localhost:5001/api/dashboard/data", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Server responded with ${response.status}: ${errorData}`);
+          }
+
+          const data = await response.json();
+          console.log("Received data:", data);
+
+          setPeriodData(data.periodData);
+          setChartData(data.chartData);
+        } catch (err) {
+          console.error("Error fetching dashboard data:", err);
+          setError(err.message || "Failed to load dashboard data");
+        } finally {
+          setLoading(false);
+          hideLoader();
+        }
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
         setError(err.message || "Failed to load dashboard data");
-      } finally {
-        setLoading(false);
+        hideLoader();
       }
     };
 
@@ -76,47 +86,59 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchDietData = async () => {
-      if (!currentUser) {
-        console.log("No current user found");
-        setDietData(prev => ({
-          ...prev,
-          loading: false,
-          error: "Please log in to view your diet data"
-        }));
-        return;
-      }
-
       try {
-        console.log("Fetching diet data for user:", currentUser.uid);
-        const token = await currentUser.getIdToken(true);
-        
-        if (!token) {
-          throw new Error("Failed to get authentication token");
+        showLoader();
+        if (!currentUser) {
+          console.log("No current user found");
+          setDietData(prev => ({
+            ...prev,
+            loading: false,
+            error: "Please log in to view your diet data"
+          }));
+          return;
         }
 
-        const response = await fetch("http://localhost:5001/api/diettracker/today", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
+        try {
+          console.log("Fetching diet data for user:", currentUser.uid);
+          const token = await currentUser.getIdToken(true);
+
+          if (!token) {
+            throw new Error("Failed to get authentication token");
           }
-        });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Server error response:", errorText);
-          throw new Error(`Server error: ${errorText}`);
+          const response = await fetch("http://localhost:5001/api/diettracker/today", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Server error response:", errorText);
+            throw new Error(`Server error: ${errorText}`);
+          }
+
+          const data = await response.json();
+          console.log("Received diet data:", data);
+
+          setDietData({
+            totalCalories: data.totalCalories || 0,
+            meals: data.meals || [],
+            loading: false,
+            error: null
+          });
+        } catch (err) {
+          console.error("Error fetching diet data:", err);
+          setDietData(prev => ({
+            ...prev,
+            loading: false,
+            error: err.message || "Failed to load diet data"
+          }));
+        } finally {
+          hideLoader();
         }
-
-        const data = await response.json();
-        console.log("Received diet data:", data);
-
-        setDietData({
-          totalCalories: data.totalCalories || 0,
-          meals: data.meals || [],
-          loading: false,
-          error: null
-        });
       } catch (err) {
         console.error("Error fetching diet data:", err);
         setDietData(prev => ({
@@ -124,6 +146,7 @@ const Dashboard = () => {
           loading: false,
           error: err.message || "Failed to load diet data"
         }));
+        hideLoader();
       }
     };
 
@@ -134,40 +157,53 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!currentUser) return;
-
       try {
-        const token = await currentUser.getIdToken(true);
-        console.log('Attempting to fetch user data with token');
-        
-        const response = await fetch("http://localhost:5001/api/user/profile", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
+        showLoader();
+        if (!currentUser) return;
+
+        try {
+          const token = await currentUser.getIdToken(true);
+          console.log('Attempting to fetch user data with token');
+
+          const response = await fetch("http://localhost:5001/api/user/profile", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Server responded with ${response.status}: ${errorData}`);
           }
-        });
 
-        if (!response.ok) {
-          const errorData = await response.text();
-          throw new Error(`Server responded with ${response.status}: ${errorData}`);
+          const data = await response.json();
+          console.log("Received user data:", data);
+
+          setUserData({
+            username: data.username || currentUser.email,
+            loading: false,
+            error: null
+          });
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUserData({
+            username: currentUser.email,
+            loading: false,
+            error: error.message
+          });
+        } finally {
+          hideLoader();
         }
-
-        const data = await response.json();
-        console.log("Received user data:", data);
-
-        setUserData({
-          username: data.username || currentUser.email,
-          loading: false,
-          error: null
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
         setUserData({
           username: currentUser.email,
           loading: false,
-          error: error.message
+          error: err.message
         });
+        hideLoader();
       }
     };
 
@@ -178,10 +214,10 @@ const Dashboard = () => {
     { label: 'Home', href: '/landing' },
     { label: 'About', href: '/aboutusafter' },
     { label: 'Blog', href: '/blogafter' },
-    { label: 'Track Your Periods', href: '/period'},
-    { label: 'Diet Tracking', href: '/diet'},
+    { label: 'Track Your Periods', href: '/period' },
+    { label: 'Diet Tracking', href: '/diet' },
     { label: 'Recipe Suggestions', href: '/recipe' },
-    { label: 'Consultation', href: 'consultation' },
+    { label: 'Consultation', href: '/consultation' },
     { label: 'My Profile', href: '/dashboard', active: true }
   ];
 
@@ -194,26 +230,26 @@ const Dashboard = () => {
     const today = new Date();
     const diffTime = Math.abs(today - lastPeriodDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     // Calculate cycle day (1-based)
     const cycleDay = (diffDays % (periodData.data.cycleLength || 28)) + 1;
-    
+
     return [
-      { 
-        day: lastPeriodDate.getDate(), 
-        cycleDay: 1, 
+      {
+        day: lastPeriodDate.getDate(),
+        cycleDay: 1,
         event: "Start of Period",
         date: lastPeriodDate
       },
-      { 
-        day: new Date(lastPeriodDate.getTime() + 24 * 60 * 60 * 1000).getDate(), 
-        cycleDay: 2, 
+      {
+        day: new Date(lastPeriodDate.getTime() + 24 * 60 * 60 * 1000).getDate(),
+        cycleDay: 2,
         event: cycleDay <= periodData.data.periodDuration ? "Heavy Flow" : "Regular Day",
         date: new Date(lastPeriodDate.getTime() + 24 * 60 * 60 * 1000)
       },
-      { 
-        day: new Date(lastPeriodDate.getTime() + 2 * 24 * 60 * 60 * 1000).getDate(), 
-        cycleDay: 3, 
+      {
+        day: new Date(lastPeriodDate.getTime() + 2 * 24 * 60 * 60 * 1000).getDate(),
+        cycleDay: 3,
         event: cycleDay <= periodData.data.periodDuration ? "Light Flow" : "Regular Day",
         date: new Date(lastPeriodDate.getTime() + 2 * 24 * 60 * 60 * 1000)
       }
@@ -248,6 +284,18 @@ const Dashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // Clear all auth-related data
+      localStorage.removeItem('pinVerified');
+      localStorage.removeItem('intendedPath');
+      navigate('/');
+    } catch (error) {
+      console.error("Failed to log out:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -278,230 +326,237 @@ const Dashboard = () => {
 
   return (
     <>
-    <main className="dashboard-main">
-      <Navbarafter 
-        navItems={navItems} 
-        username={userData.loading 
-          ? 'USER' 
-          : userData.username?.split('@')[0].toUpperCase()}
-      />
-      
-      <div className="dashboard-welcome-section">
-        <div className="welcome-content">
-          <h1 className="welcome-title">
-            Welcome, {userData.loading 
-              ? 'Loading...' 
-              : userData.username?.split('@')[0].toUpperCase()}!
-          </h1>
-          <button 
-            onClick={() => navigate('/personaldetails')} 
-            className="edit-profile-button"
-          >
-            Edit Personal Details
-          </button>
-        </div>
-      </div>
+      <main className="dashboard-main">
+        <Navbarafter
+          navItems={navItems}
+          username={userData.loading
+            ? 'USER'
+            : userData.username?.split('@')[0].toUpperCase()}
+        />
 
-      <div className="dashboard-content-grid">
-        <div className="dashboard-left-content">
-          <div className="dashboard-tips-container">
-            <h2 className="dashboard-section-title">Menstrual Health Tips</h2>
-            <div className="dashboard-tips-grid">
-              {[
-                {
-                  title: "Track Your Cycle",
-                  description: "Keep a record of your menstrual cycle for better health management and predictions.",
-                  icon: <Droplet className="dashboard-tip-icon" />
-                },
-                {
-                  title: "Maintain Healthy Diet",
-                  description: "A balanced diet rich in iron and vitamins helps manage menstrual symptoms.",
-                  icon: <Heart className="dashboard-tip-icon" />
-                },
-                {
-                  title: "Stay Active",
-                  description: "Exercise helps alleviate cramps and boosts overall well-being during menstruation.",
-                  icon: <Activity className="dashboard-tip-icon" />
-                },
-                {
-                  title: "Relax & Manage Stress",
-                  description: "Practice relaxation techniques such as yoga or meditation to reduce stress during your cycle.",
-                  icon: <Smile className="dashboard-tip-icon" />
-                }
-              ].map((tip, index) => (
-                <div key={index} className="dashboard-tip-card">
-                  {tip.icon}
-                  <div>
-                    <h3 className="dashboard-tip-title">{tip.title}</h3>
-                    <p className="dashboard-tip-description">{tip.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="dashboard-period-container">
-            <h2 className="dashboard-section-title">Period Tracker</h2>
-            {periodData.data.lastPeriod === "Not available" ? (
-              <div className="dashboard-no-data">
-                No period tracking data available. Please add your period data.
-              </div>
-            ) : (
-              <>
-                <div className="dashboard-period-status">
-                  {(() => {
-                    const status = calculatePeriodStatus(
-                      periodData.data.lastPeriod,
-                      periodData.data.cycleLength
-                    );
-                    
-                    if (!status) return null;
-
-                    return (
-                      <div className={`period-status-card ${status.status}`}>
-                        <div className="status-icon">
-                          {status.status === 'late' ? '⚠️' : '📅'}
-                        </div>
-                        <div className="status-text">
-                          {status.status === 'late' ? (
-                            <>
-                              <h3>Period is {status.days} days late</h3>
-                              <p>Expected date was {status.nextDate.toLocaleDateString()}</p>
-                            </>
-                          ) : (
-                            <>
-                              <h3>Next period in {status.days} days</h3>
-                              <p>Expected on {status.nextDate.toLocaleDateString()}</p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-                
-                <div className="dashboard-cycle-grid">
-                  {calculateCycleDays().map((day, index) => (
-                    <div key={index} className="dashboard-cycle-card">
-                      <h3 className="dashboard-cycle-day">
-                        {day.date.toLocaleDateString('default', { month: 'short', day: 'numeric' })}
-                      </h3>
-                      <p className="dashboard-cycle-number">Day {day.cycleDay}</p>
-                      <span className="dashboard-cycle-event">{day.event}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="dashboard-diet-container">
-            <h2 className="dashboard-section-title">Diet Tracking</h2>
-            {dietData.loading ? (
-              <div className="dashboard-loading">Loading diet data...</div>
-            ) : dietData.error ? (
-              <div className="dashboard-error">{dietData.error}</div>
-            ) : (
-              <>
-                <div className="dashboard-diet-grid">
-                  <div className="dashboard-diet-card">
-                    <h3 className="dashboard-diet-title">Calories Consumed</h3>
-                    <p className="dashboard-diet-value">{dietData.totalCalories} kcal</p>
-                  </div>
-                  <div className="dashboard-diet-card">
-                    <h3 className="dashboard-diet-title">Meals Today</h3>
-                    <p className="dashboard-diet-value">{dietData.meals.length}</p>
-                  </div>
-                  <div className="dashboard-diet-card">
-                    <h3 className="dashboard-diet-title">Daily Goal</h3>
-                    <p className="dashboard-diet-value">2000 kcal</p>
-                  </div>
-                </div>
-
-                <div className="dashboard-recent-meals">
-                  <h3 className="dashboard-diet-subtitle">Recent Meals</h3>
-                  {dietData.meals.length > 0 ? (
-                    <div className="dashboard-meals-list">
-                      {dietData.meals.slice(0, 3).map((meal, index) => (
-                        <div key={index} className="dashboard-meal-item">
-                          <div className="dashboard-meal-info">
-                            <span className="dashboard-meal-name">{meal.name}</span>
-                            <span className="dashboard-meal-type">{meal.type}</span>
-                          </div>
-                          <span className="dashboard-meal-calories">
-                            {parseInt(meal.calories) || 0} cal
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="dashboard-no-meals">No meals tracked today</p>
-                  )}
-                </div>
-
-                <a href="/diet" className="dashboard-button dashboard-button-full">
-                  Track New Meal
-                </a>
-              </>
-            )}
+        <div className="dashboard-welcome-section">
+          <div className="welcome-content">
+            <h1 className="welcome-title">
+              Welcome, {userData.loading
+                ? 'Loading...'
+                : userData.username?.split('@')[0].toUpperCase()}!
+            </h1>
+            <button
+              onClick={() => navigate('/personaldetails')}
+              className="edit-profile-button"
+            >
+              Edit Personal Details
+            </button>
+            <button
+              onClick={handleLogout}
+              className="logout-button"
+            >
+              <LogOut size={20} />
+              Logout
+            </button>
           </div>
         </div>
 
-        <div className="dashboard-right-content">
-          <div className="dashboard-stats-container">
-            <h2 className="dashboard-section-title">Cycle Statistics</h2>
-            <div className="dashboard-stats-grid">
-              <div>
-                <div className="dashboard-stats-card">
-                  <h3 className="dashboard-stats-title">Last Period</h3>
-                  <p className="dashboard-stats-value">{periodData.data.lastPeriod}</p>
-                </div>
-                <div className="dashboard-stats-card">
-                  <h3 className="dashboard-stats-title">Cycle Length</h3>
-                  <p className="dashboard-stats-value">
-                    {periodData.data.cycleLength ? `${periodData.data.cycleLength} days` : "Not available"}
-                  </p>
-                </div>
-                <div className="dashboard-stats-card">
-                  <h3 className="dashboard-stats-title">Period Duration</h3>
-                  <p className="dashboard-stats-value">
-                    {periodData.data.periodDuration ? `${periodData.data.periodDuration} days` : "Not available"}
-                  </p>
-                </div>
+        <div className="dashboard-content-grid">
+          <div className="dashboard-left-content">
+            <div className="dashboard-tips-container">
+              <h2 className="dashboard-section-title">Menstrual Health Tips</h2>
+              <div className="dashboard-tips-grid">
+                {[
+                  {
+                    title: "Track Your Cycle",
+                    description: "Keep a record of your menstrual cycle for better health management and predictions.",
+                    icon: <Droplet className="dashboard-tip-icon" />
+                  },
+                  {
+                    title: "Maintain Healthy Diet",
+                    description: "A balanced diet rich in iron and vitamins helps manage menstrual symptoms.",
+                    icon: <Heart className="dashboard-tip-icon" />
+                  },
+                  {
+                    title: "Stay Active",
+                    description: "Exercise helps alleviate cramps and boosts overall well-being during menstruation.",
+                    icon: <Activity className="dashboard-tip-icon" />
+                  },
+                  {
+                    title: "Relax & Manage Stress",
+                    description: "Practice relaxation techniques such as yoga or meditation to reduce stress during your cycle.",
+                    icon: <Smile className="dashboard-tip-icon" />
+                  }
+                ].map((tip, index) => (
+                  <div key={index} className="dashboard-tip-card">
+                    {tip.icon}
+                    <div>
+                      <h3 className="dashboard-tip-title">{tip.title}</h3>
+                      <p className="dashboard-tip-description">{tip.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          <div className="dashboard-chart-container">
-            <h2 className="dashboard-section-title">Period Length Over Time</h2>
-            <div className="dashboard-chart-card">
-              {chartData.length > 0 ? (
-                <LineChart width={300} height={400} data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="length" stroke="#DC2626" />
-                </LineChart>
-              ) : (
+            <div className="dashboard-period-container">
+              <h2 className="dashboard-section-title">Period Tracker</h2>
+              {periodData.data.lastPeriod === "Not available" ? (
                 <div className="dashboard-no-data">
-                  No period tracking data available yet
+                  No period tracking data available. Please add your period data.
                 </div>
+              ) : (
+                <>
+                  <div className="dashboard-period-status">
+                    {(() => {
+                      const status = calculatePeriodStatus(
+                        periodData.data.lastPeriod,
+                        periodData.data.cycleLength
+                      );
+
+                      if (!status) return null;
+
+                      return (
+                        <div className={`period-status-card ${status.status}`}>
+                          <div className="status-icon">
+                            {status.status === 'late' ? '⚠️' : '📅'}
+                          </div>
+                          <div className="status-text">
+                            {status.status === 'late' ? (
+                              <>
+                                <h3>Period is {status.days} days late</h3>
+                                <p>Expected date was {status.nextDate.toLocaleDateString()}</p>
+                              </>
+                            ) : (
+                              <>
+                                <h3>Next period in {status.days} days</h3>
+                                <p>Expected on {status.nextDate.toLocaleDateString()}</p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="dashboard-cycle-grid">
+                    {calculateCycleDays().map((day, index) => (
+                      <div key={index} className="dashboard-cycle-card">
+                        <h3 className="dashboard-cycle-day">
+                          {day.date.toLocaleDateString('default', { month: 'short', day: 'numeric' })}
+                        </h3>
+                        <p className="dashboard-cycle-number">Day {day.cycleDay}</p>
+                        <span className="dashboard-cycle-event">{day.event}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
-              <p className="dashboard-chart-description">
-                This chart shows the period duration over the past six months.
-                {periodData.data.lastPeriod !== "Not available" && (
-                  <span className="dashboard-last-period">
-                    Last period started on: {periodData.data.lastPeriod}
-                  </span>
+            </div>
+
+            <div className="dashboard-diet-container">
+              <h2 className="dashboard-section-title">Diet Tracking</h2>
+              {dietData.loading ? (
+                <div className="dashboard-loading">Loading diet data...</div>
+              ) : dietData.error ? (
+                <div className="dashboard-error">{dietData.error}</div>
+              ) : (
+                <>
+                  <div className="dashboard-diet-grid">
+                    <div className="dashboard-diet-card">
+                      <h3 className="dashboard-diet-title">Calories Consumed</h3>
+                      <p className="dashboard-diet-value">{dietData.totalCalories} kcal</p>
+                    </div>
+                    <div className="dashboard-diet-card">
+                      <h3 className="dashboard-diet-title">Meals Today</h3>
+                      <p className="dashboard-diet-value">{dietData.meals.length}</p>
+                    </div>
+                    <div className="dashboard-diet-card">
+                      <h3 className="dashboard-diet-title">Daily Goal</h3>
+                      <p className="dashboard-diet-value">2000 kcal</p>
+                    </div>
+                  </div>
+
+                  <div className="dashboard-recent-meals">
+                    <h3 className="dashboard-diet-subtitle">Recent Meals</h3>
+                    {dietData.meals.length > 0 ? (
+                      <div className="dashboard-meals-list">
+                        {dietData.meals.slice(0, 3).map((meal, index) => (
+                          <div key={index} className="dashboard-meal-item">
+                            <div className="dashboard-meal-info">
+                              <span className="dashboard-meal-name">{meal.name}</span>
+                              <span className="dashboard-meal-type">{meal.type}</span>
+                            </div>
+                            <span className="dashboard-meal-calories">
+                              {parseInt(meal.calories) || 0} cal
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="dashboard-no-meals">No meals tracked today</p>
+                    )}
+                  </div>
+
+                  <a href="/diet" className="dashboard-track-meal-button">
+                    Track New Meal
+                  </a>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="dashboard-right-content">
+            <div className="dashboard-stats-container">
+              <h2 className="dashboard-section-title">Cycle Statistics</h2>
+              <div className="dashboard-stats-grid">
+                <div>
+                  <div className="dashboard-stats-card">
+                    <h3 className="dashboard-stats-title">Last Period</h3>
+                    <p className="dashboard-stats-value">{periodData.data.lastPeriod}</p>
+                  </div>
+                  <div className="dashboard-stats-card">
+                    <h3 className="dashboard-stats-title">Cycle Length</h3>
+                    <p className="dashboard-stats-value">
+                      {periodData.data.cycleLength ? `${periodData.data.cycleLength} days` : "Not available"}
+                    </p>
+                  </div>
+                  <div className="dashboard-stats-card">
+                    <h3 className="dashboard-stats-title">Period Duration</h3>
+                    <p className="dashboard-stats-value">
+                      {periodData.data.periodDuration ? `${periodData.data.periodDuration} days` : "Not available"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="dashboard-chart-container">
+              <h2 className="dashboard-section-title">Period Length Over Time</h2>
+              <div className="dashboard-chart-card">
+                {chartData.length > 0 ? (
+                  <LineChart width={300} height={400} data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="length" stroke="#DC2626" />
+                  </LineChart>
+                ) : (
+                  <div className="dashboard-no-data">
+                    No period tracking data available yet
+                  </div>
                 )}
-              </p>
+                <p className="dashboard-chart-description">
+                  This chart shows the period duration over the past six months.
+                  {periodData.data.lastPeriod !== "Not available" && (
+                    <span className="dashboard-last-period">
+                      Last period started on: {periodData.data.lastPeriod}
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
-          <Footer />
+      </main>
+      <Footer />
     </>
   );
 };

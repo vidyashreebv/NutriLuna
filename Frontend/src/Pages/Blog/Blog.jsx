@@ -3,8 +3,10 @@ import "./blog.css";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import blogVideo from "../../assets/blogpage.mp4";
+import { useLoading } from '../../context/LoadingContext';
 
 const Blog = () => {
+  const { showLoader, hideLoader } = useLoading();
   const [articles, setArticles] = useState([]);
 
   const navItems = [
@@ -16,11 +18,19 @@ const Blog = () => {
   
 
   useEffect(() => {
-    const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => setArticles(data.articles || []))
-      .catch(error => console.error("Error fetching data:", error));
+    const fetchBlogs = async () => {
+      try {
+        showLoader();
+        const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        setArticles(data.articles || []);
+      } finally {
+        hideLoader();
+      }
+    };
+
+    fetchBlogs();
   }, []);
 
   return (

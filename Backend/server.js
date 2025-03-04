@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 5001;
 // Enhanced CORS configuration
 app.use(cors({
   origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
@@ -18,7 +18,10 @@ app.use(bodyParser.json());
 // Add error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(500).json({ 
+    success: false, 
+    error: err.message || 'Internal Server Error'
+  });
 });
 
 // Add request logging
@@ -35,6 +38,7 @@ const periodRoutes = require('./pages/periodtrack');
 const dashboardRoutes = require('./pages/dashboardRoutes');
 const recipeSuggestionRoutes = require('./pages/recipesuggestion');
 const consultationRoutes = require('./pages/consultation');
+const pinRoutes = require('./pages/pin');
 
 // Use routes
 app.use('/api/user', userRoutes);
@@ -44,15 +48,22 @@ app.use("/api/period", periodRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/recipesuggestion', recipeSuggestionRoutes);
 app.use('/api/consultation', consultationRoutes);
+app.use('/api/pin', pinRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
-  res.send('Welcome to Nutri-Luna Backend API!');
+  res.json({
+    success: true,
+    message: 'Welcome to Nutri-Luna Backend API!'
+  });
 });
 
 // 404 Error Handling
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route Not Found' });
+  res.status(404).json({ 
+    success: false, 
+    error: 'Route Not Found' 
+  });
 });
 
 // Start Server

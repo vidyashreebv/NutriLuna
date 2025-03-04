@@ -39,7 +39,6 @@
 .dashboard-diet-container,
 .dashboard-stats-container,
 .dashboard-chart-container {
-  background-color: #fff1f2;
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
@@ -322,6 +321,27 @@
   width: 100%;
 }
 
+.dashboard-track-meal-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background-color: #dc2626;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-track-meal-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+}
+
 /* Add this new style for the body if needed */
 body {
   overflow-y: auto;
@@ -404,9 +424,7 @@ body {
 
 /* Welcome Section Styles */
 .dashboard-welcome-section {
-  background-color: #fff1f2;
   padding: 2rem;
-  margin-top: 153px; /* Updated to match navbar height */
   border-bottom: 1px solid #fecdd3;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -439,8 +457,48 @@ body {
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
   display: inline-block; /* Make button inline-block */
   margin-top: 0.5rem; /* Add some space above button */
+  margin-bottom: 30px;
 }
 
 .edit-profile-button:hover {
   background-color: #b91c1c;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: #dc2626;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ee9999;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  width: auto;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.logout-button:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(255, 105, 180, 0.2);
 }
