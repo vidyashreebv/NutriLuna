@@ -98,6 +98,25 @@ const timeSlots = [
     { time: "04:00 PM", popularity: "low" }
 ];
 
+const CustomPopup = ({ message, onClose }) => {
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <div className="popup-header">
+                    <h3>Notification</h3>
+                    <button className="close-btn" onClick={onClose}>×</button>
+                </div>
+                <div className="popup-body">
+                    <p>{message}</p>
+                </div>
+                <div className="popup-footer">
+                    <button className="confirm-btn" onClick={onClose}>Close</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const BookAppointment = () => {
     const navigate = useNavigate();
     const { subscription, checkSubscriptionStatus, updateSubscription } = useSubscription();
@@ -118,6 +137,7 @@ const BookAppointment = () => {
     const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
     const [remainingConsultations, setRemainingConsultations] = useState(0);
     const auth = getAuth();
+    const [popup, setPopup] = useState({ show: false, message: '' });
 
     useEffect(() => {
         const verifySubscription = async () => {
@@ -186,14 +206,18 @@ const BookAppointment = () => {
     }, [subscription]);
 
     const handleDoctorSelect = (doctor) => {
-        if (doctor.available) {
-            setSelectedDoctor(doctor);
-        } else {
-            alert("This doctor is currently not available. Please select another doctor.");
+        if (!doctor.available) {
+            showPopup("This doctor is currently not available. Please select another doctor.");
+            return;
         }
+        setSelectedDoctor(doctor);
     };
 
     const handleTimeSlotSelect = (slot) => {
+        if (!selectedDoctor) {
+            showPopup("Please select a doctor first");
+            return;
+        }
         setSelectedTimeSlot(slot.time);
     };
 
@@ -202,6 +226,12 @@ const BookAppointment = () => {
         setFormData(prev => ({
             ...prev,
             [id]: value
+        }));
+
+        // Clear error for this field as user types
+        setFormErrors(prev => ({
+            ...prev,
+            [id]: ''
         }));
     };
 
@@ -216,20 +246,88 @@ const BookAppointment = () => {
         setSelectedTimeSlot(null);
     };
 
+    const showPopup = (message) => {
+        setPopup({ show: true, message });
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        let isValid = true;
+
+        if (!formData.name.trim()) {
+            errors.name = 'Name is required';
+            isValid = false;
+            showPopup('Please enter your name');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email.trim() || !emailRegex.test(formData.email)) {
+            errors.email = 'Please enter a valid email address';
+            isValid = false;
+            showPopup('Please enter a valid email address');
+            return false;
+        }
+
+        if (!formData.date) {
+            errors.date = 'Please select an appointment date';
+            isValid = false;
+            showPopup('Please select an appointment date');
+            return false;
+        }
+
+        const selectedDate = new Date(formData.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+            errors.date = 'Please select a future date';
+            isValid = false;
+            showPopup('Please select a future date');
+            return false;
+        }
+
+        if (!formData.reason.trim()) {
+            errors.reason = 'Please provide a reason for consultation';
+            isValid = false;
+            showPopup('Please provide a reason for consultation');
+            return false;
+        }
+
+        if (!selectedDoctor) {
+            isValid = false;
+            showPopup('Please select a doctor');
+            return false;
+        }
+
+        if (!selectedTimeSlot) {
+            isValid = false;
+            showPopup('Please select a time slot');
+            return false;
+        }
+
+        setFormErrors(errors);
+        return isValid;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
 
         try {
             const user = auth.currentUser;
             if (!user) {
-                toast.error('Please login to book a consultation');
+                showPopup('Please login to book a consultation');
+                navigate('/login');
                 return;
             }
 
-            // Check subscription status again before booking
+            // Check subscription status
             const hasActiveSubscription = await checkSubscriptionStatus(user.uid);
             if (!hasActiveSubscription) {
-                toast.info('Please subscribe to book a consultation');
+                showPopup('Please subscribe to book a consultation');
                 navigate('/consultation');
                 return;
             }
@@ -264,7 +362,7 @@ const BookAppointment = () => {
             const data = await response.json();
 
             if (data.success) {
-                // Update subscription in context and show success message
+                // Update subscription in context
                 if (subscription) {
                     const newRemainingConsultations = subscription.remainingConsultations - 1;
                     await updateSubscription({
@@ -274,12 +372,20 @@ const BookAppointment = () => {
                     });
                 }
 
+                // Clear form fields
+                setFormData({
+                    name: '',
+                    email: '',
+                    date: '',
+                    reason: ''
+                });
+                setSelectedDoctor(null);
+                setSelectedTimeSlot(null);
+
+                // Show success message
                 setSuccessMessage('Your consultation has been successfully booked! Our team will contact you via email.');
                 setShowSuccess(true);
-                toast.success('Consultation booked successfully!');
-
-                // Clear form
-                resetForm();
+                setRemainingConsultations(prev => prev - 1);
 
                 // If no consultations remaining, redirect after a delay
                 if (subscription?.remainingConsultations <= 1) {
@@ -292,7 +398,7 @@ const BookAppointment = () => {
             }
         } catch (error) {
             console.error('Error booking consultation:', error);
-            toast.error(error.message || 'Failed to book consultation');
+            showPopup(error.message || 'Failed to book consultation');
         }
     };
 
@@ -449,41 +555,31 @@ const BookAppointment = () => {
                             <h3>Complete Your Booking</h3>
                             <form className="booking-form" onSubmit={handleSubmit}>
                                 <div className="form-group">
-                                    <label className='form-l' htmlFor="name">Full Name</label>
+                                    <label className='form-l' htmlFor="name">Full Name *</label>
                                     <input
                                         type="text"
                                         id="name"
                                         className={`form-control ${formErrors.name ? 'error' : ''}`}
                                         value={formData.name}
                                         onChange={handleInputChange}
+                                        placeholder="Enter your full name"
                                     />
-                                    {formErrors.name && (
-                                        <div className="error-message">
-                                            <FaExclamationCircle />
-                                            {formErrors.name}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label className='form-l' htmlFor="email">Email Address</label>
+                                    <label className='form-l' htmlFor="email">Email Address *</label>
                                     <input
                                         type="email"
                                         id="email"
                                         className={`form-control ${formErrors.email ? 'error' : ''}`}
                                         value={formData.email}
                                         onChange={handleInputChange}
+                                        placeholder="Enter your email"
                                     />
-                                    {formErrors.email && (
-                                        <div className="error-message">
-                                            <FaExclamationCircle />
-                                            {formErrors.email}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label className='form-l' htmlFor="date">Appointment Date</label>
+                                    <label className='form-l' htmlFor="date">Appointment Date *</label>
                                     <input
                                         type="date"
                                         id="date"
@@ -491,35 +587,24 @@ const BookAppointment = () => {
                                         value={formData.date}
                                         onChange={handleInputChange}
                                     />
-                                    {formErrors.date && (
-                                        <div className="error-message">
-                                            <FaExclamationCircle />
-                                            {formErrors.date}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="form-group">
-                                    <label className='form-l' htmlFor="reason">Reason for Consultation</label>
+                                    <label className='form-l' htmlFor="reason">Reason for Consultation *</label>
                                     <textarea
                                         id="reason"
                                         className={`form-control ${formErrors.reason ? 'error' : ''}`}
                                         rows="4"
                                         value={formData.reason}
                                         onChange={handleInputChange}
+                                        placeholder="Please describe your reason for consultation"
                                     ></textarea>
-                                    {formErrors.reason && (
-                                        <div className="error-message">
-                                            <FaExclamationCircle />
-                                            {formErrors.reason}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <button 
                                     type="submit" 
                                     className="submit-btn" 
-                                    disabled={isLoading || !isFormValid || bookingDisabled}
+                                    disabled={isLoading}
                                 >
                                     {isLoading ? 'Booking...' : 'Confirm Booking'}
                                 </button>
@@ -527,10 +612,24 @@ const BookAppointment = () => {
 
                             {showSuccess && (
                                 <div className="success-message">
-                                    <p style={{ color: '#2e7d32', fontSize: '16px', fontWeight: '500' }}>
+                                    <p style={{ 
+                                        color: '#2e7d32', 
+                                        fontSize: '16px', 
+                                        fontWeight: '500',
+                                        marginTop: '20px',
+                                        padding: '15px',
+                                        backgroundColor: '#e8f5e9',
+                                        borderRadius: '8px',
+                                        border: '1px solid #a5d6a7'
+                                    }}>
                                         {successMessage}
                                     </p>
-                                    <p className="remaining-consultations" style={{ color: '#1b5e20', fontSize: '14px', fontWeight: 'bold' }}>
+                                    <p className="remaining-consultations" style={{ 
+                                        color: '#1b5e20', 
+                                        fontSize: '14px', 
+                                        fontWeight: 'bold',
+                                        marginTop: '10px' 
+                                    }}>
                                         Remaining consultations: {remainingConsultations}
                                     </p>
                                 </div>
@@ -543,51 +642,12 @@ const BookAppointment = () => {
 
             <Footer />
 
-            
-
-            <style jsx>{`
-                .consultation-status {
-                    margin-top: 20px;
-                    padding: 15px;
-                    background-color: #f5f5f5;
-                    border-radius: 8px;
-                    text-align: center;
-                }
-
-                .consultation-status p {
-                    font-size: 16px;
-                    color: #333;
-                    margin-bottom: 10px;
-                }
-
-                .upgrade-button {
-                    background-color:rgb(8, 155, 13);
-                    color: white;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 14px;
-                }
-
-                .upgrade-button:hover {
-                    background-color: #45a049;
-                }
-
-                .success-message {
-                    background-color: #e8f5e9;
-                    border: 1px solid #a5d6a7;
-                    border-radius: 8px;
-                    padding: 15px 20px;
-                    margin: 20px 0;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                }
-
-                .success-message p {
-                    margin: 8px 0;
-                }
-            `}</style>
+            {popup.show && (
+                <CustomPopup 
+                    message={popup.message} 
+                    onClose={() => setPopup({ show: false, message: '' })} 
+                />
+            )}
         </div>
     );
 };
