@@ -29,25 +29,21 @@ app.use((req, res, next) => {
 
 // Routes
 const userRoutes = require('./pages/user');
-app.use('/api/user', userRoutes);
-
 const personalDetailsRoutes = require('./pages/personalDetails');
-app.use('/api/personalDetails', personalDetailsRoutes);
-
 const dietTrackerRoutes = require("./pages/diettracker");
-app.use("/api/diettracker", dietTrackerRoutes);
-
 const periodRoutes = require('./pages/periodtrack');  
-app.use("/api/period", periodRoutes);
-
-// Add the dashboard routes
 const dashboardRoutes = require('./pages/dashboardRoutes');
-const dietTrackerRoutes = require('./pages/diettracker');
+const recipeSuggestionRoutes = require('./pages/recipesuggestion');
+const consultationRoutes = require('./pages/consultation');
 
 // Use routes
 app.use('/api/user', userRoutes);
+app.use('/api/personalDetails', personalDetailsRoutes);
+app.use("/api/diettracker", dietTrackerRoutes);
+app.use("/api/period", periodRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/diettracker', dietTrackerRoutes);
+app.use('/api/recipesuggestion', recipeSuggestionRoutes);
+app.use('/api/consultation', consultationRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
