@@ -33,9 +33,16 @@ services:
       cd Frontend
       npm install
       npm run build
+      ls -la
+      ls -la dist || echo "dist directory not found"
     startCommand: |
       cd Frontend
-      npx serve -s dist -l $PORT --single
+      if [ -d "dist" ]; then
+        npx serve -s dist -l $PORT --single
+      else
+        echo "Error: dist directory not found. Build may have failed."
+        exit 1
+      fi
     envVars:
       - key: NODE_ENV
         value: production
