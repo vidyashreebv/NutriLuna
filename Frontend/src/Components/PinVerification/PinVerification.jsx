@@ -21,7 +21,7 @@ const PinVerification = ({ onVerify }) => {
     const checkPinStatus = async () => {
         try {
             const token = await currentUser.getIdToken();
-            const response = await axios.get('http://localhost:5001/api/pin/status', {
+            const response = await axios.get('https://nutriluna-backend.onrender.com/api/pin/status', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -75,7 +75,7 @@ const PinVerification = ({ onVerify }) => {
 
         try {
             const token = await currentUser.getIdToken();
-            await axios.post('http://localhost:5001/api/pin/set', 
+            await axios.post('https://nutriluna-backend.onrender.com/api/pin/set', 
                 { pin: enteredPin },
                 {
                     headers: {
@@ -101,7 +101,7 @@ const PinVerification = ({ onVerify }) => {
         
         try {
             const token = await currentUser.getIdToken();
-            const response = await axios.post('http://localhost:5001/api/pin/verify',
+            const response = await axios.post('https://nutriluna-backend.onrender.com/api/pin/verify',
                 { pin: enteredPin },
                 {
                     headers: {

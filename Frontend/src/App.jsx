@@ -77,7 +77,7 @@ const ProtectedRoute = ({ children }) => {
         // Check PIN status with explicit error handling
         let response;
         try {
-          response = await axios.get('http://localhost:5001/api/pin/status', {
+          response = await axios.get('https://nutriluna-backend.onrender.com/api/pin/status', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
