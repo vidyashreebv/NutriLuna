@@ -30,7 +30,7 @@ services:
     name: nutriluna-frontend
     env: node
     buildCommand: cd Frontend && npm install && npm install terser --save-dev && npm run build
-    startCommand: cd Frontend && npm run start
+    startCommand: cd Frontend && npx serve -s dist -l $PORT
     envVars:
       - key: NODE_ENV
         value: production
