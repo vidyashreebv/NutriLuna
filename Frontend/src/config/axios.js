@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://nutriluna-backend.onrender.com' // Your Render deployment URL
+  ? 'https://nutriluna-backend.onrender.com' // Your deployed Render URL
   : 'http://localhost:5001';
 
 const axiosInstance = axios.create({
