@@ -29,7 +29,7 @@ services:
   - type: web
     name: nutriluna-frontend
     env: node
-    buildCommand: cd Frontend && npm install && npm run build
+    buildCommand: cd Frontend && npm install && npm install terser --save-dev && npm run build
     startCommand: cd Frontend && npm run start
     envVars:
       - key: NODE_ENV
