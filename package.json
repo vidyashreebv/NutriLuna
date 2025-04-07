@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "cd Frontend && npm run build && npm start"
+    "start": "cd Frontend && NODE_OPTIONS='--max-old-space-size=4096' npm run build && npm start"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
