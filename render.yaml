@@ -1,5 +1,16 @@
 services:
   - type: web
+    name: nutriluna-backend
+    env: node
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+
+  - type: web
     name: nutriluna-frontend
     env: node
     buildCommand: cd Frontend && npm install && npm run build
@@ -9,3 +20,5 @@ services:
         value: production
       - key: VITE_API_URL
         value: https://nutriluna-backend.onrender.com
+      - key: PORT
+        value: 5173

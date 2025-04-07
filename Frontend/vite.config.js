@@ -6,14 +6,19 @@ export default defineConfig({
   server: {
     host: true,
     port: process.env.PORT || 5173,
-    strictPort: true,
-    hmr: {
-      clientPort: 443
+    strictPort: false,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
     }
   },
   preview: {
     port: process.env.PORT || 5173,
-    strictPort: true,
+    strictPort: false,
     host: true
   },
   build: {
