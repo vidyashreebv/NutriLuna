@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./blog.css";
+import "./Blog.css";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import blogVideo from "../../assets/blogpage.mp4";
