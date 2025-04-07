@@ -1,287 +1,242 @@
 /* Full-body styles using the app-body class */
 .app-body {
-    font-family: "Poppins", sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background:url('../../assets/loginbg.jpg') no-repeat ;
-    background-size:cover ;
-    background-size: contain cover;
-    background-position:center ;
-    background-repeat: no-repeat; /* Prevent tiling */
-   
-  }
-  *{
-    margin:0;
-    padding:0;
-    box-sizing: border-box;
-  
-  }
-  
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: url("../../assets/loginbg.jpg") no-repeat;
+  background-size: cover;
+  background-size: contain cover;
+  background-position: center;
+  background-repeat: no-repeat; /* Prevent tiling */
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
- 
-
-
-.Wrapper{
-    position: relative;
-    width : 420px;
-    height: 420px;
-    background: transparent;
-    margin: 10px 0;
-    border-radius: 50px;
-    color: #fff;
-    display: flex;
-    align-items:center;
-    transition: all 0.3s ease-in-out;
-    transition: height .2s ease;
-    overflow: hidden;
-    border: 1px solid rgb(218, 209, 209);
-    backdrop-filter: blur(3.5px);
-    box-shadow: 0 0 10px rgba(195, 61, 61, 0.912);
-    
-
+.Wrapper {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  background: transparent;
+  margin: 10px 0;
+  border-radius: 50px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  transition: height 0.2s ease;
+  overflow: hidden;
+  border: 1px solid rgb(218, 209, 209);
+  backdrop-filter: blur(3.5px);
+  box-shadow: 0 0 10px rgba(195, 61, 61, 0.912);
 }
 .Wrapper.activate {
-    height:600px
+  height: 600px;
 }
-.Wrapper .form-box-login{
-    width: 100%;
-    padding: 40px;   
+.Wrapper .form-box-login {
+  width: 100%;
+  padding: 40px;
 }
-.Wrapper.activate .form-box-login{
-    transition: none;
-    translate: -500px;
-
+.Wrapper.activate .form-box-login {
+  transition: none;
+  translate: -500px;
 }
-.Wrapper .form-box-register{
-    width: 100%;
-    padding: 40px;  
-    position: absolute;
-    translate: 600px;
-    transition: none;
-     
+.Wrapper .form-box-register {
+  width: 100%;
+  padding: 40px;
+  position: absolute;
+  translate: 600px;
+  transition: none;
 }
-.Wrapper.activate .form-box-register{
-    transition: translate .18s ease;
-    translate: 0;
-
+.Wrapper.activate .form-box-register {
+  transition: translate 0.18s ease;
+  translate: 0;
 }
 
-
-.Wrapper .form-box-login{
-    transition: translate .18s ease;
-    translate: 0;
-
+.Wrapper .form-box-login {
+  transition: translate 0.18s ease;
+  translate: 0;
 }
 
-
-
-
-
-
-
-
-
-.log-hed{
-    font-size: 36px;  
-     text-align: center; 
-     color: #fff;
-     margin-bottom: 20px;
-     font-family:'Courier New', Courier, monospace;
-     margin-top: 20px;
+.log-hed {
+  font-size: 36px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 20px;
+  font-family: "Courier New", Courier, monospace;
+  margin-top: 20px;
 }
 
-form .input-box{
-    position: relative;
-    width: 100%;
-    height: 50px;
-    margin: 30px 0;
+form .input-box {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  margin: 30px 0;
 }
 
-.input-box input{
-    width: 100%;
-    height: 100%;
-    background: transparent ;
-    border: none;
-    outline: none;
-    border: 0.2px solid rgba(255, 255, 255, 0.912);
-    border-radius: 40px;
-    font-size: 16px;
-    color: #fff;
-    padding: 20px 45px 20px 20px;
-    
+.input-box input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  border: 0.2px solid rgba(255, 255, 255, 0.912);
+  border-radius: 40px;
+  font-size: 16px;
+  color: #fff;
+  padding: 20px 45px 20px 20px;
 }
 /* When input is focused or contains text */
 .input-box input:focus,
 .input-box input:not(:placeholder-shown) {
-    background: white;
-    color: black;
-   
+  background: white;
+  color: black;
 }
-.input-box input::placeholder{
-    color: #fff;
+.input-box input::placeholder {
+  color: #fff;
 }
-.input-box .icon{
-    position: absolute;
-    right:20px;
-    top: 50%;
-    translate: 0 -50%;
-    font-size: 16px;
-}
-
-form .remember-forget{
-    display: flex;
-    justify-content: space-between;
-    font-size: 14.5px;
-    margin: -15px 0 15 px;
-
-
+.input-box .icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: 16px;
 }
 
-.remember-forget input { 
-    accent-color: #fff;
-    margin-right: 4px;
-    color: #fff;
-    display: flex;
-    width: 16px;  /* Adjust size if needed */
+form .remember-forget {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+  margin: -15px 0 15 px;
+}
+
+.remember-forget input {
+  accent-color: #fff;
+  margin-right: 4px;
+  color: #fff;
+  display: flex;
+  width: 16px; /* Adjust size if needed */
   height: 16px;
-  
-  
 }
 .remember-forget label {
-    accent-color: #fff;
-    margin-right: 4px;
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Adjust spacing between checkbox and text */
+  accent-color: #fff;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Adjust spacing between checkbox and text */
 }
-.remember-forget a{
-    color: #fff;
-    text-decoration: none; 
-
+.remember-forget a {
+  color: #fff;
+  text-decoration: none;
 }
 .register-button:disabled {
-    background-color: rgba(234, 229, 229, 0.736); /* Light gray */
-    cursor: not-allowed;
-    text-emphasis-style:inherit;
-    text-decoration: line-through;
-    color: rgb(3, 3, 3);
-  }
-  .register-button:disabled:hover{
-    background-color: rgba(204, 16, 16, 0.736);
-    color: #fff;
-    border: 2px solid #660808;
-    cursor: not-allowed;
-    text-decoration: line-through;
-    text-emphasis-style:inherit;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
+  background-color: rgba(234, 229, 229, 0.736); /* Light gray */
+  cursor: not-allowed;
+  text-emphasis-style: inherit;
+  text-decoration: line-through;
+  color: rgb(3, 3, 3);
+}
+.register-button:disabled:hover {
+  background-color: rgba(204, 27, 27, 0.736);
+  color: #fff;
+  border: 2px solid #660808;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  text-emphasis-style: inherit;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
+}
 
-  }
-  
 /* Make the selector more specific */
 .form-box-login button[type="submit"].register-button,
 .form-box-register button[type="submit"].register-button,
 button.register-button {
-    width: 100%;
-    height: 45px;
-    background: white !important; /* Added !important as last resort */
-    border: 2px solid #660808;
-    outline: none;
-    border-radius: 40px;
-    box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
-    cursor: pointer;
-    font-size: 16px;
-    color: #333;
-    font-weight: 700;
-    transition: all 0.3s ease;
+  width: 100%;
+  height: 45px;
+  background: white !important; /* Added !important as last resort */
+  border: 2px solid #660808;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(210, 21, 21, 0.1);
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  font-weight: 700;
+  transition: all 0.3s ease;
 }
 
 /* Make hover selector equally specific */
 .form-box-login button[type="submit"].register-button:hover,
 .form-box-register button[type="submit"].register-button:hover,
 button.register-button:hover {
-    background: #da0e0e !important;
-    color: #fff;
+  background: #da0e0e !important;
+  color: #fff;
 }
-
-
-
 
 form .new-register-link {
-    font-size: 14.5px;
-    text-align: center;
-    margin: 20px 0 15px;
+  font-size: 14.5px;
+  text-align: center;
+  margin: 20px 0 15px;
 }
 
- .new-register-link p a {
-    color: #fff;
-    text-decoration-color: #fff;
-    font-weight: 600;
-    text-decoration: none;
-
-
- }
-.new-register-link p a:hover{
-    text-decoration:underline;
-    text-decoration-color: #fff;
-
-
+.new-register-link p a {
+  color: #fff;
+  text-decoration-color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.new-register-link p a:hover {
+  text-decoration: underline;
+  text-decoration-color: #fff;
 }
 
-
-form .terms-condition{
-    display: flex;
-    justify-content: space-between;
-    font-size: 14.5px;
-    margin: -15px 0 15 px;
-
-
+form .terms-condition {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+  margin: -15px 0 15 px;
 }
 
-.terms-condition input { 
-    accent-color: #fff;
-    margin-right: 0.1px;
-    width: 16px;  /* Adjust size if needed */
-    height: 16px;
-
+.terms-condition input {
+  accent-color: #fff;
+  margin-right: 0.1px;
+  width: 16px; /* Adjust size if needed */
+  height: 16px;
 }
 .terms-condition label {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Adjust spacing between checkbox and text */
-  }
-
-
-.terms-condition a{
-    color: #fff;
-    text-decoration-color: #fff;
-    font-weight: 600;
-    text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Adjust spacing between checkbox and text */
 }
-.terms-condition a:hover{
-    text-decoration:underline;
-    text-decoration-color: #fff;
+
+.terms-condition a {
+  color: #fff;
+  text-decoration-color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.terms-condition a:hover {
+  text-decoration: underline;
+  text-decoration-color: #fff;
 }
 
 form .login-link {
-    font-size: 14.5px;
-    text-align: center;
-    margin: 20px 0 15px;
+  font-size: 14.5px;
+  text-align: center;
+  margin: 20px 0 15px;
 }
 
- .login-link p a {
-    color: #fff;
-    text-decoration-color: #fff;
-    font-weight: 600;
-    text-decoration: none;
-
-
- }
-.login-link p a:hover{
-    text-decoration:underline; 
-    text-decoration-color: #fff;
-
-
+.login-link p a {
+  color: #fff;
+  text-decoration-color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-link p a:hover {
+  text-decoration: underline;
+  text-decoration-color: #fff;
 }

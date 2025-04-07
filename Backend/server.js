@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5001;
 
 // Enhanced CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: ['http://localhost:5173', 'https://nutriluna.vercel.app', 'https://nutriluna-git-main-vidya-shree-b-vs-projects.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

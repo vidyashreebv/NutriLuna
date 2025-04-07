@@ -46,7 +46,6 @@
   padding: 1.5rem;
   max-width: 56rem;
   margin: 0 auto;
-  margin-top: 4rem;
 }
 
 /* Tracker title */
@@ -1075,6 +1074,7 @@
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 2px solid rgba(230, 0, 0, 0.1);
+  margin-top: 100px;
 }
 
 /* Meal Type Badges */
