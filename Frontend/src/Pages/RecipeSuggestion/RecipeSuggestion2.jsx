@@ -33,7 +33,7 @@ const RecipeSuggestion2 = () => {
       const token = await auth.currentUser.getIdToken();
 
       console.log('Fetching recipes for phase:', selectedPhase);
-      const response = await axios.get("http://localhost:5001/api/recipesuggestion/suggestions", {
+      const response = await axios.get("https://nutriluna-backend.onrender.com/api/recipesuggestion/suggestions", {
         headers: {
           'Authorization': `Bearer ${token}`
         },

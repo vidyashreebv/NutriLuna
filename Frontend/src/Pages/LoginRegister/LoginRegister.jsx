@@ -107,7 +107,7 @@ const LoginRegister = () => {
       // Check if user has set up PIN before
       try {
         const token = await user.getIdToken();
-        const response = await axios.get('http://localhost:5001/api/pin/status', {
+        const response = await axios.get('https://nutriluna-backend.onrender.com/api/pin/status', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

@@ -48,7 +48,7 @@ const Dashboard = () => {
           const token = await currentUser.getIdToken(true);
           console.log("Fetching data with token:", token.substring(0, 10) + "...");
 
-          const response = await fetch("http://localhost:5001/api/dashboard/data", {
+          const response = await fetch("https://nutriluna-backend.onrender.com/api/dashboard/data", {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -106,7 +106,7 @@ const Dashboard = () => {
             throw new Error("Failed to get authentication token");
           }
 
-          const response = await fetch("http://localhost:5001/api/diettracker/today", {
+          const response = await fetch("https://nutriluna-backend.onrender.com/api/diettracker/today", {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -165,7 +165,7 @@ const Dashboard = () => {
           const token = await currentUser.getIdToken(true);
           console.log('Attempting to fetch user data with token');
 
-          const response = await fetch("http://localhost:5001/api/user/profile", {
+          const response = await fetch("https://nutriluna-backend.onrender.com/api/user/profile", {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
