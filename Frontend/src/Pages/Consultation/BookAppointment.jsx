@@ -17,6 +17,7 @@ import { useSubscription } from '../../context/SubscriptionContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useLoading } from '../../context/LoadingContext';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const navItems = [
     { label: 'Home', href: '/landing' },
@@ -348,7 +349,7 @@ const BookAppointment = () => {
                 }
             };
 
-            const response = await fetch('https://nutriluna-backend.onrender.com/api/consultation/book', {
+            const response = await fetch(API_ENDPOINTS.CONSULTATION_BOOK, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -6,6 +6,7 @@ import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import { useLoading } from '../../context/LoadingContext';
 import axiosInstance from '../../config/axios';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 function PeriodTracker() {
     const [lastPeriod, setLastPeriod] = useState("");
@@ -57,7 +58,7 @@ function PeriodTracker() {
     const fetchPeriodData = async (currentUser) => {
         try {
             showLoader();
-            const response = await axiosInstance.get(`/api/period/getPeriodData`);
+            const response = await axiosInstance.get(API_ENDPOINTS.PERIOD_DATA);
             if (response.data) {
                 setPeriodData(response.data);
                 setAllPeriods(response.data.periods || []);
@@ -268,7 +269,7 @@ function PeriodTracker() {
     const handleDelete = async (periodId) => {
         try {
             showLoader();
-            await axiosInstance.delete(`/api/period/deletePeriod/${periodId}`);
+            await axiosInstance.delete(API_ENDPOINTS.PERIOD_DELETE(periodId));
             setAllPeriods(prevPeriods => prevPeriods.filter(p => p.id !== periodId));
             setPeriodData(prev => ({
                 ...prev,
@@ -290,7 +291,7 @@ function PeriodTracker() {
                 duration: parseInt(periodDuration)
             };
 
-            const response = await axiosInstance.post('/api/period/savePeriod', newPeriod);
+            const response = await axiosInstance.post(API_ENDPOINTS.PERIOD_SAVE, newPeriod);
             if (response.data) {
                 setAllPeriods(prev => [...prev, response.data]);
                 setPeriodData(prev => ({

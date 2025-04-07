@@ -1,19 +1,12 @@
 import axios from 'axios';
-
-// Get API URL from environment variable or fallback
-const API_URL = import.meta.env.VITE_API_URL || 'https://nutriluna-backend.onrender.com';
-
-// Ensure API_URL uses HTTPS
-const secureAPI_URL = API_URL.replace('http://', 'https://');
+import { secureAPI_BASE_URL } from './apiConfig';
 
 // Debug log
-console.log('Environment:', import.meta.env.MODE);
-console.log('API_URL:', secureAPI_URL);
-console.log('Current hostname:', window.location.hostname);
+console.log('Axios Configuration - Using API URL:', secureAPI_BASE_URL);
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: secureAPI_URL,
+  baseURL: secureAPI_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

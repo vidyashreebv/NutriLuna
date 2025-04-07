@@ -24,6 +24,7 @@ import axios from 'axios';
 import { AuthProvider } from './context/AuthContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { LoadingProvider } from './context/LoadingContext';
+import { API_ENDPOINTS } from './config/apiConfig';
 
 // Wrapper component to handle PIN verification
 const ProtectedRoute = ({ children }) => {
@@ -77,7 +78,7 @@ const ProtectedRoute = ({ children }) => {
         // Check PIN status with explicit error handling
         let response;
         try {
-          response = await axios.get('https://nutriluna-backend.onrender.com/api/pin/status', {
+          response = await axios.get(API_ENDPOINTS.PIN_STATUS, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

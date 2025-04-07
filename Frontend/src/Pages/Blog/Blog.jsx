@@ -4,10 +4,12 @@ import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import blogVideo from "../../assets/blogpage.mp4";
 import { useLoading } from '../../context/LoadingContext';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const Blog = () => {
   const { showLoader, hideLoader } = useLoading();
   const [articles, setArticles] = useState([]);
+  const [videoError, setVideoError] = useState(false);
 
   const navItems = [
     { label: 'Home', href: '/landing' },
@@ -21,7 +23,7 @@ const Blog = () => {
     const fetchBlogs = async () => {
       try {
         showLoader();
-        const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=f29bbe91c4fe4be2ba8ca4f32b1bb42c";
+        const apiUrl = API_ENDPOINTS.NEWS_API("health diet menstrual wellness", 100);
         const response = await fetch(apiUrl);
         const data = await response.json();
         setArticles(data.articles || []);
@@ -33,16 +35,38 @@ const Blog = () => {
     fetchBlogs();
   }, []);
 
+  const handleVideoError = () => {
+    console.error("Video failed to load");
+    setVideoError(true);
+  };
+
   return (
     <div className="blog-page-wrapper">
       <Navbarafter navItems={navItems} />
 
       <div className="blog-hero-section">
         <div className="hero-video-wrapper">
-          <video autoPlay loop muted className="hero-video">
-            <source src={blogVideo} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {!videoError ? (
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              className="hero-video"
+              onError={handleVideoError}
+              playsInline
+            >
+              <source src={blogVideo} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <div className="hero-video-fallback">
+              <img 
+                src="https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+                alt="Wellness background" 
+                className="hero-video"
+              />
+            </div>
+          )}
         </div>
         <div className="blog-hero-content">
           <h1>Wellness & Health Blog</h1>

@@ -7,6 +7,7 @@ import Footer from "../../Components/Footer";
 import { auth } from "../../config/firebase";
 import axios from 'axios';
 import { useLoading } from '../../context/LoadingContext';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const DEFAULT_RECIPE_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkhlYWx0aHkgUmVjaXBlPC90ZXh0Pjwvc3ZnPg==';
 
@@ -33,7 +34,7 @@ const RecipeSuggestion2 = () => {
       const token = await auth.currentUser.getIdToken();
 
       console.log('Fetching recipes for phase:', selectedPhase);
-      const response = await axios.get("https://nutriluna-backend.onrender.com/api/recipesuggestion/suggestions", {
+      const response = await axios.get(API_ENDPOINTS.RECIPE_SUGGESTION_SUGGESTIONS, {
         headers: {
           'Authorization': `Bearer ${token}`
         },

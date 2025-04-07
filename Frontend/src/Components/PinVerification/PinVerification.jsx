@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import './PinVerification.css';
 import loginbg from '../../assets/loginbg.jpg';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const PinVerification = ({ onVerify }) => {
     const [pin, setPin] = useState(['', '', '', '']);
@@ -21,7 +22,7 @@ const PinVerification = ({ onVerify }) => {
     const checkPinStatus = async () => {
         try {
             const token = await currentUser.getIdToken();
-            const response = await axios.get('https://nutriluna-backend.onrender.com/api/pin/status', {
+            const response = await axios.get(API_ENDPOINTS.PIN_STATUS, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -75,7 +76,7 @@ const PinVerification = ({ onVerify }) => {
 
         try {
             const token = await currentUser.getIdToken();
-            await axios.post('https://nutriluna-backend.onrender.com/api/pin/set', 
+            await axios.post(API_ENDPOINTS.PIN_SET, 
                 { pin: enteredPin },
                 {
                     headers: {
@@ -101,7 +102,7 @@ const PinVerification = ({ onVerify }) => {
         
         try {
             const token = await currentUser.getIdToken();
-            const response = await axios.post('https://nutriluna-backend.onrender.com/api/pin/verify',
+            const response = await axios.post(API_ENDPOINTS.PIN_VERIFY,
                 { pin: enteredPin },
                 {
                     headers: {

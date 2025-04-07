@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useLoading } from '../../context/LoadingContext';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../config/apiConfig';
 
 const Dashboard = () => {
   const { currentUser, signOut } = useAuth();
@@ -48,7 +49,7 @@ const Dashboard = () => {
           const token = await currentUser.getIdToken(true);
           console.log("Fetching data with token:", token.substring(0, 10) + "...");
 
-          const response = await fetch("https://nutriluna-backend.onrender.com/api/dashboard/data", {
+          const response = await fetch(API_ENDPOINTS.DASHBOARD_DATA, {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -106,7 +107,7 @@ const Dashboard = () => {
             throw new Error("Failed to get authentication token");
           }
 
-          const response = await fetch("https://nutriluna-backend.onrender.com/api/diettracker/today", {
+          const response = await fetch(API_ENDPOINTS.DIET_TRACKER_TODAY, {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -165,7 +166,7 @@ const Dashboard = () => {
           const token = await currentUser.getIdToken(true);
           console.log('Attempting to fetch user data with token');
 
-          const response = await fetch("https://nutriluna-backend.onrender.com/api/user/profile", {
+          const response = await fetch(API_ENDPOINTS.USER_PROFILE, {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
