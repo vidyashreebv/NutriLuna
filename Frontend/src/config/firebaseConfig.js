@@ -21,4 +21,7 @@ if (getApps().length === 0) {
 
 const auth = getAuth(app);
 
+// Log the current domain for debugging
+console.log('Current domain:', window.location.hostname);
+
 export { app, auth };

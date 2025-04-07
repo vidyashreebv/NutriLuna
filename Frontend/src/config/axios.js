@@ -1,45 +1,50 @@
 import axios from 'axios';
 
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://nutriluna-backend.onrender.com' // Your deployed Render URL
-  : 'http://localhost:5001'; // Local development URL
+// Determine the API URL based on the environment
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_URL = isLocalhost 
+  ? 'http://localhost:5001'
+  : 'https://nutriluna-backend.onrender.com';
 
-console.log('API URL:', API_URL); // Debug log
+// Debug log
+console.log('API_URL:', API_URL);
+console.log('Current hostname:', window.location.hostname);
 
+// Create axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // Set to false for cross-origin requests
-  timeout: 10000 // 10 second timeout
+  withCredentials: false, // Disable credentials for cross-origin requests
+  timeout: 10000, // 10 second timeout
 });
 
-// Add a request interceptor to add the auth token
+// Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('Request:', config.method.toUpperCase(), config.url); // Debug log
+    console.log('Request:', config.method.toUpperCase(), config.url);
     return config;
   },
   (error) => {
-    console.error('Request error:', error); // Debug log
+    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor to handle errors
+// Response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log('Response:', response.status, response.config.url); // Debug log
+    console.log('Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
-    console.error('Response error:', error.response?.status, error.config?.url, error.message); // Debug log
-    if (error.response?.status === 401) {
+    console.error('Response error:', error);
+    if (error.response && error.response.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
       window.location.href = '/login';
