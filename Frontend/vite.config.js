@@ -7,14 +7,14 @@ export default defineConfig({
     host: true,
     port: process.env.PORT || 5173,
     strictPort: false,
-    proxy: {
+    proxy: process.env.NODE_ENV === 'development' ? {
       '/api': {
         target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
-    }
+    } : undefined
   },
   preview: {
     port: process.env.PORT || 5173,
@@ -26,5 +26,8 @@ export default defineConfig({
     sourcemap: false,
     minify: 'terser',
     chunkSizeWarningLimit: 1600
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
   }
 }); 
