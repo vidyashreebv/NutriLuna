@@ -11,6 +11,18 @@ services:
         value: 5001
       - key: CORS_ORIGIN
         value: "*"
+      - key: FIREBASE_API_KEY
+        value: "AIzaSyAr--QBGH8ed01xXD9VTKm7LGdve8JAIZw"
+      - key: FIREBASE_AUTH_DOMAIN
+        value: "nutri-luna.firebaseapp.com"
+      - key: FIREBASE_PROJECT_ID
+        value: "nutri-luna"
+      - key: FIREBASE_STORAGE_BUCKET
+        value: "nutri-luna.firebasestorage.app"
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        value: "75642002726"
+      - key: FIREBASE_APP_ID
+        value: "1:75642002726:web:6b82ca7f749826d127f5e7"
     healthCheckPath: /
     autoDeploy: true
 
@@ -26,5 +38,17 @@ services:
         value: https://nutriluna-backend.onrender.com
       - key: PORT
         value: 5173
+      - key: VITE_FIREBASE_API_KEY
+        value: "AIzaSyAr--QBGH8ed01xXD9VTKm7LGdve8JAIZw"
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        value: "nutri-luna.firebaseapp.com"
+      - key: VITE_FIREBASE_PROJECT_ID
+        value: "nutri-luna"
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        value: "nutri-luna.firebasestorage.app"
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        value: "75642002726"
+      - key: VITE_FIREBASE_APP_ID
+        value: "1:75642002726:web:6b82ca7f749826d127f5e7"
     healthCheckPath: /
     autoDeploy: true
