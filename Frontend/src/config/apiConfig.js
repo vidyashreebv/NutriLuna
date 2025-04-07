@@ -9,34 +9,34 @@ console.log('Environment:', import.meta.env.MODE);
 console.log('API_BASE_URL:', secureAPI_BASE_URL);
 console.log('Current hostname:', window.location.hostname);
 
-// API Endpoints
+// API Endpoints - Using relative paths since baseURL is configured in axios.js
 const API_ENDPOINTS = {
   // User related
-  USER_PROFILE: `${secureAPI_BASE_URL}/api/user/profile`,
-  PIN_STATUS: `${secureAPI_BASE_URL}/api/pin/status`,
-  PIN_SET: `${secureAPI_BASE_URL}/api/pin/set`,
-  PIN_VERIFY: `${secureAPI_BASE_URL}/api/pin/verify`,
+  USER_PROFILE: '/api/user/profile',
+  PIN_STATUS: '/api/pin/status',
+  PIN_SET: '/api/pin/set',
+  PIN_VERIFY: '/api/pin/verify',
   
   // Dashboard related
-  DASHBOARD_DATA: `${secureAPI_BASE_URL}/api/dashboard/data`,
+  DASHBOARD_DATA: '/api/dashboard/data',
   
   // Diet tracker related
-  DIET_TRACKER_TODAY: `${secureAPI_BASE_URL}/api/diettracker/today`,
-  DIET_TRACKER_USER: (userId) => `${secureAPI_BASE_URL}/api/diettracker/${userId}`,
+  DIET_TRACKER_TODAY: '/api/diettracker/today',
+  DIET_TRACKER_USER: (userId) => `/api/diettracker/${userId}`,
   
   // Period tracking related
-  PERIOD_DATA: `${secureAPI_BASE_URL}/api/period/getPeriodData`,
-  PERIOD_SAVE: `${secureAPI_BASE_URL}/api/period/savePeriod`,
-  PERIOD_DELETE: (periodId) => `${secureAPI_BASE_URL}/api/period/deletePeriod/${periodId}`,
+  PERIOD_DATA: '/api/period/getPeriodData',
+  PERIOD_SAVE: '/api/period/savePeriod',
+  PERIOD_DELETE: (periodId) => `/api/period/deletePeriod/${periodId}`,
   
   // Recipe suggestion related
-  RECIPE_SUGGESTION_STATUS: `${secureAPI_BASE_URL}/api/recipesuggestion/status`,
-  RECIPE_SUGGESTION_SUGGESTIONS: `${secureAPI_BASE_URL}/api/recipesuggestion/suggestions`,
+  RECIPE_SUGGESTION_STATUS: '/api/recipesuggestion/status',
+  RECIPE_SUGGESTION_SUGGESTIONS: '/api/recipesuggestion/suggestions',
   
   // Consultation related
-  CONSULTATION_BOOK: `${secureAPI_BASE_URL}/api/consultation/book`,
+  CONSULTATION_BOOK: '/api/consultation/book',
   
-  // News API
+  // News API - Keep this as full URL since it's external
   NEWS_API: (query, pageSize = 20) => 
     `https://newsapi.org/v2/everything?q=${query}&language=en&sortBy=publishedAt&pageSize=${pageSize}&apiKey=f29bbe91c4fe4be2ba8ca4f32b1bb42c`
 };
