@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import { useLoading } from '../../context/LoadingContext';
+import axiosInstance from '../../config/axios';
 
 function PeriodTracker() {
     const [lastPeriod, setLastPeriod] = useState("");
@@ -54,39 +55,20 @@ function PeriodTracker() {
     }, [allPeriods, currentMonth, currentYear]);
 
     const fetchPeriodData = async (currentUser) => {
-        if (!currentUser) return;
-
         try {
             showLoader();
-            const token = await auth.currentUser.getIdToken(true);
-            const response = await fetch("http://localhost:5001/api/period/getPeriodData", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            const responseText = await response.text();
-
-            try {
-                const data = JSON.parse(responseText);
-                console.log("✅ Fetched Data:", data);
-
-                // Update the form fields
-                setLastPeriod(data.lastPeriod || "");
-                setCycleLength(data.cycleLength || "");
-                setPeriodDuration(data.periodDuration || "");
-
-                // Update the periods history
-                if (data.periodsHistory && Array.isArray(data.periodsHistory)) {
-                    setAllPeriods(data.periodsHistory);
+            const response = await axiosInstance.get(`/api/period/getPeriodData`);
+            if (response.data) {
+                setPeriodData(response.data);
+                setAllPeriods(response.data.periods || []);
+                if (response.data.periods && response.data.periods.length > 0) {
+                    const mostRecent = getMostRecentPeriod();
+                    if (mostRecent) {
+                        setLastPeriod(mostRecent.startDate);
+                        setCycleLength(mostRecent.cycleLength);
+                        setPeriodDuration(mostRecent.duration);
+                    }
                 }
-
-                setPeriodData(data);
-            } catch (jsonError) {
-                console.error("❌ JSON Parsing Error:", jsonError.message);
-                throw new Error("Received non-JSON response from server");
             }
         } catch (error) {
             console.error("❌ Error fetching period data:", error);
@@ -284,92 +266,43 @@ function PeriodTracker() {
     };
 
     const handleDelete = async (periodId) => {
-        if (!window.confirm('Are you sure you want to delete this period log?')) {
-            return;
-        }
-
         try {
             showLoader();
-            const token = await auth.currentUser.getIdToken(true);
-            const response = await fetch(`http://localhost:5001/api/period/deletePeriodData/${periodId}`, {
-                method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (response.ok) {
-                // Remove the deleted period from the state
-                setAllPeriods(allPeriods.filter(p => p.id !== periodId));
-                setOutput("Period log deleted successfully");
-            } else {
-                const error = await response.json();
-                setOutput(error.message || "Error deleting period log");
-            }
+            await axiosInstance.delete(`/api/period/deletePeriod/${periodId}`);
+            setAllPeriods(prevPeriods => prevPeriods.filter(p => p.id !== periodId));
+            setPeriodData(prev => ({
+                ...prev,
+                periods: prev.periods.filter(p => p.id !== periodId)
+            }));
         } catch (error) {
-            console.error("Error deleting period data:", error);
-            setOutput("Error deleting period log");
+            console.error("Error deleting period:", error);
         } finally {
             hideLoader();
         }
     };
 
-    // Update the savePeriodData function to handle both new and edited periods
     const savePeriodData = async () => {
-        if (!lastPeriod || isNaN(cycleLength) || isNaN(periodDuration)) {
-            setOutput("Please provide valid inputs for all fields.");
-            return;
-        }
-
         try {
             showLoader();
-            const token = await auth.currentUser.getIdToken(true);
-
-            const periodData = {
+            const newPeriod = {
                 startDate: lastPeriod,
-                duration: parseInt(periodDuration),
-                cycleLength: parseInt(cycleLength)
+                cycleLength: parseInt(cycleLength),
+                duration: parseInt(periodDuration)
             };
 
-            const endpoint = editingPeriod
-                ? `http://localhost:5001/api/period/updatePeriodData/${editingPeriod.id}`
-                : "http://localhost:5001/api/period/savePeriodData";
-
-            const method = editingPeriod ? "PUT" : "POST";
-
-            const response = await fetch(endpoint, {
-                method: method,
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(periodData),
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                if (editingPeriod) {
-                    // Update the edited period in the state
-                    setAllPeriods(allPeriods.map(p =>
-                        p.id === editingPeriod.id ? { ...periodData, id: p.id } : p
-                    ));
-                    setEditingPeriod(null);
-                } else {
-                    // Add the new period to the state
-                    setAllPeriods([...allPeriods, { ...periodData, id: result.periodId }]);
-                }
-                setOutput(result.message);
-                // Reset form
+            const response = await axiosInstance.post('/api/period/savePeriod', newPeriod);
+            if (response.data) {
+                setAllPeriods(prev => [...prev, response.data]);
+                setPeriodData(prev => ({
+                    ...prev,
+                    periods: [...(prev.periods || []), response.data]
+                }));
                 setLastPeriod("");
                 setCycleLength("");
                 setPeriodDuration("");
-            } else {
-                setOutput(result.error);
             }
         } catch (error) {
             console.error("Error saving period data:", error);
-            setOutput("Error saving period data.");
         } finally {
             hideLoader();
         }

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronUp, Plus, Trash2, Edit2 } from "lucide-react";
 import { auth, db } from "../../config/firebase"; // Ensure Firebase is imported
 import "./dietTracking.css";
-import axios from "axios";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import { useLoading } from '../../context/LoadingContext';
+import axiosInstance from '../../config/axios';
 
 const DietTracker = () => {
   // State management
@@ -150,51 +150,37 @@ const DietTracker = () => {
   // Fetch Meals
   const fetchMealsData = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const userId = auth.currentUser?.uid; // Use the logged-in user's ID
-
-      if (!userId) {
-        throw new Error('User ID is not available');
-      }
-
-      if (!user) {
-        setError('Please sign in to view your meals');
-        setIsLoading(false);
-        return;
-      }
-
       showLoader();
-      const token = await auth.currentUser.getIdToken();
-      const response = await axios.get(`http://localhost:5001/api/diettracker/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.get(`/api/diettracker/${user.uid}`);
+      if (response.data) {
+        const mealsData = response.data.meals || [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-      console.log("✅ Raw server response:", response);
-      console.log("✅ Fetched meals data:", response.data);
+        const categorizedMeals = mealsData.reduce((acc, meal) => {
+          const mealDate = new Date(meal.date);
+          mealDate.setHours(0, 0, 0, 0);
 
-      // Validate the response data structure
-      if (!response.data || typeof response.data !== 'object') {
-        throw new Error("Invalid response format");
+          const diffDays = Math.floor((today - mealDate) / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 0) {
+            acc.today.push(meal);
+          } else if (diffDays === 1) {
+            acc.yesterday.push(meal);
+          } else {
+            acc.earlier.push(meal);
+          }
+          return acc;
+        }, { today: [], yesterday: [], earlier: [] });
+
+        setMeals(categorizedMeals);
       }
-
-      // Ensure all required categories exist
-      const categorizedMeals = {
-        today: Array.isArray(response.data.today) ? response.data.today : [],
-        yesterday: Array.isArray(response.data.yesterday) ? response.data.yesterday : [],
-        earlier: Array.isArray(response.data.earlier) ? response.data.earlier : []
-      };
-
-      console.log("Final categorized meals:", categorizedMeals);
-      setMeals(categorizedMeals);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch meals');
-      console.error('❌ Error fetching meals:', err);
+    } catch (error) {
+      console.error("❌ Error fetching meals:", error);
+      setError("Failed to fetch meals data");
     } finally {
-      setIsLoading(false);
       hideLoader();
+      setIsLoading(false);
     }
   };
 
@@ -207,27 +193,26 @@ const DietTracker = () => {
   const addMeal = async () => {
     try {
       showLoader();
-      const token = await auth.currentUser.getIdToken();
-      console.log("🔑 Firebase Token:", token);
-      const response = await axios.post("http://localhost:5001/api/diettracker/add", {
-        mealType: document.getElementById("mealType").value,
-        foodName: document.getElementById("foodName").value,
-        calories: document.getElementById("calories").value,
-        quantity: document.getElementById("quantity").value,
-        unit: document.getElementById("unit").value,
-        date: new Date().toISOString().split("T")[0]
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const newMeal = {
+        name: "New Meal",
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        date: new Date().toISOString(),
+        userId: user.uid
+      };
 
-      console.log("Meal added successfully:", response.data);
-      fetchMealsData();
-
+      const response = await axiosInstance.post('/api/diettracker/addMeal', newMeal);
+      if (response.data) {
+        setMeals(prev => ({
+          ...prev,
+          today: [...prev.today, response.data]
+        }));
+      }
     } catch (error) {
-      console.error("Failed to add meal:", error);
+      console.error("Error adding meal:", error);
+      setError("Failed to add meal");
     } finally {
       hideLoader();
     }
@@ -242,20 +227,15 @@ const DietTracker = () => {
   const onDeleteMeal = async (mealId) => {
     try {
       showLoader();
-      const token = await auth.currentUser.getIdToken();
-
-      await axios.delete(`http://localhost:5001/api/diettracker/${mealId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      console.log("Meal deleted successfully");
-      // Refresh meals data after deletion
-      fetchMealsData();
-    } catch (err) {
-      console.error("Error deleting meal:", err);
-      setError(err.response?.data?.error || 'Failed to delete meal');
+      await axiosInstance.delete(`/api/diettracker/deleteMeal/${mealId}`);
+      setMeals(prev => ({
+        today: prev.today.filter(meal => meal.id !== mealId),
+        yesterday: prev.yesterday.filter(meal => meal.id !== mealId),
+        earlier: prev.earlier.filter(meal => meal.id !== mealId)
+      }));
+    } catch (error) {
+      console.error("Error deleting meal:", error);
+      setError("Failed to delete meal");
     } finally {
       hideLoader();
     }
@@ -265,23 +245,18 @@ const DietTracker = () => {
   const editMeal = async (id, section, updatedData) => {
     try {
       showLoader();
-      const token = await auth.currentUser.getIdToken();
-
-      console.log("Updating meal:", id, "with data:", updatedData);
-
-      await axios.put(`http://localhost:5001/api/diettracker/${id}`, updatedData, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      console.log("Meal updated successfully");
-      // Refresh meals data after update
-      fetchMealsData();
-      setIsEditing(null);
-    } catch (err) {
-      console.error("Error updating meal:", err);
-      setError(err.response?.data?.error || 'Failed to update meal');
+      const response = await axiosInstance.put(`/api/diettracker/updateMeal/${id}`, updatedData);
+      if (response.data) {
+        setMeals(prev => ({
+          ...prev,
+          [section]: prev[section].map(meal => 
+            meal.id === id ? response.data : meal
+          )
+        }));
+      }
+    } catch (error) {
+      console.error("Error updating meal:", error);
+      setError("Failed to update meal");
     } finally {
       hideLoader();
     }

@@ -3,6 +3,7 @@ import "./../Blog/Blog.css";
 import Navbarafter from "../../Components/Navbarafter";
 import Footer from "../../Components/Footer";
 import { useLoading } from '../../context/LoadingContext';
+import videoSource from '../../assets/video.mp4';
 
 const Blogafter = () => {
   const { showLoader, hideLoader } = useLoading();
@@ -10,23 +11,28 @@ const Blogafter = () => {
 
   const navItems = [
     { label: 'Home', href: '/landing' },
-        { label: 'About', href: '/aboutusafter' },
-        { label: 'Blog', href: '/blogafter', active: true  },
-        { label: 'Track Your Periods', href: '/period'},
-        { label: 'Diet Tracking', href: '/diet'},
-        { label: 'Recipe Suggestions', href: '/recipe' },
-        { label: 'Consultation', href: 'consultation' },
-        { label: 'My Profile', href: '/dashboard' }
+    { label: 'About', href: '/aboutusafter' },
+    { label: 'Blog', href: '/blogafter', active: true  },
+    { label: 'Track Your Periods', href: '/period'},
+    { label: 'Diet Tracking', href: '/diet'},
+    { label: 'Recipe Suggestions', href: '/recipe' },
+    { label: 'Consultation', href: 'consultation' },
+    { label: 'My Profile', href: '/dashboard' }
   ];
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         showLoader();
-        const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
+        const apiUrl = "https://newsapi.org/v2/everything?q=women+health+nutrition+wellness&language=en&sortBy=publishedAt&pageSize=20&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
         const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         setArticles(data.articles || []);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
       } finally {
         hideLoader();
       }
@@ -42,7 +48,7 @@ const Blogafter = () => {
       <div className="blog-hero-section">
         <div className="hero-video-wrapper">
           <video autoPlay loop muted className="hero-video">
-            <source src="./../Frontend/src/assets/video.mp4" type="video/mp4" />
+            <source src={videoSource} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
