@@ -9,9 +9,9 @@ export default defineConfig({
     strictPort: false,
     proxy: process.env.NODE_ENV === 'development' ? {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://nutriluna-backend.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     } : undefined
@@ -28,6 +28,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1600
   },
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL)
   }
 }); 
