@@ -10,21 +10,51 @@ import { API_ENDPOINTS } from '../../config/apiConfig';
 const FALLBACK_ARTICLES = [
   {
     title: "Understanding Your Menstrual Cycle",
-    description: "Learn about the different phases of your menstrual cycle and how they affect your body.",
+    description: "Learn about the different phases of your menstrual cycle and how they affect your body. Understanding your cycle can help you better manage your health and well-being.",
     url: "https://www.healthline.com/health/womens-health/menstrual-cycle",
     urlToImage: "https://images.unsplash.com/photo-1519824144514-5faadc7d025e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   },
   {
     title: "Nutrition Tips for Women's Health",
-    description: "Discover the best foods to support your hormonal health and overall wellbeing.",
+    description: "Discover the best foods to support your hormonal health and overall wellbeing. A balanced diet rich in essential nutrients is crucial for women's health at every stage of life.",
     url: "https://www.healthline.com/nutrition/womens-health-nutrition",
     urlToImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   },
   {
     title: "Managing PMS Naturally",
-    description: "Natural remedies and lifestyle changes to help manage premenstrual symptoms.",
+    description: "Natural remedies and lifestyle changes to help manage premenstrual symptoms. From diet adjustments to stress management techniques, learn how to alleviate PMS without medication.",
     url: "https://www.healthline.com/health/womens-health/pms-natural-remedies",
     urlToImage: "https://images.unsplash.com/photo-1519824144514-5faadc7d025e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Iron-Rich Foods for Women",
+    description: "Iron deficiency is common among women. Discover the best iron-rich foods to include in your diet to prevent anemia and maintain optimal energy levels.",
+    url: "https://www.healthline.com/nutrition/iron-rich-foods",
+    urlToImage: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Hormonal Balance Through Diet",
+    description: "Learn how your diet can help maintain hormonal balance and improve overall wellbeing. Specific foods can support your endocrine system and help regulate hormones naturally.",
+    url: "https://www.healthline.com/nutrition/hormonal-balance-diet",
+    urlToImage: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Exercise During Your Period",
+    description: "Is it safe to exercise during your period? Learn which types of exercise are beneficial during menstruation and which ones to avoid for optimal health.",
+    url: "https://www.healthline.com/health/womens-health/exercise-during-period",
+    urlToImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Sleep and Women's Health",
+    description: "Quality sleep is essential for women's health. Discover how sleep affects your hormones, mood, and overall wellbeing, and learn tips for better sleep hygiene.",
+    url: "https://www.healthline.com/health/womens-health/sleep",
+    urlToImage: "https://images.unsplash.com/photo-1511295742362-92c96b1cf484?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Stress Management for Women",
+    description: "Women often face unique stressors. Learn effective stress management techniques tailored for women, including mindfulness, meditation, and lifestyle changes.",
+    url: "https://www.healthline.com/health/womens-health/stress-management",
+    urlToImage: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   }
 ];
 

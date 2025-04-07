@@ -10,21 +10,51 @@ import { API_ENDPOINTS } from '../../config/apiConfig';
 const FALLBACK_ARTICLES = [
   {
     title: "Women's Health and Nutrition Guide",
-    description: "A comprehensive guide to maintaining optimal health through proper nutrition.",
+    description: "A comprehensive guide to maintaining optimal health through proper nutrition. Learn about the essential nutrients women need at different life stages.",
     url: "https://www.healthline.com/nutrition/womens-health-nutrition-guide",
     urlToImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   },
   {
     title: "Hormonal Balance Through Diet",
-    description: "Learn how your diet can help maintain hormonal balance and improve overall wellbeing.",
+    description: "Learn how your diet can help maintain hormonal balance and improve overall wellbeing. Discover foods that support your endocrine system and help regulate hormones naturally.",
     url: "https://www.healthline.com/nutrition/hormonal-balance-diet",
     urlToImage: "https://images.unsplash.com/photo-1519824144514-5faadc7d025e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   },
   {
     title: "Wellness Tips for Women",
-    description: "Essential wellness tips and practices for women of all ages.",
+    description: "Essential wellness tips and practices for women of all ages. From self-care routines to lifestyle changes, discover ways to enhance your overall wellbeing.",
     url: "https://www.healthline.com/health/womens-health/wellness-tips",
     urlToImage: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Menstrual Health and Diet",
+    description: "How your diet affects your menstrual health. Learn which foods can help alleviate symptoms and which ones to avoid during your cycle.",
+    url: "https://www.healthline.com/nutrition/menstrual-health-diet",
+    urlToImage: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Fertility and Nutrition",
+    description: "The connection between nutrition and fertility. Discover how certain foods and nutrients can support reproductive health and improve fertility outcomes.",
+    url: "https://www.healthline.com/nutrition/fertility-nutrition",
+    urlToImage: "https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Menopause and Diet",
+    description: "Nutritional strategies for managing menopause symptoms. Learn how diet changes can help alleviate hot flashes, mood swings, and other common symptoms.",
+    url: "https://www.healthline.com/nutrition/menopause-diet",
+    urlToImage: "https://images.unsplash.com/photo-1511295742362-92c96b1cf484?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Bone Health for Women",
+    description: "Maintaining strong bones through proper nutrition. Discover calcium-rich foods and other nutrients essential for preventing osteoporosis.",
+    url: "https://www.healthline.com/nutrition/bone-health-women",
+    urlToImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Heart Health for Women",
+    description: "Heart disease is the leading cause of death for women. Learn about heart-healthy foods and lifestyle changes to protect your cardiovascular health.",
+    url: "https://www.healthline.com/health/womens-health/heart-health",
+    urlToImage: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
   }
 ];
 
