@@ -30,6 +30,23 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health Check Route - Add before other routes
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Default Route - Add before other routes
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to Nutri-Luna Backend API!'
+  });
+});
+
 // Routes
 const userRoutes = require('./pages/user');
 const personalDetailsRoutes = require('./pages/personalDetails');
@@ -49,23 +66,6 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/recipesuggestion', recipeSuggestionRoutes);
 app.use('/api/consultation', consultationRoutes);
 app.use('/api/pin', pinRoutes);
-
-// Health Check Route
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    status: 'healthy',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Default Route
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Welcome to Nutri-Luna Backend API!'
-  });
-});
 
 // 404 Error Handling
 app.use((req, res) => {
