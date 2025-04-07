@@ -1,19 +1,13 @@
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
+import axiosInstance from '../config/axios';
 
 const auth = getAuth();
 
 export const loginWithCustomToken = async (uid) => {
   try {
     // Get custom token from backend
-    const response = await fetch('http://localhost:5001/api/auth/create-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ uid }),
-    });
-
-    const { token } = await response.json();
+    const response = await axiosInstance.post('/api/auth/create-token', { uid });
+    const { token } = response.data;
 
     // Sign in with Firebase using the custom token
     const userCredential = await signInWithCustomToken(auth, token);
@@ -26,16 +20,8 @@ export const loginWithCustomToken = async (uid) => {
 
 export const refreshToken = async (uid) => {
   try {
-    const response = await fetch('http://localhost:5001/api/auth/refresh-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ uid }),
-    });
-
-    const { token } = await response.json();
-    return token;
+    const response = await axiosInstance.post('/api/auth/refresh-token', { uid });
+    return response.data.token;
   } catch (error) {
     console.error('Token refresh error:', error);
     throw error;

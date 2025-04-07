@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nutriluna-frontend
+    env: node
+    buildCommand: cd Frontend && npm install && npm run build
+    startCommand: cd Frontend && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: https://nutriluna-backend.onrender.com

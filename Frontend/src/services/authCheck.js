@@ -1,4 +1,5 @@
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import axiosInstance from '../config/axios';
 
 export const checkAuthStatus = async () => {
   const auth = getAuth();
@@ -13,19 +14,15 @@ export const checkAuthStatus = async () => {
       try {
         const token = await user.getIdToken(true);
         
-        const response = await fetch('http://localhost:5001/api/auth/check-token', {
-          method: 'POST',
+        const response = await axiosInstance.post('/api/auth/check-token', {}, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           }
         });
 
-        const data = await response.json();
-        
         resolve({
-          isAuthenticated: data.isValid,
-          user: data.user
+          isAuthenticated: response.data.isValid,
+          user: response.data.user
         });
       } catch (error) {
         console.error('Auth check error:', error);
