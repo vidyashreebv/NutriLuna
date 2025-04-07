@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && ls -la dist",
     "preview": "vite preview",
-    "start": "npx serve -s dist -l $PORT --single",
+    "start": "ls -la dist && npx serve -s dist -l $PORT --single",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {

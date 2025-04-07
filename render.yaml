@@ -29,8 +29,15 @@ services:
   - type: web
     name: nutriluna-frontend
     env: node
-    buildCommand: cd Frontend && npm install && npm run build
-    startCommand: cd Frontend && npx serve -s dist -l $PORT --single
+    buildCommand: |
+      cd Frontend
+      npm install
+      npm run build
+      ls -la dist
+    startCommand: |
+      cd Frontend
+      ls -la dist
+      npx serve -s dist -l $PORT --single
     envVars:
       - key: NODE_ENV
         value: production
