@@ -1,11 +1,17 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nutriluna-backend.onrender.com';
+const isProduction = import.meta.env.PROD;
+const API_BASE_URL = isProduction 
+  ? 'https://nutriluna-backend.onrender.com'
+  : (import.meta.env.VITE_API_URL || 'http://localhost:5001');
 
-// Ensure API_BASE_URL uses HTTPS
-const secureAPI_BASE_URL = API_BASE_URL.replace('http://', 'https://');
+// Ensure API_BASE_URL uses HTTPS in production
+const secureAPI_BASE_URL = isProduction 
+  ? API_BASE_URL 
+  : API_BASE_URL.replace('http://', 'https://');
 
 // Debug log
 console.log('Environment:', import.meta.env.MODE);
+console.log('Is Production:', isProduction);
 console.log('API_BASE_URL:', secureAPI_BASE_URL);
 console.log('Current hostname:', window.location.hostname);
 
