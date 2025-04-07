@@ -601,3 +601,18 @@ button[type="submit"]:hover {
   height: 100%;
   object-fit: cover;
 }
+
+.api-error-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.api-error-message p {
+  margin: 0;
+  font-size: 0.9rem;
+}

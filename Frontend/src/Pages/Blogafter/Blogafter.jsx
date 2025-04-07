@@ -6,10 +6,33 @@ import { useLoading } from '../../context/LoadingContext';
 import videoSource from '../../assets/video.mp4';
 import { API_ENDPOINTS } from '../../config/apiConfig';
 
+// Fallback articles in case the API fails
+const FALLBACK_ARTICLES = [
+  {
+    title: "Women's Health and Nutrition Guide",
+    description: "A comprehensive guide to maintaining optimal health through proper nutrition.",
+    url: "https://www.healthline.com/nutrition/womens-health-nutrition-guide",
+    urlToImage: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Hormonal Balance Through Diet",
+    description: "Learn how your diet can help maintain hormonal balance and improve overall wellbeing.",
+    url: "https://www.healthline.com/nutrition/hormonal-balance-diet",
+    urlToImage: "https://images.unsplash.com/photo-1519824144514-5faadc7d025e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  },
+  {
+    title: "Wellness Tips for Women",
+    description: "Essential wellness tips and practices for women of all ages.",
+    url: "https://www.healthline.com/health/womens-health/wellness-tips",
+    urlToImage: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+  }
+];
+
 const Blogafter = () => {
   const { showLoader, hideLoader } = useLoading();
   const [articles, setArticles] = useState([]);
   const [videoError, setVideoError] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   const navItems = [
     { label: 'Home', href: '/landing' },
@@ -26,15 +49,31 @@ const Blogafter = () => {
     const fetchBlogs = async () => {
       try {
         showLoader();
+        setApiError(false);
         const apiUrl = API_ENDPOINTS.NEWS_API("women health nutrition wellness", 20);
+        console.log("Fetching from News API:", apiUrl);
+        
         const response = await fetch(apiUrl);
+        
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`News API error: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
-        setArticles(data.articles || []);
+        
+        if (data.status === "error") {
+          throw new Error(`News API error: ${data.message || "Unknown error"}`);
+        }
+        
+        if (data.articles && data.articles.length > 0) {
+          setArticles(data.articles);
+        } else {
+          throw new Error("No articles returned from News API");
+        }
       } catch (error) {
-        console.error("Error fetching blogs:", error);
+        console.error("Error fetching blog articles:", error);
+        setApiError(true);
+        setArticles(FALLBACK_ARTICLES);
       } finally {
         hideLoader();
       }
@@ -85,6 +124,11 @@ const Blogafter = () => {
       <div className="blog-main-content">
         <div className="blog-posts-container">
           <h2>Latest Articles</h2>
+          {apiError && (
+            <div className="api-error-message">
+              <p>We're having trouble connecting to our news service. Showing featured articles instead.</p>
+            </div>
+          )}
           <div className="blog-posts-grid">
             {articles.length > 0 ? (
               articles.map((article, index) => (

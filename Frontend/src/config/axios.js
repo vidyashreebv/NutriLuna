@@ -11,16 +11,35 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: false, // Disable credentials for cross-origin requests
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // 15 second timeout
 });
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Get token from localStorage or from Firebase auth
+    let token = localStorage.getItem('token');
+    
+    // If no token in localStorage, try to get it from Firebase auth
+    if (!token && window.firebase && window.firebase.auth) {
+      const currentUser = window.firebase.auth().currentUser;
+      if (currentUser) {
+        token = currentUser.getIdToken();
+      }
+    }
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add timestamp to prevent caching
+    if (config.method === 'get') {
+      config.params = {
+        ...config.params,
+        _t: new Date().getTime()
+      };
+    }
+    
     console.log('Request:', config.method.toUpperCase(), config.url);
     return config;
   },
@@ -38,11 +57,30 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     console.error('Response error:', error);
-    if (error.response && error.response.status === 401) {
+    
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error - server may be down or unreachable');
+      // You could show a user-friendly message here
+      return Promise.reject({
+        message: 'Network error. Please check your connection and try again.',
+        isNetworkError: true
+      });
+    }
+    
+    // Handle specific status codes
+    if (error.response.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token');
       window.location.href = '/login';
+    } else if (error.response.status === 403) {
+      console.error('Forbidden - insufficient permissions');
+    } else if (error.response.status === 404) {
+      console.error('Resource not found');
+    } else if (error.response.status >= 500) {
+      console.error('Server error');
     }
+    
     return Promise.reject(error);
   }
 );
