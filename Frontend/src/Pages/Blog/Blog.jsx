@@ -21,7 +21,7 @@ const Blog = () => {
     const fetchBlogs = async () => {
       try {
         showLoader();
-        const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
+        const apiUrl = "https://newsapi.org/v2/everything?q=health+diet+menstrual+wellness&pageSize=100&apiKey=f29bbe91c4fe4be2ba8ca4f32b1bb42c";
         const response = await fetch(apiUrl);
         const data = await response.json();
         setArticles(data.articles || []);

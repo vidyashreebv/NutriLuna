@@ -24,7 +24,7 @@ const Blogafter = () => {
     const fetchBlogs = async () => {
       try {
         showLoader();
-        const apiUrl = "https://newsapi.org/v2/everything?q=women+health+nutrition+wellness&language=en&sortBy=publishedAt&pageSize=20&apiKey=9fd24d14ddd54ddcadda53c41d9f2d55";
+        const apiUrl = "https://newsapi.org/v2/everything?q=women+health+nutrition+wellness&language=en&sortBy=publishedAt&pageSize=20&apiKey=f29bbe91c4fe4be2ba8ca4f32b1bb42c";
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
