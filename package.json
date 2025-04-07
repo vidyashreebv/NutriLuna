@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "cd Frontend && npm start"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -34,7 +35,8 @@
     "react-router-dom": "^7.2.0",
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.1",
-    "tailwind-merge": "^3.0.1"
+    "tailwind-merge": "^3.0.1",
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
@@ -43,7 +45,6 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
-    "concurrently": "^9.1.2",
     "eslint": "^9.15.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
