@@ -23,6 +23,8 @@ services:
         value: "75642002726"
       - key: FIREBASE_APP_ID
         value: "1:75642002726:web:6b82ca7f749826d127f5e7"
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=4096"
     healthCheckPath: /api/health
     autoDeploy: true
 
@@ -50,5 +52,7 @@ services:
         value: "75642002726"
       - key: VITE_FIREBASE_APP_ID
         value: "1:75642002726:web:6b82ca7f749826d127f5e7"
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=4096"
     healthCheckPath: /
     autoDeploy: true
