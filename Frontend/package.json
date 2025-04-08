@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode production",
-    "build:prod": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build --mode production",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "start": "npx serve -s dist -l $PORT --single"
+    "start": "NODE_OPTIONS='--max-old-space-size=4096' npx serve -s dist -l $PORT --single"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",

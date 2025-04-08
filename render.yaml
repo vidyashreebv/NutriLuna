@@ -32,13 +32,12 @@ services:
     name: nutriluna-frontend
     env: node
     buildCommand: |
-      export NODE_OPTIONS="--max-old-space-size=4096"
       cd Frontend
       npm ci --production=false
-      npm run build:prod
+      npm run build
     startCommand: |
       cd Frontend
-      npm start
+      npm run start
     envVars:
       - key: NODE_ENV
         value: production
