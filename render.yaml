@@ -34,10 +34,9 @@ services:
     buildCommand: |
       export NODE_OPTIONS="--max-old-space-size=4096"
       cd Frontend
-      npm install --production=false
-      npm run build
+      npm ci --production=false
+      npm run build:prod
     startCommand: |
-      export NODE_OPTIONS="--max-old-space-size=4096"
       cd Frontend
       npm start
     envVars:
