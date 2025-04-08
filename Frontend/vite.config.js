@@ -31,7 +31,8 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           ui: ['@headlessui/react', '@heroicons/react'],
-          charts: ['recharts']
+          charts: ['recharts'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage']
         }
       }
     },
@@ -39,8 +40,14 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true
+      },
+      format: {
+        comments: false
       }
-    }
+    },
+    target: 'esnext',
+    cssCodeSplit: true,
+    reportCompressedSize: false
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
